@@ -1,4 +1,5 @@
 import { useState } from 'react';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function LoginModal({
   onClose,
@@ -13,7 +14,7 @@ function LoginModal({
   const [isRegister, setIsRegister] = useState(false);
 
   const handleLogin = async () => {
-    const response = await fetch('http://localhost:3000/auth/login', {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,8 +36,8 @@ if (response.ok) {
   };
 
   const handleRegister = async () => {
-    const response = await fetch('http://localhost:3000/auth/register', {
-      method: 'POST',
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method:'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -64,7 +65,7 @@ if (response.ok) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   return (
