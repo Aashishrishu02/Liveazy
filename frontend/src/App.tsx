@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect} from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import CategorySection from './components/CategorySection';
@@ -10,6 +10,26 @@ import { PRODUCTS_DATA } from './data/rentalData';
 import type { Product } from './types/rental';
 
 function App() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    if (token) {
+      // Save JWT token
+      localStorage.setItem('token', token);
+
+      // Remove token from URL
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      );
+
+      // Tell Navbar that authentication has changed
+      window.dispatchEvent(new Event('auth-change'));
+    }
+  }, []);
+  
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('Pune (All Areas)');

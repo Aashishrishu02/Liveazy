@@ -80,10 +80,16 @@ export function Navbar({
   }, []);
 
   useEffect(() => {
-    updateAuth();
-    window.addEventListener('storage', updateAuth);
-    return () => window.removeEventListener('storage', updateAuth);
-  }, [updateAuth]);
+  updateAuth();
+
+  window.addEventListener('storage', updateAuth);
+  window.addEventListener('auth-change', updateAuth);
+
+  return () => {
+    window.removeEventListener('storage', updateAuth);
+    window.removeEventListener('auth-change', updateAuth);
+  };
+}, [updateAuth]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
