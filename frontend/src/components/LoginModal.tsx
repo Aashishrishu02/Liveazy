@@ -1,66 +1,85 @@
-import { useState } from 'react';
-const API_URL = import.meta.env.VITE_API_URL;
+import React, { useState } from "react";
 
-function LoginModal({
-  onClose,
-  onLoginSuccess,
-}: {
+interface LoginModalProps {
   onClose: () => void;
   onLoginSuccess: () => void;
-}) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+}
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Images from src/assets/products
+const productImages = Object.values(
+  import.meta.glob("../assets/products/*.{png,jpg,jpeg,webp,avif}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  })
+) as string[];
+
+const LoginModal: React.FC<LoginModalProps> = ({
+  onClose,
+  onLoginSuccess,
+}) => {
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const data = await response.json();
+  const [loading, setLoading] = useState(false);
 
-    console.log(data);
-if (response.ok) {
-  localStorage.setItem('token', data.access_token);
-  onLoginSuccess();
-  onClose();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    } else {
-      alert(data.message);
+    if (!email || !password || (isRegister && !name)) {
+      alert("Please fill all required fields");
+      return;
     }
-  };
 
-  const handleRegister = async () => {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method:'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
+    try {
+      setLoading(true);
 
-    const data = await response.json();
+      const endpoint = isRegister
+        ? "/auth/register"
+        : "/auth/login";
 
-    console.log(data);
+      const body = isRegister
+        ? { name, email, password }
+        : { email, password };
 
-    if (response.ok) {
-      alert('Registration successful! Please login.');
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
-      setIsRegister(false);
-      setName('');
-      setEmail('');
-      setPassword('');
-    } else {
-      alert(data.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Something went wrong");
+        return;
+      }
+
+      if (isRegister) {
+        alert("Registration successful. Please login.");
+
+        setIsRegister(false);
+        setName("");
+        setEmail("");
+        setPassword("");
+      } else {
+        localStorage.setItem("token", data.access_token);
+        onLoginSuccess();
+        onClose();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Unable to connect to server");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,139 +87,343 @@ if (response.ok) {
     window.location.href = `${API_URL}/auth/google`;
   };
 
+  // Divide products into 4 columns
+  const columns = [
+    productImages.slice(0, 8),
+    productImages.slice(8, 16),
+    productImages.slice(16, 24),
+    productImages.slice(24, 32),
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <>
+      <style>
+        {`
+          @keyframes moveUp {
+            from {
+              transform: translateY(0);
+            }
+            to {
+              transform: translateY(-50%);
+            }
+          }
 
-      <div className="relative w-full max-w-200 rounded-2xl bg-white p-10 shadow-2xl">
+          @keyframes moveDown {
+            from {
+              transform: translateY(-50%);
+            }
+            to {
+              transform: translateY(0);
+            }
+          }
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 text-2xl text-gray-500 hover:text-gray-800"
+          .move-up {
+            animation: moveUp 28s linear infinite;
+          }
+
+          .move-down {
+            animation: moveDown 32s linear infinite;
+          }
+
+          .move-up-slow {
+            animation: moveUp 35s linear infinite;
+          }
+
+          .move-down-slow {
+            animation: moveDown 30s linear infinite;
+          }
+
+          .move-up:hover,
+          .move-down:hover,
+          .move-up-slow:hover,
+          .move-down-slow:hover {
+            animation-play-state: paused;
+          }
+        `}
+      </style>
+
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-5 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        {/* Main Modal */}
+        <div
+          className="relative flex h-[680px] w-full max-w-4xl overflow-hidden rounded-[26px] bg-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
         >
-          ×
-        </button>
-
-        {/* Logo + Heading */}
-        <div className="text-center">
-
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-3xl font-bold text-orange-500">
-            R
-          </div>
-
-          <h2 className="text-3xl font-bold text-gray-900">
-            {isRegister ? 'Create Account' : 'Welcome Back'}
-          </h2>
-
-          <p className="mt-2 text-base text-gray-500">
-            {isRegister
-              ? 'Create your RentNest account'
-              : 'Login to your RentNest account'}
-          </p>
-
-        </div>
-
-        {/* Name - Only Register */}
-        {isRegister && (
-          <div className="mt-8">
-
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Name
-            </label>
-
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base outline-none focus:border-orange-500"
-            />
-
-          </div>
-        )}
-
-        {/* Email */}
-        <div className="mt-6">
-
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Email
-          </label>
-
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base outline-none focus:border-orange-500"
-          />
-
-        </div>
-
-        {/* Password */}
-        <div className="mt-6">
-
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Password
-          </label>
-
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base outline-none focus:border-orange-500"
-          />
-
-        </div>
-
-        {/* Login / Register Button */}
-        <button
-          onClick={isRegister ? handleRegister : handleLogin}
-          className="mt-7 w-full rounded-lg bg-orange-500 py-3.5 text-base font-semibold text-white hover:bg-orange-600"
-        >
-          {isRegister ? 'REGISTER' : 'LOGIN'}
-        </button>
-
-        {/* Google */}
-        <div className="my-6 flex items-center gap-3">
-
-          <div className="h-px flex-1 bg-gray-200" />
-
-          <span className="text-sm text-gray-400">
-            OR
-          </span>
-
-          <div className="h-px flex-1 bg-gray-200" />
-
-        </div>
-
-        <button
-          onClick={handleGoogleLogin}
-          className="w-full rounded-lg border border-gray-300 py-3.5 text-base font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Continue with Google
-        </button>
-
-        {/* Register / Login Switch */}
-        <p className="mt-7 text-center text-sm text-gray-500">
-
-          {isRegister
-            ? 'Already have an account?'
-            : "Don't have an account?"}
-
-          <span
-            onClick={() => setIsRegister(!isRegister)}
-            className="ml-1 cursor-pointer font-semibold text-orange-500"
+          {/* Close */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl text-gray-500 shadow-sm transition hover:bg-gray-100 hover:text-black"
           >
-            {isRegister ? 'Login' : 'Register'}
-          </span>
+            ×
+          </button>
 
-        </p>
+          {/* ================================= */}
+          {/* LEFT ANIMATED SECTION */}
+          {/* ================================= */}
 
+          <div className="relative hidden w-[45%] overflow-hidden bg-[#f7f4ef] lg:block">
+            {/* Soft overlay */}
+            <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-b from-[#f7f4ef]/80 via-transparent to-[#f7f4ef]/90" />
+
+            {/* Logo + Heading */}
+            <div className="absolute left-7 top-7 z-30">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 text-lg font-bold text-white">
+                  R
+                </div>
+
+                <span className="text-xl font-bold text-gray-900">
+                  RentNest
+                </span>
+              </div>
+
+              <h2 className="mt-5 text-3xl font-bold leading-tight tracking-tight text-gray-900">
+                
+              </h2>
+
+              <p className="mt-2 max-w-xs text-xs leading-5 text-gray-500">
+                
+              </p>
+            </div>
+
+            {/* Animated Products */}
+            <div className="absolute -inset-x-3 -bottom-36 -top-24 flex gap-2.5">
+              {columns.map((column, columnIndex) => {
+                const images = [...column, ...column];
+
+                return (
+                  <div
+                    key={columnIndex}
+                    className="w-1/4 shrink-0"
+                  >
+                    <div
+                      className={`flex flex-col gap-2.5 ${
+                        columnIndex === 0
+                          ? "move-up"
+                          : columnIndex === 1
+                            ? "move-down"
+                            : columnIndex === 2
+                              ? "move-up-slow"
+                              : "move-down-slow"
+                      }`}
+                    >
+                      {images.map((image, index) => (
+                        <div
+                          key={`${columnIndex}-${index}`}
+                          className="h-32 overflow-hidden rounded-xl bg-white shadow-sm"
+                        >
+                          <img
+                            src={image}
+                            alt="RentNest product"
+                            className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom */}
+            <div className="absolute bottom-6 left-7 z-30">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+                Rent • Live • Enjoy
+              </p>
+            </div>
+          </div>
+
+          {/* ================================= */}
+          {/* RIGHT FORM */}
+          {/* ================================= */}
+
+          <div className="flex w-full items-center justify-center overflow-y-auto px-6 py-8 sm:px-10 lg:w-[55%] lg:px-12">
+            <div className="w-full max-w-sm">
+
+              {/* Mobile Logo */}
+              <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 font-bold text-white">
+                  R
+                </div>
+
+                <span className="text-xl font-bold text-gray-900">
+                  RentNest
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="mb-7">
+                <p className="mb-2 text-[11px] font-semibold tracking-[0.18em] text-orange-500">
+                  {isRegister ? "CREATE ACCOUNT" : "HELLO"}
+                </p>
+
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                  {isRegister
+                    ? "Create your account"
+                    : "Welcome to RentNest"}
+                </h1>
+
+                <p className="mt-2 text-sm leading-5 text-gray-500">
+                  {isRegister
+                    ? "Join RentNest and discover your next perfect space."
+                    : "Sign in to continue your rental journey."}
+                </p>
+              </div>
+
+              {/* Form */}
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-4"
+              >
+                {/* Name */}
+                {isRegister && (
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                      Full name
+                    </label>
+
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) =>
+                        setName(e.target.value)
+                      }
+                      placeholder="Enter your full name"
+                      className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                    />
+                  </div>
+                )}
+
+                {/* Email */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                    Email address
+                  </label>
+
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) =>
+                      setEmail(e.target.value)
+                    }
+                    placeholder="you@example.com"
+                    className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                  />
+                </div>
+
+                {/* Password */}
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-700">
+                      Password
+                    </label>
+
+                    {!isRegister && (
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-orange-500 hover:text-orange-600"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type={
+                        showPassword
+                          ? "text"
+                          : "password"
+                      }
+                      value={password}
+                      onChange={(e) =>
+                        setPassword(e.target.value)
+                      }
+                      placeholder="Enter your password"
+                      className="h-11 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 pr-16 text-sm outline-none transition placeholder:text-gray-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(!showPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-500 hover:text-gray-900"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="h-11 w-full rounded-xl bg-orange-500 text-sm font-semibold text-white shadow-md shadow-orange-100 transition hover:bg-orange-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading
+                    ? "Please wait..."
+                    : isRegister
+                      ? "Create account"
+                      : "Sign in"}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-gray-200" />
+
+                <span className="text-[11px] text-gray-400">
+                  OR
+                </span>
+
+                <div className="h-px flex-1 bg-gray-200" />
+              </div>
+
+              {/* Google */}
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                <span className="font-bold">G</span>
+                Continue with Google
+              </button>
+
+              {/* Switch */}
+              <p className="mt-6 text-center text-sm text-gray-500">
+                {isRegister
+                  ? "Already have an account?"
+                  : "Don't have an account?"}{" "}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegister(!isRegister);
+                    setPassword("");
+                  }}
+                  className="font-semibold text-orange-500 hover:text-orange-600"
+                >
+                  {isRegister
+                    ? "Sign in"
+                    : "Create account"}
+                </button>
+              </p>
+
+              {/* Terms */}
+              <p className="mt-4 text-center text-[10px] leading-4 text-gray-400">
+                By continuing, you agree to RentNest's
+                Terms of Service and Privacy Policy.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-
-    </div>
+    </>
   );
-}
+};
 
 export default LoginModal;
