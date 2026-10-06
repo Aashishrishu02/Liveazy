@@ -4,14 +4,19 @@ import { useNavigate } from "react-router-dom";
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:3000/auth/login", {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -35,31 +40,29 @@ export default function AdminLogin() {
       // Go to dashboard
       navigate("/admin/dashboard");
     } catch (error) {
-      console.error(error);
+      console.error("Login error:", error);
       alert("Unable to connect to server");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#F5FAFA] flex items-center justify-center px-4">
-
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-[#D8EEF0] p-8">
 
-        {/* Logo / Brand */}
+        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-  <img
-    src="/liveazy-logo.png"
-    alt="LIVEAZY Furniture Rental"
-    className="w-70 h-50 object-contain"
-  />
-</div>
-
-
-
-          
+            <img
+              src="/liveazy-logo.png"
+              alt="LIVEAZY Furniture Rental"
+              className="w-70 h-50 object-contain"
+            />
+          </div>
         </div>
 
+        {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-5">
 
           {/* Email */}
@@ -94,16 +97,16 @@ export default function AdminLogin() {
             />
           </div>
 
-          {/* Login */}
+          {/* Login Button */}
           <button
             type="submit"
-            className="w-full h-11 bg-[#123B63] hover:bg-[#0795A3] text-white rounded-lg font-semibold transition"
+            disabled={loading}
+            className="w-full h-11 bg-[#123B63] hover:bg-[#0795A3] disabled:bg-gray-400 text-white rounded-lg font-semibold transition"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
         </form>
-
       </div>
     </div>
   );
