@@ -23,8 +23,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="max-w-2xl text-white space-y-5">
-              <div className="inline-flex items-center space-x-2 bg-amber-500/20 border border-amber-400/40 px-3 py-1 rounded text-amber-300 text-xs font-extrabold tracking-widest uppercase">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <div className="inline-flex items-center space-x-2 bg-amber-[#0795A3]/20 border border-[#0795A3]/50 px-3 py-1 rounded text-[#35C6CF] text-xs font-extrabold tracking-widest uppercase">
+                <span className="w-2 h-2 rounded-full bg-[#35C6CF] animate-pulse" />
                 <span>NO INVESTMENT, JUST COMFORT</span>
               </div>
 
@@ -38,7 +38,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
 
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <a
-                  className="bg-[#f28e2b] hover:bg-[#d87819] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-7 py-3.5 rounded shadow-lg transition duration-200"
+                  className="bg-[#123B63] hover:bg-[#0795A3] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-7 py-3.5 rounded shadow-lg transition duration-200"
                   href="#categories"
                   onClick={onExploreClick}
                 >
@@ -57,7 +57,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
               <div className="pt-4 sm:pt-6 flex items-center space-x-4 text-xs font-semibold text-gray-400">
                 <span className="text-white font-bold text-sm">01</span>
                 <div className="w-16 h-0.5 bg-gray-600 overflow-hidden">
-                  <div className="w-1/2 h-full bg-[#f28e2b]" />
+                  <div className="w-1/2 h-full bg-[#0795A3]" />
                 </div>
                 <span>02</span>
               </div>

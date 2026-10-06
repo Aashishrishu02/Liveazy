@@ -1,108 +1,217 @@
-import React from 'react';
-import { Truck, MessageCircle, CreditCard, Clock } from 'lucide-react';
+import React from "react";
+import {
+  Truck,
+  MessageCircle,
+  CreditCard,
+  Clock,
+  ChevronUp,
+} from "lucide-react";
 
-export const WhyRentNest: React.FC = () => {
+export const Footer: React.FC = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="w-full">
+    <>
       {/* ========================================================= */}
-      {/* 1. FOUR VALUE PILLARS (Stitch: FourValuePillars)          */}
+      {/* LIVEZY SERVICE FEATURES                                  */}
       {/* ========================================================= */}
-      <section className="py-10 bg-white border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Pillar 1 */}
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl font-black text-[#f28e2b] leading-none">1.</span>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Free Delivery</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Doorstep across Pune &amp; PCMC</p>
+
+      <section className="w-full bg-[#123B63] text-white border-t border-[#0795A3]/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
+            {/* ================= FREE SHIPPING ================= */}
+            <div className="flex items-center gap-4 py-6 lg:py-7">
+
+              <div
+                className="
+                  w-12
+                  h-12
+                  rounded-xl
+                  bg-[#0795A3]/15
+                  border
+                  border-[#0795A3]/30
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                "
+              >
+                <Truck
+                  size={25}
+                  strokeWidth={2}
+                  className="text-[#35C6CF]"
+                />
               </div>
+
+              <div>
+                <h3 className="text-white font-semibold text-sm sm:text-base">
+                  Free Shipping
+                </h3>
+
+                <p className="text-white/65 text-xs sm:text-sm mt-1">
+                  Free delivery, first order
+                </p>
+              </div>
+
             </div>
 
-            {/* Pillar 2 */}
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl font-black text-[#f28e2b] leading-none">2.</span>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Easy Rentals</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Flexible budget-friendly plans</p>
+
+            {/* ================= 24/7 SUPPORT ================= */}
+            <div className="flex items-center gap-4 py-6 lg:py-7">
+
+              <div
+                className="
+                  w-12
+                  h-12
+                  rounded-xl
+                  bg-[#0795A3]/15
+                  border
+                  border-[#0795A3]/30
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                "
+              >
+                <MessageCircle
+                  size={25}
+                  strokeWidth={2}
+                  className="text-[#35C6CF]"
+                />
               </div>
+
+              <div>
+                <h3 className="text-white font-semibold text-sm sm:text-base">
+                  24/7 Support
+                </h3>
+
+                <p className="text-white/65 text-xs sm:text-sm mt-1">
+                  Quick reply on WhatsApp
+                </p>
+              </div>
+
             </div>
 
-            {/* Pillar 3 */}
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl font-black text-[#f28e2b] leading-none">3.</span>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Best Quality</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Thoroughly clean &amp; inspected</p>
+
+            {/* ================= ONLINE PAYMENT ================= */}
+            <div className="flex items-center gap-4 py-6 lg:py-7">
+
+              <div
+                className="
+                  w-12
+                  h-12
+                  rounded-xl
+                  bg-[#0795A3]/15
+                  border
+                  border-[#0795A3]/30
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                "
+              >
+                <CreditCard
+                  size={25}
+                  strokeWidth={2}
+                  className="text-[#35C6CF]"
+                />
               </div>
+
+              <div>
+                <h3 className="text-white font-semibold text-sm sm:text-base">
+                  Online Payment
+                </h3>
+
+                <p className="text-white/65 text-xs sm:text-sm mt-1">
+                  Pay easily via UPI / Cards
+                </p>
+              </div>
+
             </div>
 
-            {/* Pillar 4 */}
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl font-black text-[#f28e2b] leading-none">4.</span>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Quick Support</h4>
-                <p className="text-xs text-gray-500 mt-0.5">Always here to help you relocate</p>
+
+            {/* ================= FAST DELIVERY ================= */}
+            <div className="flex items-center gap-4 py-6 lg:py-7">
+
+              <div
+                className="
+                  w-12
+                  h-12
+                  rounded-xl
+                  bg-[#0795A3]/15
+                  border
+                  border-[#0795A3]/30
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                "
+              >
+                <Clock
+                  size={25}
+                  strokeWidth={2}
+                  className="text-[#35C6CF]"
+                />
               </div>
+
+              <div>
+                <h3 className="text-white font-semibold text-sm sm:text-base">
+                  Fast Delivery
+                </h3>
+
+                <p className="text-white/65 text-xs sm:text-sm mt-1">
+                  Delivered within 2–4 days
+                </p>
+              </div>
+
             </div>
+
           </div>
+
         </div>
       </section>
 
+
       {/* ========================================================= */}
-      {/* 2. TRUST PILLARS STRIP (Stitch: TrustPillarsStrip)         */}
+      {/* SCROLL TO TOP                                             */}
       {/* ========================================================= */}
-      <div className="bg-[#f28e2b] text-white py-8 border-y border-amber-600">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-            {/* Free Shipping */}
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
-              <div className="p-2 rounded-lg bg-white/10 text-white">
-                <Truck size={28} />
-              </div>
-              <div>
-                <h5 className="font-bold text-sm leading-tight">Free Shipping</h5>
-                <p className="text-xs text-white/85">Free delivery, first order</p>
-              </div>
-            </div>
 
-            {/* 24/7 Support */}
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
-              <div className="p-2 rounded-lg bg-white/10 text-white">
-                <MessageCircle size={28} />
-              </div>
-              <div>
-                <h5 className="font-bold text-sm leading-tight">24/7 Support</h5>
-                <p className="text-xs text-white/85">Quick reply on WhatsApp</p>
-              </div>
-            </div>
-
-            {/* Online Payment */}
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
-              <div className="p-2 rounded-lg bg-white/10 text-white">
-                <CreditCard size={28} />
-              </div>
-              <div>
-                <h5 className="font-bold text-sm leading-tight">Online Payment</h5>
-                <p className="text-xs text-white/85">Pay easily via UPI / Cards</p>
-              </div>
-            </div>
-
-            {/* Fast Delivery */}
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-2 md:space-y-0 md:space-x-4">
-              <div className="p-2 rounded-lg bg-white/10 text-white">
-                <Clock size={28} />
-              </div>
-              <div>
-                <h5 className="font-bold text-sm leading-tight">Fast Delivery</h5>
-                <p className="text-xs text-white/85">Delivered within 2–4 days</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <button
+        aria-label="Back to top"
+        onClick={scrollToTop}
+        className="
+          fixed
+          bottom-5
+          right-5
+          z-40
+          w-11
+          h-11
+          rounded-full
+          bg-white
+          text-[#123B63]
+          border
+          border-gray-200
+          shadow-lg
+          flex
+          items-center
+          justify-center
+          hover:bg-[#F0FAFA]
+          hover:text-[#0795A3]
+          transition-all
+          duration-300
+        "
+      >
+        <ChevronUp size={19} />
+      </button>
+    </>
   );
 };
 
-export default WhyRentNest;
+export default Footer;

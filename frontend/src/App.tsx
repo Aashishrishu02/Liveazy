@@ -1,155 +1,288 @@
-import { useState, useCallback, useEffect} from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import CategorySection from './components/CategorySection';
-import PopularRentals from './components/PopularRentals';
-import PromoBanner from './components/PromoBanner';
-import WhyRentNest from './components/WhyRentNest';
-import Footer from './components/Footer';
-import { PRODUCTS_DATA } from './data/rentalData';
-import type { Product } from './types/rental';
+import { useState, useCallback } from "react";
+
+import Navbar from "./components/Navbar";
+import HeroSection from "./components/HeroSection";
+import CategorySection from "./components/CategorySection";
+import PopularRentals from "./components/PopularRentals";
+import PromoBanner from "./components/PromoBanner";
+import WhyRentNest from "./components/WhyRentNest";
+import Footer from "./components/Footer";
+
+
+import type { Product } from "./types/rental";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import Categories from "./pages/Categories";
+import Products from "./pages/Products";
+
 
 function App() {
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
 
-    if (token) {
-      // Save JWT token
-      localStorage.setItem('token', token);
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("All");
 
-      // Remove token from URL
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      );
+  const [searchFilter, setSearchFilter] =
+    useState<string>("");
 
-      // Tell Navbar that authentication has changed
-      window.dispatchEvent(new Event('auth-change'));
-    }
-  }, []);
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [searchFilter, setSearchFilter] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('Pune (All Areas)');
+  const [selectedCity, setSelectedCity] =
+    useState<string>("Pune (All Areas)");
 
-  // Wishlist state
-  const [wishlistIds, setWishlistIds] = useState<Set<string>>(
-    new Set(['p-sofa-01', 'p-bed-01'])
+  const [wishlistIds, setWishlistIds] =
+    useState<Set<string>>(
+      new Set(["p-sofa-01", "p-bed-01"])
+    );
+
+
+  // ================= WISHLIST =================
+
+  const handleToggleWishlist = useCallback(
+    (product: Product) => {
+
+      setWishlistIds((prev) => {
+
+        const next = new Set(prev);
+
+        if (next.has(product.id)) {
+          next.delete(product.id);
+        } else {
+          next.add(product.id);
+        }
+
+        return next;
+      });
+
+    },
+    []
   );
 
-  // Toggle wishlist handler
-  const handleToggleWishlist = useCallback((product: Product) => {
-    setWishlistIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(product.id)) {
-        next.delete(product.id);
-      } else {
-        next.add(product.id);
-      }
-      return next;
-    });
-  }, []);
 
-  // Search from hero or navbar
-  const handleSearch = (query: string, category = 'All Categories', city?: string) => {
+  // ================= SEARCH =================
+
+  const handleSearch = (
+    query: string,
+    category = "All Categories",
+    city?: string
+  ) => {
+
     if (city) {
       setSelectedCity(city);
     }
-    if (category && category !== 'All Categories') {
+
+    if (
+      category &&
+      category !== "All Categories"
+    ) {
       setSelectedCategory(category);
     } else {
-      setSelectedCategory('All');
+      setSelectedCategory("All");
     }
+
     setSearchFilter(query);
 
-    const target = document.getElementById('products');
+    const target =
+      document.getElementById("products");
+
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      target.scrollIntoView({
+        behavior: "smooth",
+      });
     }
   };
 
-  // Category select handler
-  const handleSelectCategory = (cat: string) => {
-    setSelectedCategory(cat);
-    setSearchFilter('');
-    const target = document.getElementById('products');
+
+  // ================= CATEGORY =================
+
+  const handleSelectCategory = (
+    category: string
+  ) => {
+
+    setSelectedCategory(category);
+
+    setSearchFilter("");
+
+    const target =
+      document.getElementById("products");
+
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      target.scrollIntoView({
+        behavior: "smooth",
+      });
     }
   };
 
-  // Scroll to products
+
+  // ================= SCROLL =================
+
   const scrollToProducts = () => {
-    const target = document.getElementById('products');
+
+    const target =
+      document.getElementById("products");
+
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      target.scrollIntoView({
+        behavior: "smooth",
+      });
     }
   };
 
-  // Rent now action
-  const handleRentNow = (_product: Product) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // Trigger login prompt or scroll
-      const loginBtn = document.querySelector('header button') as HTMLButtonElement;
-      if (loginBtn) {
-        loginBtn.click();
-      }
-    } else {
-      alert(`Booking initiated for ${_product.name}. Our Pune team will contact you for delivery scheduling!`);
-    }
+
+  // ================= RENT NOW =================
+
+  const handleRentNow = (
+    product: Product
+  ) => {
+
+    alert(
+      `Booking initiated for ${product.name}. Our Pune team will contact you for delivery scheduling!`
+    );
+
   };
+
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] text-gray-900 font-sans selection:bg-orange-500 selection:text-white">
-      {/* 1. ANNOUNCEMENT BAR + NAVBAR WITH LOGIN/LOGOUT + CATEGORY NAVIGATION */}
-      <Navbar
-        onSearch={(query) => handleSearch(query)}
-        selectedCity={selectedCity}
-        onSelectCity={(city: string) => setSelectedCity(city)}
-        wishlistCount={wishlistIds.size}
-        cartCount={1}
-        onOpenWishlist={scrollToProducts}
-        onOpenCart={scrollToProducts}
-      />
 
-      {/* 2. HERO */}
-      <HeroSection
-        onSearchSubmit={(q, cat, city) => handleSearch(q, cat, city)}
-        selectedCity={selectedCity}
-        onExploreClick={scrollToProducts}
-      />
+    <BrowserRouter>
 
-      {/* 3. CATEGORIES */}
-      <CategorySection
-        onSelectCategory={handleSelectCategory}
-        selectedCategory={selectedCategory}
-      />
+      <Routes>
 
-      {/* 4. PRODUCTS / POPULAR RENTALS */}
-      <PopularRentals
-        products={PRODUCTS_DATA}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        searchFilter={searchFilter}
-        onClearSearch={() => setSearchFilter('')}
-        wishlistIds={wishlistIds}
-        onToggleWishlist={handleToggleWishlist}
-        onRentNow={handleRentNow}
-      />
+        {/* ================================= */}
+        {/* PUBLIC CUSTOMER WEBSITE */}
+        {/* ================================= */}
 
-      {/* 5. SIMPLE PROMO */}
-      <PromoBanner onCtaClick={scrollToProducts} />
+        <Route
+          path="/"
+          element={
 
-      {/* 6. BENEFITS (WHY RENTNEST) */}
-      <WhyRentNest />
+            <div className="min-h-screen bg-[#faf9f7] text-gray-900 font-sans">
 
-      {/* 7. FOOTER */}
-      <Footer />
-    </div>
+              <Navbar />
+
+              <HeroSection
+                onSearchSubmit={(
+                  query,
+                  category,
+                  city
+                ) =>
+                  handleSearch(
+                    query,
+                    category,
+                    city
+                  )
+                }
+                selectedCity={selectedCity}
+                onExploreClick={
+                  scrollToProducts
+                }
+              />
+
+              <CategorySection
+                onSelectCategory={
+                  handleSelectCategory
+                }
+                selectedCategory={
+                  selectedCategory
+                }
+              />
+
+              <PopularRentals
+                products={[]}
+                selectedCategory={
+                  selectedCategory
+                }
+                onSelectCategory={
+                  setSelectedCategory
+                }
+                searchFilter={
+                  searchFilter
+                }
+                onClearSearch={() =>
+                  setSearchFilter("")
+                }
+                wishlistIds={
+                  wishlistIds
+                }
+                onToggleWishlist={
+                  handleToggleWishlist
+                }
+                onRentNow={
+                  handleRentNow
+                }
+              />
+
+              <PromoBanner
+                onCtaClick={
+                  scrollToProducts
+                }
+              />
+
+              <WhyRentNest />
+
+              <Footer />
+
+            </div>
+
+          }
+        />
+
+
+        {/* ================================= */}
+        {/* ADMIN LOGIN */}
+        {/* ================================= */}
+
+        <Route
+          path="/admin"
+          element={<AdminLogin />}
+        />
+
+
+        {/* ================================= */}
+        {/* ADMIN DASHBOARD */}
+        {/* ================================= */}
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminDashboard />
+          }
+        />
+
+
+        {/* ================================= */}
+        {/* CATEGORIES MASTER */}
+        {/* ================================= */}
+
+        <Route
+          path="/admin/categories"
+          element={
+            <Categories />
+          }
+        />
+
+
+        {/* ================================= */}
+        {/* PRODUCTS MASTER */}
+        {/* ================================= */}
+
+        <Route
+          path="/admin/products"
+          element={
+            <Products />
+          }
+        />
+
+      </Routes>
+
+    </BrowserRouter>
+
   );
 }
+
 
 export default App;
