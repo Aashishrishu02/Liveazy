@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Category {
   id: string;
   name: string;
@@ -25,8 +27,8 @@ export default function AdminDashboard() {
       try {
         const [categoriesResponse, productsResponse] =
           await Promise.all([
-            fetch("http://localhost:3000/categories"),
-            fetch("http://localhost:3000/products"),
+            fetch(`${API_URL}/categories`),
+            fetch(`${API_URL}/products`),
           ]);
 
         const categoriesData = await categoriesResponse.json();
@@ -62,7 +64,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F5FAFA] p-6 md:p-8">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
 
       <div className="mb-8">
 
@@ -77,7 +79,7 @@ export default function AdminDashboard() {
       </div>
 
 
-      {/* ================= STATS ================= */}
+      {/*STATS */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
@@ -143,7 +145,7 @@ export default function AdminDashboard() {
       </div>
 
 
-      {/* ================= MASTER SECTIONS ================= */}
+      {/*MASTER SECTIONS  */}
 
       <div className="mt-8">
 
@@ -154,7 +156,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          {/* ================= CATEGORIES ================= */}
+          {/*  CATEGORIES  */}
 
           <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
 
@@ -217,7 +219,7 @@ export default function AdminDashboard() {
           </div>
 
 
-          {/* ================= PRODUCTS ================= */}
+          {/* PRODUCTS */}
 
           <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
 

@@ -10,10 +10,10 @@ export default function Navbar() {
       {/* Main Container */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
 
-        {/* ================= MAIN NAVBAR ================= */}
+        {/*  MAIN NAVBAR  */}
         <div className="min-h-20 flex items-center">
 
-          {/* ================= LOGO ================= */}
+          {/* LOGO  */}
           <a
             href="/"
             className="
@@ -41,7 +41,7 @@ export default function Navbar() {
             />
           </a>
 
-          {/* ================= DESKTOP NAVIGATION ================= */}
+          {/* DESKTOP NAVIGATION  */}
           <div
             className="
               hidden
@@ -170,7 +170,7 @@ export default function Navbar() {
 
           </div>
 
-          {/* ================= SEARCH ================= */}
+          {/*  SEARCH  */}
           <div className="hidden lg:block ml-8 xl:ml-10">
 
             <div className="relative w-[220px] xl:w-[270px]">
@@ -213,7 +213,7 @@ export default function Navbar() {
 
           </div>
 
-          {/* ================= MOBILE BUTTON ================= */}
+          {/*MOBILE BUTTON  */}
           <button
             type="button"
             onClick={() => setMobileMenu(!mobileMenu)}
@@ -242,7 +242,7 @@ export default function Navbar() {
 
         </div>
 
-        {/* ================= MOBILE MENU ================= */}
+        {/* MOBILE MENU  */}
         {mobileMenu && (
           <div className="lg:hidden border-t border-[#D8EEF0] py-5">
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Category {
   id: string;
   name: string;
@@ -32,7 +34,7 @@ export default function Products() {
   const [image, setImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  // ================= FETCH PRODUCTS + CATEGORIES =================
+  // FETCH PRODUCTS + CATEGORIES
 
   const fetchData = async () => {
     try {
@@ -40,8 +42,8 @@ export default function Products() {
 
       const [productsResponse, categoriesResponse] =
         await Promise.all([
-          fetch("http://localhost:3000/products"),
-          fetch("http://localhost:3000/categories"),
+        fetch(`${API_URL}/categories`),
+          fetch(`${API_URL}/products`),
         ]);
 
       if (!productsResponse.ok) {

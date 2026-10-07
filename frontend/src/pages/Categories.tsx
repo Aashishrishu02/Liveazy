@@ -34,7 +34,7 @@ export default function Categories() {
   // Saving
   const [saving, setSaving] = useState(false);
 
-  // ================= FETCH CATEGORIES =================
+  // FETCH CATEGORIES 
 
   const fetchCategories = async () => {
     try {
@@ -61,7 +61,7 @@ export default function Categories() {
     fetchCategories();
   }, []);
 
-  // ================= RESET FORM =================
+  //  RESET FORM 
 
   const resetForm = () => {
     setName("");
@@ -76,14 +76,14 @@ export default function Categories() {
     }
   };
 
-  // ================= CLOSE MODAL =================
+  // CLOSE MODAL 
 
   const closeModal = () => {
     setShowModal(false);
     resetForm();
   };
 
-  // ================= IMAGE UPLOAD =================
+  // IMAGE UPLOAD 
 
   const handleImageUpload = async (file: File) => {
     try {
@@ -117,7 +117,7 @@ export default function Categories() {
     }
   };
 
-  // ================= FILE SELECT =================
+  // FILE SELECT 
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -140,7 +140,7 @@ export default function Categories() {
     await handleImageUpload(file);
   };
 
-  // ================= ADD CATEGORY =================
+  // ADD CATEGORY 
 
   const handleAddCategory = async () => {
     if (!name.trim()) {
@@ -181,7 +181,7 @@ export default function Categories() {
     }
   };
 
-  // ================= OPEN EDIT MODAL =================
+  // OPEN EDIT MODAL 
 
   const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
@@ -194,7 +194,7 @@ export default function Categories() {
     setShowModal(true);
   };
 
-  // ================= UPDATE CATEGORY =================
+  // UPDATE CATEGORY 
 
   const handleUpdateCategory = async () => {
     if (!editingCategory) return;
@@ -240,7 +240,7 @@ export default function Categories() {
     }
   };
 
-  // ================= DELETE CATEGORY =================
+  // DELETE CATEGORY 
 
   const handleDeleteCategory = async (id: string) => {
     const confirmDelete = window.confirm(
@@ -271,7 +271,7 @@ export default function Categories() {
     }
   };
 
-  // ================= TOGGLE ACTIVE =================
+  // TOGGLE ACTIVE 
 
   const handleToggleStatus = async (category: Category) => {
     try {
@@ -299,7 +299,7 @@ export default function Categories() {
     }
   };
 
-  // ================= UI =================
+  //  UI 
 
   return (
     <div className="min-h-screen bg-[#F5FAFA] p-6 md:p-8">

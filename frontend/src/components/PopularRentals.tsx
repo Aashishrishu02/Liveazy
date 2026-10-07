@@ -37,9 +37,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
   const [backendProducts, setBackendProducts] = useState<BackendProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ---------------------------------------
+
   // FETCH PRODUCTS FROM BACKEND
-  // ---------------------------------------
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -69,9 +69,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     fetchProducts();
   }, []);
 
-  // ---------------------------------------
+
   // FILTER PRODUCTS
-  // ---------------------------------------
+
   const filteredProducts = useMemo(() => {
     return backendProducts.filter((product) => {
       const categoryMatch =
@@ -90,9 +90,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     });
   }, [backendProducts, selectedCategory, searchFilter]);
 
-  // ---------------------------------------
+  
   // WHATSAPP
-  // ---------------------------------------
+  
   const handleWhatsApp = (product: BackendProduct) => {
     const message = `Hi LIVEAZY, I am interested in renting ${product.name}.`;
 
@@ -103,9 +103,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     window.open(whatsappUrl, "_blank");
   };
 
-  // ---------------------------------------
+  
   // LOADING
-  // ---------------------------------------
+  
   if (loading) {
     return (
       <section id="products" className="bg-white py-12">
@@ -124,9 +124,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   }
 
-  // ---------------------------------------
+  
   // MAIN UI
-  // ---------------------------------------
+  
   return (
     <section
       id="products"
@@ -134,9 +134,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     >
       <div className="mx-auto max-w-7xl px-4">
 
-        {/* ---------------------------------
+        {/* 
             HEADER
-        ---------------------------------- */}
+      */}
         <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-4">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#0795A3]">
@@ -176,9 +176,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         </div>
 
-        {/* ---------------------------------
+        {/*
             SEARCH RESULT
-        ---------------------------------- */}
+         */}
         {searchFilter && (
           <div className="mb-6 flex items-center justify-between rounded-lg bg-[#F5FAFA] px-4 py-3">
             <p className="text-sm text-gray-600">
@@ -195,9 +195,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         )}
 
-        {/* ---------------------------------
+        {/* 
             NO PRODUCTS
-        ---------------------------------- */}
+         */}
         {filteredProducts.length === 0 ? (
           <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50">
             <div className="text-center">
@@ -214,9 +214,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         ) : (
           <>
-            {/* ---------------------------------
+            {/* 
                 PRODUCTS GRID
-            ---------------------------------- */}
+             */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 
               {filteredProducts.map((product) => (
