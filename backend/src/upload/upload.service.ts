@@ -26,23 +26,25 @@ export class UploadService {
           }
         },
       );
-    })
+
+      uploadStream.end(file.buffer);
+    });
   }
-      
-      async uploadBanner(file:any){
-        return new Promise((resolve,reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'liveazy/banners'},
-            (error,result) => {
-              if(error) {
-                reject(error);
-              } else {
-                resolve(result);
-              }
-            },
-          );
-        
-      
+
+  async uploadBanner(file: any) {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'liveazy/banners',
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        },
+      );
 
       uploadStream.end(file.buffer);
     });
