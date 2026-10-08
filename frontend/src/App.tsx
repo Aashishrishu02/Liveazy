@@ -8,7 +8,6 @@ import PromoBanner from "./components/PromoBanner";
 import WhyRentNest from "./components/WhyRentNest";
 import Footer from "./components/Footer";
 
-
 import type { Product } from "./types/rental";
 
 import {
@@ -24,7 +23,6 @@ import Products from "./pages/Products";
 import Banner from "./pages/Banner";
 
 function App() {
-
   const [selectedCategory, setSelectedCategory] =
     useState<string>("All");
 
@@ -39,14 +37,11 @@ function App() {
       new Set(["p-sofa-01", "p-bed-01"])
     );
 
-
-  //WISHLIST 
+  // ================= WISHLIST =================
 
   const handleToggleWishlist = useCallback(
     (product: Product) => {
-
       setWishlistIds((prev) => {
-
         const next = new Set(prev);
 
         if (next.has(product.id)) {
@@ -57,20 +52,17 @@ function App() {
 
         return next;
       });
-
     },
     []
   );
 
-
-  //SEARCH 
+  // ================= SEARCH =================
 
   const handleSearch = (
     query: string,
     category = "All Categories",
     city?: string
   ) => {
-
     if (city) {
       setSelectedCity(city);
     }
@@ -96,15 +88,12 @@ function App() {
     }
   };
 
-
-  //  CATEGORY 
+  // ================= CATEGORY =================
 
   const handleSelectCategory = (
     category: string
   ) => {
-
     setSelectedCategory(category);
-
     setSearchFilter("");
 
     const target =
@@ -117,11 +106,9 @@ function App() {
     }
   };
 
-
-  // SCROLL 
+  // ================= SCROLL =================
 
   const scrollToProducts = () => {
-
     const target =
       document.getElementById("products");
 
@@ -132,33 +119,25 @@ function App() {
     }
   };
 
-
   // ================= RENT NOW =================
 
   const handleRentNow = (
     product: Product
   ) => {
-
     alert(
       `Booking initiated for ${product.name}. Our Pune team will contact you for delivery scheduling!`
     );
-
   };
 
-
   return (
-
     <BrowserRouter>
-
       <Routes>
 
-       
-        {/* PUBLIC CUSTOMER WEBSITE */}
-        
+        {/* ================= PUBLIC CUSTOMER WEBSITE ================= */}
+
         <Route
           path="/"
           element={
-
             <div className="min-h-screen bg-[#faf9f7] text-gray-900 font-sans">
 
               <Navbar />
@@ -226,61 +205,47 @@ function App() {
               <Footer />
 
             </div>
-
           }
         />
 
+        {/* ================= ADMIN LOGIN ================= */}
 
-        
-        {/* ADMIN LOGIN */}
-        
         <Route
           path="/admin"
           element={<AdminLogin />}
         />
 
+        {/* ================= ADMIN DASHBOARD ================= */}
 
-        
-        {/* ADMIN DASHBOARD */}
-        
         <Route
           path="/admin/dashboard"
-          element={
-            <AdminDashboard />
-          }
+          element={<AdminDashboard />}
         />
 
+        {/* ================= CATEGORIES MASTER ================= */}
 
-        
-        {/* CATEGORIES MASTER */}
-        
         <Route
           path="/admin/categories"
-          element={
-            <Categories />
-          }
+          element={<Categories />}
         />
 
+        {/* ================= PRODUCTS MASTER ================= */}
 
-        
         <Route
           path="/admin/products"
-          element={
-            <Products />
-          }
+          element={<Products />}
         />
 
+        {/* ================= BANNER MANAGEMENT ================= */}
+
         <Route
-  path="/admin/banner"
-  element={<Banner />}
-/>
+          path="/admin/banner"
+          element={<Banner />}
+        />
 
       </Routes>
-
     </BrowserRouter>
-
   );
 }
-
 
 export default App;

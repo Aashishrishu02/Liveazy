@@ -79,7 +79,7 @@ export default function AdminDashboard() {
       </div>
 
 
-      {/*STATS */}
+      {/* STATS */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
       </div>
 
 
-      {/*MASTER SECTIONS  */}
+      {/* MASTER SECTIONS */}
 
       <div className="mt-8">
 
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          {/*  CATEGORIES  */}
+          {/* CATEGORIES */}
 
           <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
 
@@ -198,7 +198,9 @@ export default function AdminDashboard() {
 
 
               <button
-                onClick={() => navigate("/admin/categories")}
+                onClick={() =>
+                  navigate("/admin/categories")
+                }
                 className="
                   bg-[#123B63]
                   hover:bg-[#0795A3]
@@ -261,7 +263,9 @@ export default function AdminDashboard() {
 
 
               <button
-                onClick={() => navigate("/admin/products")}
+                onClick={() =>
+                  navigate("/admin/products")
+                }
                 className="
                   bg-[#123B63]
                   hover:bg-[#0795A3]
@@ -275,6 +279,66 @@ export default function AdminDashboard() {
                 "
               >
                 Manage Products
+              </button>
+
+            </div>
+
+          </div>
+
+
+          {/* BANNER MANAGEMENT */}
+
+          <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
+
+            <div className="flex items-center justify-between">
+
+              <div>
+
+                <h3 className="text-lg font-bold text-[#123B63]">
+                  Banner Management
+                </h3>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  Change and manage your homepage banner
+                </p>
+
+              </div>
+
+              <div className="w-12 h-12 rounded-xl bg-[#0795A3]/10 flex items-center justify-center">
+
+                <span className="text-xl">
+                  🖼️
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div className="mt-5 flex items-center justify-between">
+
+              <p className="text-sm text-gray-500">
+                Homepage
+              </p>
+
+
+              <button
+                onClick={() =>
+                  navigate("/admin/banner")
+                }
+                className="
+                  bg-[#123B63]
+                  hover:bg-[#0795A3]
+                  text-white
+                  px-4
+                  py-2
+                  rounded-lg
+                  text-sm
+                  font-semibold
+                  transition
+                "
+              >
+                Manage Banner
               </button>
 
             </div>

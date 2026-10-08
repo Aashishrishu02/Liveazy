@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,6 +34,10 @@ export default function Products() {
   const [image, setImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
+  // Image upload
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // ================= FETCH PRODUCTS + CATEGORIES =================
 
   const fetchData = async () => {
@@ -41,24 +45,24 @@ export default function Products() {
       setLoading(true);
 
       const [productsResponse, categoriesResponse] =
-  await Promise.all([
-    fetch(`${API_URL}/products`),
-    fetch(`${API_URL}/categories`),
-  ]);
+        await Promise.all([
+          fetch(`${API_URL}/products`),
+          fetch(`${API_URL}/categories`),
+        ]);
 
-if (!productsResponse.ok) {
-  throw new Error("Failed to fetch products");
-}
+      if (!productsResponse.ok) {
+        throw new Error("Failed to fetch products");
+      }
 
-if (!categoriesResponse.ok) {
-  throw new Error("Failed to fetch categories");
-}
+      if (!categoriesResponse.ok) {
+        throw new Error("Failed to fetch categories");
+      }
 
-const productsData = await productsResponse.json();
-const categoriesData = await categoriesResponse.json();
+      const productsData = await productsResponse.json();
+      const categoriesData = await categoriesResponse.json();
 
-setProducts(productsData);
-setCategories(categoriesData);
+      setProducts(productsData);
+      setCategories(categoriesData);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Unable to load products");
@@ -80,6 +84,11 @@ setCategories(categoriesData);
     setImage("");
     setCategoryId("");
     setEditingProduct(null);
+    setUploading(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   // ================= CLOSE MODAL =================
@@ -87,6 +96,66 @@ setCategories(categoriesData);
   const closeModal = () => {
     resetForm();
     setShowModal(false);
+  };
+
+  // ================= IMAGE UPLOAD =================
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${API_URL}/upload/image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Image upload failed");
+      }
+
+      const data = await response.json();
+
+      if (!data.url) {
+        throw new Error("Cloudinary URL not received");
+      }
+
+      setImage(data.url);
+
+      alert("Image uploaded successfully");
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // ================= FILE SELECT =================
+
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // 5 MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5 MB");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return;
+    }
+
+    await handleImageUpload(file);
   };
 
   // ================= ADD PRODUCT =================
@@ -153,6 +222,10 @@ setCategories(categoriesData);
     setPrice(String(product.price));
     setImage(product.image || "");
     setCategoryId(product.categoryId);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
 
     setShowModal(true);
   };
@@ -330,7 +403,6 @@ setCategories(categoriesData);
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
 
         <div className="bg-white border border-[#D8EEF0] rounded-xl p-5 shadow-sm">
-
           <p className="text-sm text-gray-500">
             Total Products
           </p>
@@ -338,11 +410,9 @@ setCategories(categoriesData);
           <h2 className="text-2xl font-bold text-[#123B63] mt-1">
             {products.length}
           </h2>
-
         </div>
 
         <div className="bg-white border border-[#D8EEF0] rounded-xl p-5 shadow-sm">
-
           <p className="text-sm text-gray-500">
             Active Products
           </p>
@@ -354,11 +424,9 @@ setCategories(categoriesData);
               ).length
             }
           </h2>
-
         </div>
 
         <div className="bg-white border border-[#D8EEF0] rounded-xl p-5 shadow-sm">
-
           <p className="text-sm text-gray-500">
             Inactive Products
           </p>
@@ -370,7 +438,6 @@ setCategories(categoriesData);
               ).length
             }
           </h2>
-
         </div>
 
       </div>
@@ -428,14 +495,12 @@ setCategories(categoriesData);
               {loading ? (
 
                 <tr>
-
                   <td
                     colSpan={5}
                     className="text-center py-12 text-gray-500"
                   >
                     Loading products...
                   </td>
-
                 </tr>
 
               ) : products.length === 0 ? (
@@ -823,64 +888,87 @@ setCategories(categoriesData);
 
               </div>
 
-              {/* IMAGE */}
+              {/* IMAGE UPLOAD */}
 
               <div>
 
                 <label className="block text-sm font-semibold text-[#123B63] mb-2">
-                  Image URL
+                  Product Image
                 </label>
 
                 <input
-                  type="url"
-                  value={image}
-                  onChange={(e) =>
-                    setImage(e.target.value)
-                  }
-                  placeholder="https://example.com/image.jpg"
-                  className="
-                    w-full
-                    h-11
-                    px-4
-                    border
-                    border-gray-300
-                    rounded-lg
-                    outline-none
-                    focus:border-[#0795A3]
-                  "
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="product-image"
+                  onChange={handleFileChange}
                 />
 
+                <label
+                  htmlFor="product-image"
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                    w-full
+                    h-12
+                    border-2
+                    border-dashed
+                    border-[#D8EEF0]
+                    rounded-lg
+                    cursor-pointer
+                    bg-[#F8FCFC]
+                    hover:bg-[#F0FAFA]
+                    hover:border-[#0795A3]
+                    transition
+                  "
+                >
+
+                  {uploading ? (
+
+                    <span className="text-sm text-[#0795A3] font-semibold">
+                      Uploading image...
+                    </span>
+
+                  ) : (
+
+                    <span className="text-sm text-gray-500">
+                      Choose Product Image
+                    </span>
+
+                  )}
+
+                </label>
+
+                {/* IMAGE PREVIEW */}
+
+                {image && (
+
+                  <div className="mt-4">
+
+                    <p className="text-xs text-gray-500 mb-2">
+                      Image Preview
+                    </p>
+
+                    <img
+                      src={image}
+                      alt="Product preview"
+                      className="
+                        w-24
+                        h-24
+                        rounded-lg
+                        object-cover
+                        border
+                        border-[#D8EEF0]
+                      "
+                    />
+
+                  </div>
+
+                )}
+
               </div>
-
-              {/* IMAGE PREVIEW */}
-
-              {image && (
-
-                <div>
-
-                  <p className="text-xs text-gray-500 mb-2">
-                    Image Preview
-                  </p>
-
-                  <img
-                    src={image}
-                    alt="Preview"
-                    className="
-                      w-24
-                      h-24
-                      rounded-lg
-                      object-cover
-                      border
-                    "
-                    onError={(e) => {
-                      e.currentTarget.style.display =
-                        "none";
-                    }}
-                  />
-
-                </div>
-
-              )}
 
               {/* DESCRIPTION */}
 
@@ -941,20 +1029,25 @@ setCategories(categoriesData);
                     ? handleUpdateProduct
                     : handleAddProduct
                 }
+                disabled={uploading}
                 className="
                   px-5
                   py-2.5
                   bg-[#123B63]
                   hover:bg-[#0795A3]
+                  disabled:opacity-60
+                  disabled:cursor-not-allowed
                   text-white
                   rounded-lg
                   font-semibold
                   transition
                 "
               >
-                {editingProduct
-                  ? "Update Product"
-                  : "Add Product"}
+                {uploading
+                  ? "Uploading..."
+                  : editingProduct
+                    ? "Update Product"
+                    : "Add Product"}
               </button>
 
             </div>
