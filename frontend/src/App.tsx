@@ -40,7 +40,7 @@ function App() {
     );
 
 
-  // ================= WISHLIST =================
+  //WISHLIST 
 
   const handleToggleWishlist = useCallback(
     (product: Product) => {
@@ -63,7 +63,7 @@ function App() {
   );
 
 
-  // ================= SEARCH =================
+  //SEARCH 
 
   const handleSearch = (
     query: string,
@@ -97,7 +97,7 @@ function App() {
   };
 
 
-  // ================= CATEGORY =================
+  //  CATEGORY 
 
   const handleSelectCategory = (
     category: string
@@ -118,7 +118,7 @@ function App() {
   };
 
 
-  // ================= SCROLL =================
+  // SCROLL 
 
   const scrollToProducts = () => {
 

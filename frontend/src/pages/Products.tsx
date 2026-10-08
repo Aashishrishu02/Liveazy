@@ -34,31 +34,31 @@ export default function Products() {
   const [image, setImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  // FETCH PRODUCTS + CATEGORIES
+  // ================= FETCH PRODUCTS + CATEGORIES =================
 
   const fetchData = async () => {
     try {
       setLoading(true);
 
       const [productsResponse, categoriesResponse] =
-        await Promise.all([
-        fetch(`${API_URL}/categories`),
-          fetch(`${API_URL}/products`),
-        ]);
+  await Promise.all([
+    fetch(`${API_URL}/products`),
+    fetch(`${API_URL}/categories`),
+  ]);
 
-      if (!productsResponse.ok) {
-        throw new Error("Failed to fetch products");
-      }
+if (!productsResponse.ok) {
+  throw new Error("Failed to fetch products");
+}
 
-      if (!categoriesResponse.ok) {
-        throw new Error("Failed to fetch categories");
-      }
+if (!categoriesResponse.ok) {
+  throw new Error("Failed to fetch categories");
+}
 
-      const productsData = await productsResponse.json();
-      const categoriesData = await categoriesResponse.json();
+const productsData = await productsResponse.json();
+const categoriesData = await categoriesResponse.json();
 
-      setProducts(productsData);
-      setCategories(categoriesData);
+setProducts(productsData);
+setCategories(categoriesData);
     } catch (error) {
       console.error("Error fetching data:", error);
       alert("Unable to load products");
@@ -109,7 +109,7 @@ export default function Products() {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/products",
+        `${API_URL}/products`,
         {
           method: "POST",
           headers: {
@@ -179,7 +179,7 @@ export default function Products() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/products/${editingProduct.id}`,
+        `${API_URL}/products/${editingProduct.id}`,
         {
           method: "PATCH",
           headers: {
@@ -224,7 +224,7 @@ export default function Products() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/products/${id}`,
+        `${API_URL}/products/${id}`,
         {
           method: "DELETE",
         }
@@ -252,7 +252,7 @@ export default function Products() {
   const handleToggleStatus = async (product: Product) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/products/${product.id}`,
+        `${API_URL}/products/${product.id}`,
         {
           method: "PATCH",
           headers: {
@@ -325,7 +325,6 @@ export default function Products() {
 
       </div>
 
-
       {/* ================= SUMMARY ================= */}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
@@ -342,7 +341,6 @@ export default function Products() {
 
         </div>
 
-
         <div className="bg-white border border-[#D8EEF0] rounded-xl p-5 shadow-sm">
 
           <p className="text-sm text-gray-500">
@@ -358,7 +356,6 @@ export default function Products() {
           </h2>
 
         </div>
-
 
         <div className="bg-white border border-[#D8EEF0] rounded-xl p-5 shadow-sm">
 
@@ -378,7 +375,6 @@ export default function Products() {
 
       </div>
 
-
       {/* ================= PRODUCT TABLE ================= */}
 
       <div className="bg-white rounded-xl border border-[#D8EEF0] shadow-sm overflow-hidden">
@@ -394,7 +390,6 @@ export default function Products() {
           </p>
 
         </div>
-
 
         <div className="overflow-x-auto">
 
@@ -427,7 +422,6 @@ export default function Products() {
               </tr>
 
             </thead>
-
 
             <tbody>
 
@@ -548,7 +542,6 @@ export default function Products() {
 
                       </td>
 
-
                       {/* CATEGORY */}
 
                       <td className="px-6 py-4">
@@ -560,7 +553,6 @@ export default function Products() {
 
                       </td>
 
-
                       {/* PRICE */}
 
                       <td className="px-6 py-4">
@@ -570,7 +562,6 @@ export default function Products() {
                         </span>
 
                       </td>
-
 
                       {/* STATUS */}
 
@@ -600,7 +591,6 @@ export default function Products() {
 
                       </td>
 
-
                       {/* ACTIONS */}
 
                       <td className="px-6 py-4">
@@ -609,9 +599,7 @@ export default function Products() {
 
                           <button
                             onClick={() =>
-                              handleEditProduct(
-                                product
-                              )
+                              handleEditProduct(product)
                             }
                             className="
                               px-3
@@ -668,7 +656,6 @@ export default function Products() {
 
       </div>
 
-
       {/* ================= ADD / EDIT MODAL ================= */}
 
       {showModal && (
@@ -712,7 +699,6 @@ export default function Products() {
 
             </div>
 
-
             {/* FORM */}
 
             <div className="p-6 space-y-5">
@@ -747,7 +733,6 @@ export default function Products() {
                 />
 
               </div>
-
 
               {/* CATEGORY */}
 
@@ -799,7 +784,6 @@ export default function Products() {
 
               </div>
 
-
               {/* PRICE */}
 
               <div>
@@ -839,7 +823,6 @@ export default function Products() {
 
               </div>
 
-
               {/* IMAGE */}
 
               <div>
@@ -868,7 +851,6 @@ export default function Products() {
                 />
 
               </div>
-
 
               {/* IMAGE PREVIEW */}
 
@@ -899,7 +881,6 @@ export default function Products() {
                 </div>
 
               )}
-
 
               {/* DESCRIPTION */}
 
@@ -932,7 +913,6 @@ export default function Products() {
               </div>
 
             </div>
-
 
             {/* MODAL FOOTER */}
 
