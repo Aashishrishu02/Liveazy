@@ -7,6 +7,8 @@ import studyTableImg from "../assets/products/study-table.jpeg";
 import fridgeImg from "../assets/products/fridge.jpeg";
 import almirahImg from "../assets/products/almirah.jpeg";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface CategorySectionProps {
   onSelectCategory?: (category: string) => void;
   selectedCategory?: string;
@@ -52,10 +54,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
         setLoading(true);
 
         const [categoriesResponse, productsResponse] = await Promise.all([
-          fetch("http://localhost:3000/categories"),
-          fetch("http://localhost:3000/products"),
-        ]);
-
+  fetch(`${API_URL}/categories`),
+  fetch(`${API_URL}/products`),
+]);
         if (!categoriesResponse.ok) {
           throw new Error("Failed to fetch categories");
         }
