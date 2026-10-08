@@ -21,7 +21,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Categories from "./pages/Categories";
 import Products from "./pages/Products";
-
+import Banner from "./pages/Banner";
 
 function App() {
 
@@ -152,10 +152,9 @@ function App() {
 
       <Routes>
 
-        {/* ================================= */}
+       
         {/* PUBLIC CUSTOMER WEBSITE */}
-        {/* ================================= */}
-
+        
         <Route
           path="/"
           element={
@@ -232,20 +231,18 @@ function App() {
         />
 
 
-        {/* ================================= */}
+        
         {/* ADMIN LOGIN */}
-        {/* ================================= */}
-
+        
         <Route
           path="/admin"
           element={<AdminLogin />}
         />
 
 
-        {/* ================================= */}
+        
         {/* ADMIN DASHBOARD */}
-        {/* ================================= */}
-
+        
         <Route
           path="/admin/dashboard"
           element={
@@ -254,10 +251,9 @@ function App() {
         />
 
 
-        {/* ================================= */}
+        
         {/* CATEGORIES MASTER */}
-        {/* ================================= */}
-
+        
         <Route
           path="/admin/categories"
           element={
@@ -266,16 +262,18 @@ function App() {
         />
 
 
-        {/* ================================= */}
-        {/* PRODUCTS MASTER */}
-        {/* ================================= */}
-
+        
         <Route
           path="/admin/products"
           element={
             <Products />
           }
         />
+
+        <Route
+  path="/admin/banner"
+  element={<Banner />}
+/>
 
       </Routes>
 

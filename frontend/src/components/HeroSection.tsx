@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect , useState } from 'react';
 import heroImg from '../assets/hero-banner.jpeg';
 
 interface HeroSectionProps {
@@ -8,12 +8,36 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
+    const API_URL = import.meta.env.VITE_API_URL;
+  const [bannerImage, setBannerImage] = useState(heroImg);
+
+  useEffect(() => {
+    const fetchBanner = async () => {
+      try {
+        const response = await fetch(`${API_URL}/banners`);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const banner = await response.json();
+
+        if (banner?.image) {
+          setBannerImage(banner.image);
+        }
+      } catch (error) {
+        console.error('Failed to fetch banner:', error);
+      }
+    };
+
+    fetchBanner();
+  }, [API_URL]);
   return (
     <section className="relative bg-gray-900 overflow-hidden">
       <div className="relative h-[460px] sm:h-[480px] w-full">
         {/* Background Image with Overlay */}
         <img
-          src={heroImg}
+          src={bannerImage}
           alt="Furnish Your Home With RentNest"
           className="w-full h-full object-cover object-center opacity-45"
         />
