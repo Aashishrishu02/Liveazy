@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import heroBannerImg from "../assets/hero-banner.jpeg";
 import table2Img from "../assets/products/table2.jpeg";
@@ -23,6 +22,7 @@ interface PromoBannerProps {
   onCtaClick: () => void;
 }
 
+// Default banners shown when no active admin banners are available.
 const fallbackBanners: PromoBannerData[] = [
   {
     id: "fallback-1",
@@ -57,23 +57,49 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
     const fetchPromoBanners = async () => {
       try {
+        if (!API_URL) {
+          console.warn(
+            "VITE_API_URL is not configured. Showing default promo banners."
+          );
+          return;
+        }
+
         const response = await fetch(`${API_URL}/promo-banners`);
 
         if (!response.ok) {
-          throw new Error("Failed to load promo banners");
+          throw new Error(
+            `Failed to load promo banners: ${response.status}`
+          );
         }
 
         const data: PromoBannerData[] = await response.json();
 
-        if (!cancelled && Array.isArray(data)) {
-          setBanners(
-            data.length > 0
-              ? data.filter((banner) => banner.isActive)
-              : []
-          );
+        if (cancelled || !Array.isArray(data)) {
+          return;
         }
+
+        // Sort and display active banners from the admin panel.
+        const activeBanners = data
+          .filter((banner) => banner.isActive)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+
+        // IMPORTANT:
+        // If there are no active banners, restore the old default banners.
+        setBanners(
+          activeBanners.length > 0
+            ? activeBanners
+            : fallbackBanners
+        );
       } catch (error) {
-        console.error("Error loading promo banners:", error);
+        console.error(
+          "Error loading promo banners. Showing default banners:",
+          error
+        );
+
+        // Keep the default banners visible if the API fails.
+        if (!cancelled) {
+          setBanners(fallbackBanners);
+        }
       }
     };
 
@@ -97,7 +123,10 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
       return;
     }
 
-    if (link.startsWith("https://") || link.startsWith("http://")) {
+    if (
+      link.startsWith("https://") ||
+      link.startsWith("http://")
+    ) {
       window.open(link, "_blank", "noopener,noreferrer");
       return;
     }
@@ -109,7 +138,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
   return (
     <div className="space-y-6">
-      {/* LIVEAZY Lifestyle Section */}
+      {/* LIVEAZY Lifestyle Hero Section */}
       <section className="bg-[#F5F8FA] py-8 sm:py-10">
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-[#E2EBF0] bg-white p-4 shadow-sm sm:p-6 lg:grid-cols-12">
@@ -125,6 +154,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
               <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 rounded-lg border border-white/50 bg-white/95 px-3 py-3 shadow-lg sm:bottom-5 sm:left-5 sm:right-auto sm:px-4">
                 <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#0795A3]" />
+
                 <span className="text-xs font-bold text-[#123B63] sm:text-sm">
                   Premium Furniture. Flexible Rentals.
                 </span>
@@ -139,8 +169,8 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
               </span>
 
               <h3 className="mx-auto mb-5 max-w-xs text-sm leading-6 text-[#64748B]">
-                Thoughtfully selected furniture to make your house feel like
-                home.
+                Thoughtfully selected furniture to make your house feel
+                like home.
               </h3>
 
               <button
@@ -168,7 +198,10 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
                   <span className="text-lg font-extrabold text-[#0795A3]">
                     ₹400
                   </span>
-                  <span className="text-xs text-[#64748B]">/ month</span>
+
+                  <span className="text-xs text-[#64748B]">
+                    / month
+                  </span>
                 </div>
 
                 <span className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-[#123B63] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0795A3]">
@@ -186,7 +219,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
         </div>
       </section>
 
-      {/* Dynamic Promo Cards */}
+      {/* Dynamic Promo Cards with Default Fallback */}
       {banners.length > 0 && (
         <section className="bg-white py-6">
           <div className="mx-auto max-w-7xl px-4">
@@ -200,6 +233,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
                     src={banner.image || sofaImg}
                     alt={banner.heading}
                     onError={(event) => {
+                      event.currentTarget.onerror = null;
                       event.currentTarget.src = sofaImg;
                     }}
                     className="absolute inset-0 h-full w-full object-cover opacity-30 transition duration-500 group-hover:scale-105"
@@ -222,7 +256,9 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
                     <button
                       type="button"
-                      onClick={() => handleBannerClick(banner.buttonLink)}
+                      onClick={() =>
+                        handleBannerClick(banner.buttonLink)
+                      }
                       className="inline-flex items-center gap-2 pt-2 text-xs font-bold uppercase tracking-wider text-white underline decoration-[#70E1E4] underline-offset-4 transition hover:text-[#70E1E4]"
                     >
                       {banner.buttonText}
