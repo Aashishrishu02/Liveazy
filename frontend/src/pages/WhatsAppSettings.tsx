@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
 const DEFAULT_MESSAGE = "Hi LIVEAZY!";
 
 export default function WhatsAppSettings() {
@@ -102,10 +101,14 @@ export default function WhatsAppSettings() {
       }
 
       setWhatsappNumber(data.whatsappNumber ?? digits);
-      setWhatsappMessage(data.whatsappMessage ?? message);
+      setWhatsappMessage(
+        data.whatsappMessage ?? message
+      );
+
       setSuccess("WhatsApp settings saved successfully!");
     } catch (err) {
       console.error("Error saving WhatsApp settings:", err);
+
       setError(
         err instanceof Error
           ? err.message
@@ -174,8 +177,7 @@ export default function WhatsAppSettings() {
             />
 
             <p className="mt-2 text-xs text-gray-500">
-              Enter your Indian WhatsApp number with or without
-              country code 91. Example: 919876543210.
+              Enter the number with or without the country code.
             </p>
           </div>
 
