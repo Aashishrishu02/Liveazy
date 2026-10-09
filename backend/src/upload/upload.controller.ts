@@ -1,9 +1,10 @@
+
 import {
+  BadRequestException,
   Controller,
   Post,
   UploadedFile,
   UseInterceptors,
-  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
@@ -12,9 +13,10 @@ import { BannersService } from '../banners/banners.service';
 
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService,
-  private readonly bannersService: BannersService,
- ) {}
+  constructor(
+    private readonly uploadService: UploadService,
+    private readonly bannersService: BannersService,
+  ) {}
 
   @Post('image')
   @ApiConsumes('multipart/form-data')
@@ -32,44 +34,75 @@ export class UploadController {
   })
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(@UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('Please select an image');
+    }
+
     const result = await this.uploadService.uploadImage(file);
 
     return {
       message: 'Image uploaded successfully',
-      url: (result as any).secure_url,
+      url: result.secure_url,
     };
   }
 
-
-
-    @Post('banner')
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          file: {
-            type: 'string',
-            format: 'binary',
-          },
+  @Post('banner')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
         },
-        required: ['file'],
       },
-    })
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadBanner(@UploadedFile() file: any) {
-      const result = await this.uploadService.uploadBanner(file);
-
-      const url = (result as any).secure_url;
-
-      const banner = await this.bannersService.createBanner(url);
-
-      return{
-        message:'Banner uploaded successfully',
-        banner,
-      };
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBanner(@UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('Please select an image');
     }
+
+    const result = await this.uploadService.uploadBanner(file);
+    const url = result.secure_url;
+
+    const banner = await this.bannersService.createBanner(url);
+
+    return {
+      message: 'Banner uploaded successfully',
+      banner,
+    };
   }
 
+  @Post('promo-banner')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPromoBanner(@UploadedFile() file: any) {
+    if (!file) {
+      throw new BadRequestException('Please select an image');
+    }
 
-   
+    const result =
+      await this.uploadService.uploadPromoBanner(file);
+
+    return {
+      message: 'Promo banner image uploaded successfully',
+      url: result.secure_url,
+    };
+  }
+}

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -66,208 +67,171 @@ export default function AdminDashboard() {
     (product) => product.isActive
   ).length;
 
+  const managementCards = [
+    {
+      title: "Categories Master",
+      description: "Add, edit and manage furniture categories",
+      icon: "📂",
+      detail: "Total Categories",
+      count: totalCategories,
+      route: "/admin/categories",
+      button: "Manage Categories",
+    },
+    {
+      title: "Products Master",
+      description: "Add, edit and manage furniture products",
+      icon: "🛋️",
+      detail: "Total Products",
+      count: totalProducts,
+      route: "/admin/products",
+      button: "Manage Products",
+    },
+    {
+      title: "Banner Management",
+      description: "Change and manage your main homepage banner",
+      icon: "🖼️",
+      detail: "Main Homepage Banner",
+      route: "/admin/banner",
+      button: "Manage Banner",
+    },
+    {
+      title: "Promo Banner Management",
+      description:
+        "Edit promo images, headings, subtitles, buttons and links",
+      icon: "🎯",
+      detail: "Homepage Promotional Cards",
+      route: "/admin/promo-banners",
+      button: "Manage Promo Banners",
+    },
+    {
+      title: "WhatsApp Settings",
+      description: "Change the WhatsApp contact number and message",
+      icon: "📱",
+      detail: "Website Contact",
+      route: "/admin/settings",
+      button: "Manage WhatsApp",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F5FAFA] p-6 md:p-8">
-      {/* HEADER */}
+      {/* Header */}
       <div className="mb-8">
+        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#0795A3]">
+          LIVEAZY Admin Panel
+        </p>
+
         <h1 className="text-3xl font-bold text-[#123B63]">
           Dashboard
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="mt-1 text-gray-500">
           Welcome to LIVEAZY Admin Panel
         </p>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Total Categories */}
-        <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Total Categories
-          </p>
+      {/* Statistics */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Categories"
+          value={loading ? "..." : totalCategories}
+          color="text-[#123B63]"
+        />
 
-          <h2 className="text-3xl font-bold text-[#123B63] mt-2">
-            {loading ? "..." : totalCategories}
-          </h2>
-        </div>
+        <StatCard
+          title="Total Products"
+          value={loading ? "..." : totalProducts}
+          color="text-[#123B63]"
+        />
 
-        {/* Total Products */}
-        <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Total Products
-          </p>
+        <StatCard
+          title="Active Categories"
+          value={loading ? "..." : activeCategories}
+          color="text-[#0795A3]"
+        />
 
-          <h2 className="text-3xl font-bold text-[#123B63] mt-2">
-            {loading ? "..." : totalProducts}
-          </h2>
-        </div>
-
-        {/* Active Categories */}
-        <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Active Categories
-          </p>
-
-          <h2 className="text-3xl font-bold text-[#0795A3] mt-2">
-            {loading ? "..." : activeCategories}
-          </h2>
-        </div>
-
-        {/* Active Products */}
-        <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-          <p className="text-sm text-gray-500">
-            Active Products
-          </p>
-
-          <h2 className="text-3xl font-bold text-[#0795A3] mt-2">
-            {loading ? "..." : activeProducts}
-          </h2>
-        </div>
+        <StatCard
+          title="Active Products"
+          value={loading ? "..." : activeProducts}
+          color="text-[#0795A3]"
+        />
       </div>
 
-      {/* MASTER SECTIONS */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold text-[#123B63] mb-4">
-          Manage Store
-        </h2>
+      {/* Management Sections */}
+      <div className="mt-10">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-[#123B63]">
+            Manage Store
+          </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* CATEGORIES */}
-          <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-[#123B63]">
-                  Categories Master
-                </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage your LIVEAZY website content from one place.
+          </p>
+        </div>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  Add, edit and manage furniture categories
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {managementCards.map((card) => (
+            <div
+              key={card.route}
+              className="rounded-xl border border-[#D8EEF0] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-[#123B63]">
+                    {card.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-gray-500">
+                    {card.description}
+                  </p>
+                </div>
+
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0795A3]/10">
+                  <span className="text-xl">{card.icon}</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                <p className="text-sm text-gray-500">
+                  {card.detail}
+
+                  {card.count !== undefined && (
+                    <span className="ml-2 font-bold text-[#123B63]">
+                      {loading ? "..." : card.count}
+                    </span>
+                  )}
                 </p>
-              </div>
 
-              <div className="w-12 h-12 rounded-xl bg-[#0795A3]/10 flex items-center justify-center">
-                <span className="text-xl">📂</span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Total:
-                <span className="font-bold text-[#123B63] ml-1">
-                  {loading ? "..." : totalCategories}
-                </span>
-              </p>
-
-              <button
-                onClick={() => navigate("/admin/categories")}
-                className="bg-[#123B63] hover:bg-[#0795A3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-              >
-                Manage Categories
-              </button>
-            </div>
-          </div>
-
-          {/* PRODUCTS */}
-          <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-[#123B63]">
-                  Products Master
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Add, edit and manage furniture products
-                </p>
-              </div>
-
-              <div className="w-12 h-12 rounded-xl bg-[#0795A3]/10 flex items-center justify-center">
-                <span className="text-xl">🛋️</span>
+                <button
+                  type="button"
+                  onClick={() => navigate(card.route)}
+                  className="rounded-lg bg-[#123B63] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0795A3]"
+                >
+                  {card.button}
+                </button>
               </div>
             </div>
-
-            <div className="mt-5 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Total:
-                <span className="font-bold text-[#123B63] ml-1">
-                  {loading ? "..." : totalProducts}
-                </span>
-              </p>
-
-              <button
-                onClick={() => navigate("/admin/products")}
-                className="bg-[#123B63] hover:bg-[#0795A3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-              >
-                Manage Products
-              </button>
-            </div>
-          </div>
-
-          {/* BANNER MANAGEMENT */}
-          <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-[#123B63]">
-                  Banner Management
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Change and manage your homepage banner
-                </p>
-              </div>
-
-              <div className="w-12 h-12 rounded-xl bg-[#0795A3]/10 flex items-center justify-center">
-                <span className="text-xl">🖼️</span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Homepage
-              </p>
-
-              <button
-                onClick={() => navigate("/admin/banner")}
-                className="bg-[#123B63] hover:bg-[#0795A3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-              >
-                Manage Banner
-              </button>
-            </div>
-          </div>
-
-          {/* WHATSAPP SETTINGS */}
-          <div className="bg-white rounded-xl border border-[#D8EEF0] p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-[#123B63]">
-                  WhatsApp Settings
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Change the WhatsApp contact number for your website
-                </p>
-              </div>
-
-              <div className="w-12 h-12 rounded-xl bg-[#0795A3]/10 flex items-center justify-center">
-                <span className="text-xl">📱</span>
-              </div>
-            </div>
-
-            <div className="mt-5 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Website Contact
-              </p>
-
-              <button
-                onClick={() => navigate("/admin/settings")}
-                className="bg-[#123B63] hover:bg-[#0795A3] text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-              >
-                Manage WhatsApp
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  color: string;
+}
+
+function StatCard({ title, value, color }: StatCardProps) {
+  return (
+    <div className="rounded-xl border border-[#D8EEF0] bg-white p-6 shadow-sm">
+      <p className="text-sm text-gray-500">{title}</p>
+
+      <h2 className={`mt-2 text-3xl font-bold ${color}`}>
+        {value}
+      </h2>
     </div>
   );
 }

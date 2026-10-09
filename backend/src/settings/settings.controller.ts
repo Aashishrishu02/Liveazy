@@ -1,35 +1,34 @@
 
-import { Body, Controller, Get, Patch, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+} from '@nestjs/common';
 import { SettingsService } from './settings.service';
-import { UpdateWhatsAppDto } from './dto/update-whatsapp.dto';
 
 @Controller('settings')
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(
+    private readonly settingsService: SettingsService,
+  ) {}
 
   @Get('whatsapp')
-  getWhatsAppNumber() {
-    return this.settingsService.getWhatsAppNumber();
+  getWhatsAppSettings() {
+    return this.settingsService.getWhatsAppSettings();
   }
 
-  
-
-
-@Patch('whatsapp')
-updateWhatsAppNumber(@Body() body: any) {
-  console.log('BODY RECEIVED:', JSON.stringify(body));
-
-  if (!body?.whatsappNumber) {
-    throw new BadRequestException(
-      'Request body missing whatsappNumber',
+  @Patch('whatsapp')
+  updateWhatsAppSettings(
+    @Body()
+    body: {
+      whatsappNumber?: string;
+      whatsappMessage?: string;
+    },
+  ) {
+    return this.settingsService.updateWhatsAppSettings(
+      body.whatsappNumber,
+      body.whatsappMessage,
     );
   }
-
-  return this.settingsService.updateWhatsAppNumber(
-    body.whatsappNumber,
-  );
 }
-
-
-}
-

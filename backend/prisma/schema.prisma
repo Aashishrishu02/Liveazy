@@ -59,7 +59,23 @@ model Banner {
 }
 
 model SiteSetting {
-  id Int   @id @default(autoincrement())
-  whatsappNumber String @default("919423838109")
+  id              Int      @id @default(autoincrement())
+  whatsappNumber  String   @default("919423838109")
+  whatsappMessage String   @default("Hi LIVEAZY! I am interested in renting {productName}. Please share the rental price and availability.")
+  updatedAt       DateTime @updatedAt
+}
+
+
+model PromoBanner {
+  id         String   @id @default(cuid())
+  image      String
+  label      String
+  heading    String
+  subtitle   String
+  buttonText String
+  buttonLink String @default("#products")
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

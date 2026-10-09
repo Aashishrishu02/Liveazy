@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeft,
@@ -44,8 +45,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
   const [loading, setLoading] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [whatsappMessage, setWhatsappMessage] = useState("");
 
-  // FETCH PRODUCTS FROM BACKEND
+  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -59,7 +61,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
         const data: BackendProduct[] = await response.json();
 
-        // Only active products
+        // Only show active products
         const activeProducts = data.filter(
           (product) => product.isActive
         );
@@ -75,20 +77,22 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     fetchProducts();
   }, []);
 
-  // FETCH WHATSAPP NUMBER SAVED FROM ADMIN SETTINGS
+  // Fetch WhatsApp number and message saved by admin
   useEffect(() => {
-    const fetchWhatsAppNumber = async () => {
+    const fetchWhatsAppSettings = async () => {
       try {
         const response = await fetch(
           `${API_URL}/settings/whatsapp`
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch WhatsApp number");
+          throw new Error("Failed to fetch WhatsApp settings");
         }
 
-        const data: { whatsappNumber?: string } =
-          await response.json();
+        const data: {
+          whatsappNumber?: string;
+          whatsappMessage?: string;
+        } = await response.json();
 
         if (data.whatsappNumber) {
           const digits = String(data.whatsappNumber).replace(
@@ -98,18 +102,22 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
           setWhatsappNumber(digits);
         }
+
+        if (data.whatsappMessage) {
+          setWhatsappMessage(data.whatsappMessage);
+        }
       } catch (error) {
         console.error(
-          "Error fetching WhatsApp number:",
+          "Error fetching WhatsApp settings:",
           error
         );
       }
     };
 
-    fetchWhatsAppNumber();
+    fetchWhatsAppSettings();
   }, []);
 
-  // FILTER PRODUCTS
+  // Filter products by category and search
   const filteredProducts = useMemo(() => {
     return backendProducts.filter((product) => {
       const categoryMatch =
@@ -130,7 +138,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     });
   }, [backendProducts, selectedCategory, searchFilter]);
 
-  // OPEN WHATSAPP USING THE NUMBER SAVED IN ADMIN SETTINGS
+  // Open WhatsApp with the admin-configured message
   const handleWhatsApp = (product: BackendProduct) => {
     if (!whatsappNumber) {
       alert(
@@ -139,13 +147,24 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
       return;
     }
 
+    if (!whatsappMessage.trim()) {
+      alert(
+        "WhatsApp message is not available. Please try again."
+      );
+      return;
+    }
+
     const digits = whatsappNumber.replace(/\D/g, "");
 
-    // Add India's country code only for a 10-digit Indian number.
+    // Add India's country code only for a 10-digit number
     const finalNumber =
       digits.length === 10 ? `91${digits}` : digits;
 
-    const message = `Hi LIVEAZY, I am interested in renting ${product.name}.`;
+    // Replace {productName} with the actual product name
+    const message = whatsappMessage.replace(
+      /\{productName\}/gi,
+      product.name
+    );
 
     const whatsappUrl =
       `https://wa.me/${finalNumber}?text=${encodeURIComponent(
@@ -159,7 +178,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   };
 
-  // LOADING
+  // Loading state
   if (loading) {
     return (
       <section id="products" className="bg-white py-12">
@@ -178,14 +197,14 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   }
 
-  // MAIN UI
+  // Main UI
   return (
     <section
       id="products"
       className="space-y-10 bg-white py-10"
     >
       <div className="mx-auto max-w-7xl px-4">
-        {/* HEADER */}
+        {/* Header */}
         <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-4">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#0795A3]">
@@ -225,7 +244,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         </div>
 
-        {/* SEARCH RESULT */}
+        {/* Search results */}
         {searchFilter && (
           <div className="mb-6 flex items-center justify-between rounded-lg bg-[#F5FAFA] px-4 py-3">
             <p className="text-sm text-gray-600">
@@ -242,7 +261,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         )}
 
-        {/* NO PRODUCTS OR PRODUCTS GRID */}
+        {/* No products or products grid */}
         {filteredProducts.length === 0 ? (
           <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50">
             <div className="text-center">
@@ -259,22 +278,23 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         ) : (
           <>
-            {/* PRODUCTS GRID */}
+            {/* Products grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-[#35C6CF] hover:shadow-lg"
                 >
-                  {/* IMAGE */}
+                  {/* Product image */}
                   <div className="relative flex h-48 items-center justify-center overflow-hidden bg-[#F5FAFA]">
                     {product.image ? (
                       <img
                         src={product.image}
                         alt={product.name}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
+                        onError={(event) => {
+                          event.currentTarget.style.display =
+                            "none";
                         }}
                       />
                     ) : (
@@ -283,32 +303,32 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                       </div>
                     )}
 
-                    {/* ACTIVE BADGE */}
+                    {/* Availability badge */}
                     <span className="absolute left-3 top-3 rounded-full bg-[#0795A3] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                       Available
                     </span>
                   </div>
 
-                  {/* PRODUCT INFO */}
+                  {/* Product information */}
                   <div className="flex flex-1 flex-col p-4">
-                    {/* CATEGORY */}
+                    {/* Category */}
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                       {product.category?.name || "Furniture"}
                     </p>
 
-                    {/* NAME */}
+                    {/* Name */}
                     <h3 className="line-clamp-2 min-h-[40px] text-sm font-bold text-gray-900 transition group-hover:text-[#0795A3]">
                       {product.name}
                     </h3>
 
-                    {/* DESCRIPTION */}
+                    {/* Description */}
                     {product.description && (
                       <p className="mt-2 line-clamp-2 text-xs leading-5 text-gray-500">
                         {product.description}
                       </p>
                     )}
 
-                    {/* PRICE */}
+                    {/* Price */}
                     <div className="mt-3">
                       <span className="text-lg font-extrabold text-[#0795A3]">
                         ₹
@@ -322,11 +342,11 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                       </span>
                     </div>
 
-                    {/* WHATSAPP BUTTON */}
+                    {/* WhatsApp button */}
                     <button
                       type="button"
                       onClick={() => handleWhatsApp(product)}
-                      disabled={!whatsappNumber}
+                      disabled={!whatsappNumber || !whatsappMessage}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#123B63] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#0795A3] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <MessageCircle size={15} />
@@ -337,7 +357,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
               ))}
             </div>
 
-            {/* PRODUCT COUNT */}
+            {/* Product count */}
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-400">
                 Showing {filteredProducts.length} active product

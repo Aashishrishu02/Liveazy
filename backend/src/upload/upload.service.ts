@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
@@ -6,14 +7,20 @@ import { ConfigService } from '@nestjs/config';
 export class UploadService {
   constructor(private configService: ConfigService) {
     cloudinary.config({
-      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
-      api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
-      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
+      cloud_name: this.configService.get<string>(
+        'CLOUDINARY_CLOUD_NAME',
+      ),
+      api_key: this.configService.get<string>(
+        'CLOUDINARY_API_KEY',
+      ),
+      api_secret: this.configService.get<string>(
+        'CLOUDINARY_API_SECRET',
+      ),
     });
   }
 
   async uploadImage(file: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'liveazy/categories',
@@ -32,10 +39,29 @@ export class UploadService {
   }
 
   async uploadBanner(file: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'liveazy/banners',
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        },
+      );
+
+      uploadStream.end(file.buffer);
+    });
+  }
+
+  async uploadPromoBanner(file: any) {
+    return new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'liveazy/promo-banners',
         },
         (error, result) => {
           if (error) {

@@ -9,6 +9,7 @@ import WhyRentNest from "./components/WhyRentNest";
 import Footer from "./components/Footer";
 
 import type { Product } from "./types/rental";
+import PromoBanners from "./pages/PromoBanners";
 
 import {
   BrowserRouter,
@@ -248,6 +249,11 @@ function App() {
 <Route
   path="/admin/settings"
   element={<WhatsAppSettings />}
+/>
+
+<Route
+  path="/admin/promo-banners"
+  element={<PromoBanners />}
 />
 
       </Routes>

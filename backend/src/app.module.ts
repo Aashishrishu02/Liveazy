@@ -7,6 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { UploadModule } from './upload/upload.module';
 import { BannersModule } from './banners/banners.module';
 import { SettingsModule } from './settings/settings.module';
+import { PromoBannersModule } from './promo-banners/promo-banners.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SettingsModule } from './settings/settings.module';
     UploadModule,
     BannersModule,
     SettingsModule,
+    PromoBannersModule,
   ],
 })
 export class AppModule {}
