@@ -18,7 +18,6 @@ export const Footer: React.FC = () => {
   return (
     <>
       
-      {/* LIVEZY SERVICE FEATURES                                  */}
       
 
       <section

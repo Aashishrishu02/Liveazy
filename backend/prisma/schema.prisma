@@ -61,7 +61,7 @@ model Banner {
 model SiteSetting {
   id              Int      @id @default(autoincrement())
   whatsappNumber  String   @default("919423838109")
-  whatsappMessage String   @default("Hi LIVEAZY! I am interested in renting {productName}. Please share the rental price and availability.")
+  whatsappMessage String   @default("Hi LIVEAZY! ")
   updatedAt       DateTime @updatedAt
 }
 
