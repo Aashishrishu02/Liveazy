@@ -1,11 +1,5 @@
-
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MessageCircle,
-} from "lucide-react";
-
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import type { Product } from "../types/rental";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -39,15 +33,11 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
   selectedCategory,
   searchFilter = "",
 }) => {
-  const [backendProducts, setBackendProducts] = useState<
-    BackendProduct[]
-  >([]);
-
+  const [backendProducts, setBackendProducts] = useState<BackendProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [whatsappMessage, setWhatsappMessage] = useState("");
 
-  // Fetch products from backend
+  // Fetch products from the backend.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -60,11 +50,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
         }
 
         const data: BackendProduct[] = await response.json();
-
-        // Only show active products
-        const activeProducts = data.filter(
-          (product) => product.isActive
-        );
+        const activeProducts = data.filter((product) => product.isActive);
 
         setBackendProducts(activeProducts);
       } catch (error) {
@@ -77,47 +63,32 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     fetchProducts();
   }, []);
 
-  // Fetch WhatsApp number and message saved by admin
+  // Fetch the WhatsApp number saved by the admin.
+  // The message is fixed to "Hi LIVEAZY!".
   useEffect(() => {
     const fetchWhatsAppSettings = async () => {
       try {
-        const response = await fetch(
-          `${API_URL}/settings/whatsapp`
-        );
+        const response = await fetch(`${API_URL}/settings/whatsapp`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch WhatsApp settings");
         }
 
-        const data: {
-          whatsappNumber?: string;
-          whatsappMessage?: string;
-        } = await response.json();
+        const data: { whatsappNumber?: string } = await response.json();
 
         if (data.whatsappNumber) {
-          const digits = String(data.whatsappNumber).replace(
-            /\D/g,
-            ""
-          );
-
+          const digits = String(data.whatsappNumber).replace(/\D/g, "");
           setWhatsappNumber(digits);
         }
-
-        if (data.whatsappMessage) {
-          setWhatsappMessage(data.whatsappMessage);
-        }
       } catch (error) {
-        console.error(
-          "Error fetching WhatsApp settings:",
-          error
-        );
+        console.error("Error fetching WhatsApp settings:", error);
       }
     };
 
     fetchWhatsAppSettings();
   }, []);
 
-  // Filter products by category and search
+  // Filter products by category and search text.
   const filteredProducts = useMemo(() => {
     return backendProducts.filter((product) => {
       const categoryMatch =
@@ -130,55 +101,34 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
         !searchText ||
         product.name.toLowerCase().includes(searchText) ||
         product.description?.toLowerCase().includes(searchText) ||
-        product.category?.name
-          .toLowerCase()
-          .includes(searchText);
+        product.category?.name.toLowerCase().includes(searchText);
 
       return categoryMatch && searchMatch;
     });
   }, [backendProducts, selectedCategory, searchFilter]);
 
-  // Open WhatsApp with the admin-configured message
-  const handleWhatsApp = (product: BackendProduct) => {
+  // Open WhatsApp with only the fixed default greeting.
+  const handleWhatsApp = () => {
     if (!whatsappNumber) {
-      alert(
-        "WhatsApp number is not available. Please try again."
-      );
-      return;
-    }
-
-    if (!whatsappMessage.trim()) {
-      alert(
-        "WhatsApp message is not available. Please try again."
-      );
+      alert("WhatsApp number is not available. Please try again.");
       return;
     }
 
     const digits = whatsappNumber.replace(/\D/g, "");
 
-    // Add India's country code only for a 10-digit number
-    const finalNumber =
-      digits.length === 10 ? `91${digits}` : digits;
+    // Add India's country code only when the number has 10 digits.
+    const finalNumber = digits.length === 10 ? `91${digits}` : digits;
 
-    // Replace {productName} with the actual product name
-    const message = whatsappMessage.replace(
-      /\{productName\}/gi,
-      product.name
-    );
+    const message = "Hi LIVEAZY!";
 
-    const whatsappUrl =
-      `https://wa.me/${finalNumber}?text=${encodeURIComponent(
-        message
-      )}`;
+    const whatsappUrl = `https://wa.me/${finalNumber}?text=${encodeURIComponent(
+      message
+    )}`;
 
-    window.open(
-      whatsappUrl,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
-  // Loading state
+  // Loading state.
   if (loading) {
     return (
       <section id="products" className="bg-white py-12">
@@ -186,7 +136,6 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           <div className="flex min-h-[250px] items-center justify-center">
             <div className="text-center">
               <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#0795A3]" />
-
               <p className="text-sm text-gray-500">
                 Loading products...
               </p>
@@ -197,12 +146,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   }
 
-  // Main UI
+  // Main UI.
   return (
-    <section
-      id="products"
-      className="space-y-10 bg-white py-10"
-    >
+    <section id="products" className="space-y-10 bg-white py-10">
       <div className="mx-auto max-w-7xl px-4">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-4">
@@ -293,8 +239,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                         alt={product.name}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                         onError={(event) => {
-                          event.currentTarget.style.display =
-                            "none";
+                          event.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
@@ -331,10 +276,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                     {/* Price */}
                     <div className="mt-3">
                       <span className="text-lg font-extrabold text-[#0795A3]">
-                        ₹
-                        {Number(product.price).toLocaleString(
-                          "en-IN"
-                        )}
+                        ₹{Number(product.price).toLocaleString("en-IN")}
                       </span>
 
                       <span className="ml-1 text-xs text-gray-500">
@@ -345,8 +287,8 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                     {/* WhatsApp button */}
                     <button
                       type="button"
-                      onClick={() => handleWhatsApp(product)}
-                      disabled={!whatsappNumber || !whatsappMessage}
+                      onClick={handleWhatsApp}
+                      disabled={!whatsappNumber}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#123B63] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#0795A3] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <MessageCircle size={15} />
