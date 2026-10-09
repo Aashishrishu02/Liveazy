@@ -80,8 +80,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     fetchData();
   }, []);
 
-  // ================= PRODUCT COUNT =================
-
+  // PRODUCT COUNT 
   const getProductCount = (categoryId: string) => {
     const count = products.filter(
       (product) =>
@@ -91,7 +90,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     return count;
   };
 
-  // ================= IMAGE =================
+  // IMAGE 
 
   const getCategoryImage = (category: Category) => {
     if (category.image) {

@@ -11,9 +11,9 @@ interface PromoBannerProps {
 export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
   return (
     <div className="space-y-6">
-      {/* ========================================================= */}
-      {/* 1. LIFESTYLE PROMO SECTION (Stitch: LifestylePromoSection)*/}
-      {/* ========================================================= */}
+      
+      {/* 1. LIFESTYLE PROMO SECTION 
+      */}
       <section className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-white rounded-xl shadow-xs border border-gray-100 p-6">
@@ -67,9 +67,9 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
         </div>
       </section>
 
-      {/* ========================================================= */}
-      {/* 2. PROMO SPLIT CARDS (Stitch: PromoSplitCards)             */}
-      {/* ========================================================= */}
+      {/* 
+      {/* 2. PROMO SPLIT CARDS */}
+      
       <section className="py-6 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

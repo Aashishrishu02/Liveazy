@@ -54,7 +54,7 @@ export default function Navbar() {
           >
 
             <a
-              href="/"
+              href="#home"
               className="
                 relative
                 text-[15px]
@@ -77,7 +77,7 @@ export default function Navbar() {
             </a>
 
             <a
-              href="/categories"
+              href="#categories"
               className="
                 relative
                 text-[15px]
@@ -100,7 +100,7 @@ export default function Navbar() {
             </a>
 
             <a
-              href="/products"
+              href="#products"
               className="
                 relative
                 text-[15px]
@@ -267,7 +267,7 @@ export default function Navbar() {
               </a>
 
               <a
-                href="/categories"
+                href="#Categories"
                 onClick={() => setMobileMenu(false)}
                 className="
                   px-3
@@ -285,7 +285,7 @@ export default function Navbar() {
               </a>
 
               <a
-                href="/products"
+                href="#products"
                 onClick={() => setMobileMenu(false)}
                 className="
                   px-3

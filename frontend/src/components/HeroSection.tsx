@@ -1,15 +1,59 @@
-import React, { useEffect , useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import heroImg from '../assets/hero-banner.jpeg';
 
 interface HeroSectionProps {
-  onSearchSubmit?: (query: string, category?: string, city?: string) => void;
+  onSearchSubmit?: (
+    query: string,
+    category?: string,
+    city?: string
+  ) => void;
   selectedCity?: string;
   onExploreClick?: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
-    const API_URL = import.meta.env.VITE_API_URL;
+interface BannerData {
+  id?: string;
+  image?: string;
+  topLabel?: string;
+  heading?: string;
+  subtitle?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+  isActive?: boolean;
+}
+
+const defaultBanner: Required<
+  Pick<
+    BannerData,
+    | 'topLabel'
+    | 'heading'
+    | 'subtitle'
+    | 'button1Text'
+    | 'button1Link'
+    | 'button2Text'
+    | 'button2Link'
+  >
+> = {
+  topLabel: 'NO INVESTMENT, JUST COMFORT',
+  heading: 'Furnish Your Home in Just 2 Days.',
+  subtitle:
+    'Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.',
+  button1Text: 'VIEW CATEGORIES',
+  button1Link: '#categories',
+  button2Text: 'CALL HOTLINE',
+  button2Link: 'tel:+919423838109',
+};
+
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  onExploreClick,
+}) => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [bannerImage, setBannerImage] = useState(heroImg);
+  const [bannerText, setBannerText] =
+    useState(defaultBanner);
 
   useEffect(() => {
     const fetchBanner = async () => {
@@ -20,69 +64,102 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreClick }) => {
           return;
         }
 
-        const banner = await response.json();
+        const banner: BannerData | null = await response.json();
 
-        if (banner?.image) {
+        if (!banner) {
+          return;
+        }
+
+        if (banner.image) {
           setBannerImage(banner.image);
         }
+
+        setBannerText({
+          topLabel: banner.topLabel || defaultBanner.topLabel,
+          heading: banner.heading || defaultBanner.heading,
+          subtitle: banner.subtitle || defaultBanner.subtitle,
+          button1Text:
+            banner.button1Text || defaultBanner.button1Text,
+          button1Link:
+            banner.button1Link || defaultBanner.button1Link,
+          button2Text:
+            banner.button2Text || defaultBanner.button2Text,
+          button2Link:
+            banner.button2Link || defaultBanner.button2Link,
+        });
       } catch (error) {
         console.error('Failed to fetch banner:', error);
       }
     };
 
-    fetchBanner();
+    void fetchBanner();
   }, [API_URL]);
+
   return (
-    <section className="relative bg-gray-900 overflow-hidden">
-      <div className="relative h-[460px] sm:h-[480px] w-full">
-        {/* Background Image with Overlay */}
+    <section className="relative overflow-hidden bg-gray-900">
+      <div className="relative h-[460px] w-full sm:h-[480px]">
+        {/* Background Image */}
         <img
           src={bannerImage}
           alt="Furnish Your Home With RentNest"
-          className="w-full h-full object-cover object-center opacity-45"
+          className="h-full w-full object-cover object-center opacity-45"
         />
+
+        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" />
 
-        {/* Hero Content Overlay */}
+        {/* Hero Content */}
         <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-6 w-full">
-            <div className="max-w-2xl text-white space-y-5">
-              <div className="inline-flex items-center space-x-2 bg-amber-[#0795A3]/20 border border-[#0795A3]/50 px-3 py-1 rounded text-[#35C6CF] text-xs font-extrabold tracking-widest uppercase">
-                <span className="w-2 h-2 rounded-full bg-[#35C6CF] animate-pulse" />
-                <span>NO INVESTMENT, JUST COMFORT</span>
+          <div className="mx-auto w-full max-w-7xl px-6">
+            <div className="max-w-2xl space-y-5 text-white">
+              {/* Top Label */}
+              <div className="inline-flex items-center space-x-2 rounded border border-[#0795A3]/50 bg-[#0795A3]/20 px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-[#35C6CF]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#35C6CF]" />
+                <span>{bannerText.topLabel}</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-white">
-                Furnish Your Home in Just 2 Days.
+              {/* Heading */}
+              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
+                {bannerText.heading}
               </h1>
 
-              <p className="text-gray-200 text-base md:text-lg font-light leading-relaxed max-w-xl">
-                Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.
+              {/* Subtitle */}
+              <p className="max-w-xl text-base font-light leading-relaxed text-gray-200 md:text-lg">
+                {bannerText.subtitle}
               </p>
 
-              <div className="pt-2 flex flex-wrap items-center gap-4">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
                 <a
-                  className="bg-[#123B63] hover:bg-[#0795A3] text-white text-xs md:text-sm font-bold uppercase tracking-wider px-7 py-3.5 rounded shadow-lg transition duration-200"
-                  href="#categories"
-                  onClick={onExploreClick}
+                  className="rounded bg-[#123B63] px-7 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition duration-200 hover:bg-[#0795A3] md:text-sm"
+                  href={bannerText.button1Link}
+                  onClick={
+                    bannerText.button1Link === '#categories'
+                      ? onExploreClick
+                      : undefined
+                  }
                 >
-                  VIEW CATEGORIES
+                  {bannerText.button1Text}
                 </a>
 
                 <a
-                  className="border border-white/80 hover:bg-white hover:text-gray-900 text-white text-xs md:text-sm font-bold uppercase tracking-wider px-7 py-3.5 rounded backdrop-blur-xs transition duration-200"
-                  href="tel:+919423838109"
+                  className="rounded border border-white/80 px-7 py-3.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm transition duration-200 hover:bg-white hover:text-gray-900 md:text-sm"
+                  href={bannerText.button2Link}
                 >
-                  CALL HOTLINE
+                  {bannerText.button2Text}
                 </a>
               </div>
 
-              {/* Slide Indicators */}
-              <div className="pt-4 sm:pt-6 flex items-center space-x-4 text-xs font-semibold text-gray-400">
-                <span className="text-white font-bold text-sm">01</span>
-                <div className="w-16 h-0.5 bg-gray-600 overflow-hidden">
-                  <div className="w-1/2 h-full bg-[#0795A3]" />
+              {/* Existing Slide Indicators */}
+              <div className="flex items-center space-x-4 pt-4 text-xs font-semibold text-gray-400 sm:pt-6">
+                <span className="text-sm font-bold text-white">
+                  01
+                </span>
+
+                <div className="h-0.5 w-16 overflow-hidden bg-gray-600">
+                  <div className="h-full w-1/2 bg-[#0795A3]" />
                 </div>
+
                 <span>02</span>
               </div>
             </div>

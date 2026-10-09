@@ -44,9 +44,22 @@ model Product {
 }
 
 model Banner {
-  id String @id @default(cuid())
-  image String 
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  image       String
+  topLabel    String   @default("NO INVESTMENT, JUST COMFORT")
+  heading     String   @default("Furnish Your Home in Just 2 Days.")
+  subtitle    String   @default("Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.")
+  button1Text String   @default("VIEW CATEGORIES")
+  button1Link String   @default("#categories")
+  button2Text String   @default("CALL HOTLINE")
+  button2Link String   @default("tel:+919423838109")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id Int   @id @default(autoincrement())
+  whatsappNumber String @default("919423838109")
+  updatedAt  DateTime @updatedAt
 }

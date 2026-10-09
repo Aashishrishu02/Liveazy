@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Categories from "./pages/Categories";
 import Products from "./pages/Products";
 import Banner from "./pages/Banner";
+import WhatsAppSettings from "./pages/WhatsAppSettings";
 
 function App() {
   const [selectedCategory, setSelectedCategory] =
@@ -37,8 +38,7 @@ function App() {
       new Set(["p-sofa-01", "p-bed-01"])
     );
 
-  // ================= WISHLIST =================
-
+  //  WISHLIST 
   const handleToggleWishlist = useCallback(
     (product: Product) => {
       setWishlistIds((prev) => {
@@ -56,7 +56,7 @@ function App() {
     []
   );
 
-  // ================= SEARCH =================
+  // SEARCH 
 
   const handleSearch = (
     query: string,
@@ -88,8 +88,7 @@ function App() {
     }
   };
 
-  // ================= CATEGORY =================
-
+  //  CATEGORY 
   const handleSelectCategory = (
     category: string
   ) => {
@@ -106,7 +105,7 @@ function App() {
     }
   };
 
-  // ================= SCROLL =================
+  // SCROLL 
 
   const scrollToProducts = () => {
     const target =
@@ -119,8 +118,7 @@ function App() {
     }
   };
 
-  // ================= RENT NOW =================
-
+  //  RENT NOW 
   const handleRentNow = (
     product: Product
   ) => {
@@ -133,7 +131,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* ================= PUBLIC CUSTOMER WEBSITE ================= */}
+        {/* PUBLIC CUSTOMER WEBSITE */}
 
         <Route
           path="/"
@@ -200,7 +198,9 @@ function App() {
                 }
               />
 
-              <WhyRentNest />
+              <div id="about" className="scroll-mt-24">
+  <WhyRentNest />
+</div>
 
               <Footer />
 
@@ -208,40 +208,47 @@ function App() {
           }
         />
 
-        {/* ================= ADMIN LOGIN ================= */}
+        {/*  ADMIN LOGIN  */}
 
         <Route
           path="/admin"
           element={<AdminLogin />}
         />
 
-        {/* ================= ADMIN DASHBOARD ================= */}
+        {/*  ADMIN DASHBOARD */}
 
         <Route
           path="/admin/dashboard"
           element={<AdminDashboard />}
         />
 
-        {/* ================= CATEGORIES MASTER ================= */}
+        {/*  CATEGORIES MASTER  */}
 
         <Route
           path="/admin/categories"
           element={<Categories />}
         />
 
-        {/* ================= PRODUCTS MASTER ================= */}
+        {/*  PRODUCTS MASTER  */}
 
         <Route
           path="/admin/products"
           element={<Products />}
         />
 
-        {/* ================= BANNER MANAGEMENT ================= */}
+        {/* BANNER MANAGEMENT  */}
 
         <Route
           path="/admin/banner"
           element={<Banner />}
         />
+
+        {/* WHATSAPP SETTINGS */}
+
+<Route
+  path="/admin/settings"
+  element={<WhatsAppSettings />}
+/>
 
       </Routes>
     </BrowserRouter>

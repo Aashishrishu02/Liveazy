@@ -36,4 +36,28 @@ export class BannersService {
             },
         });
     }
+
+    async updateActiveBanner(data: {
+        topLabeel?: string;
+        heading?: string;
+        subtitle?: string;
+        button1Text?: string;
+        button1Linc?: string;
+        button2Text?: string;
+        button2Link?: string;
+    }) {
+        const activeBanner = await this.prisma.banner.findFirst({
+            where: { isActive: true },
+            orderBy: { createdAt: 'desc'},
+        });
+
+        if(!activeBanner) {
+            throw new Error('Please upload a banner image first');
+
+        }
+        return this.prisma.banner.update({
+            where: {id: activeBanner.id},
+            data,
+        })
+    }
 }

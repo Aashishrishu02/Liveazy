@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+} from "lucide-react";
 
 import type { Product } from "../types/rental";
-
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -31,18 +34,18 @@ interface PopularRentalsProps {
   onRentNow: (product: Product) => void;
 }
 
-const WHATSAPP_NUMBER = "919423838109";
-
 const PopularRentals: React.FC<PopularRentalsProps> = ({
   selectedCategory,
   searchFilter = "",
 }) => {
-  const [backendProducts, setBackendProducts] = useState<BackendProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [backendProducts, setBackendProducts] = useState<
+    BackendProduct[]
+  >([]);
 
+  const [loading, setLoading] = useState(true);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
 
   // FETCH PRODUCTS FROM BACKEND
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -72,9 +75,41 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     fetchProducts();
   }, []);
 
+  // FETCH WHATSAPP NUMBER SAVED FROM ADMIN SETTINGS
+  useEffect(() => {
+    const fetchWhatsAppNumber = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/settings/whatsapp`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch WhatsApp number");
+        }
+
+        const data: { whatsappNumber?: string } =
+          await response.json();
+
+        if (data.whatsappNumber) {
+          const digits = String(data.whatsappNumber).replace(
+            /\D/g,
+            ""
+          );
+
+          setWhatsappNumber(digits);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching WhatsApp number:",
+          error
+        );
+      }
+    };
+
+    fetchWhatsAppNumber();
+  }, []);
 
   // FILTER PRODUCTS
-
   const filteredProducts = useMemo(() => {
     return backendProducts.filter((product) => {
       const categoryMatch =
@@ -87,28 +122,44 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
         !searchText ||
         product.name.toLowerCase().includes(searchText) ||
         product.description?.toLowerCase().includes(searchText) ||
-        product.category?.name.toLowerCase().includes(searchText);
+        product.category?.name
+          .toLowerCase()
+          .includes(searchText);
 
       return categoryMatch && searchMatch;
     });
   }, [backendProducts, selectedCategory, searchFilter]);
 
-  
-  // WHATSAPP
-  
+  // OPEN WHATSAPP USING THE NUMBER SAVED IN ADMIN SETTINGS
   const handleWhatsApp = (product: BackendProduct) => {
+    if (!whatsappNumber) {
+      alert(
+        "WhatsApp number is not available. Please try again."
+      );
+      return;
+    }
+
+    const digits = whatsappNumber.replace(/\D/g, "");
+
+    // Add India's country code only for a 10-digit Indian number.
+    const finalNumber =
+      digits.length === 10 ? `91${digits}` : digits;
+
     const message = `Hi LIVEAZY, I am interested in renting ${product.name}.`;
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      message
-    )}`;
+    const whatsappUrl =
+      `https://wa.me/${finalNumber}?text=${encodeURIComponent(
+        message
+      )}`;
 
-    window.open(whatsappUrl, "_blank");
+    window.open(
+      whatsappUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
-  
   // LOADING
-  
   if (loading) {
     return (
       <section id="products" className="bg-white py-12">
@@ -127,19 +178,14 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   }
 
-  
   // MAIN UI
-  
   return (
     <section
       id="products"
       className="space-y-10 bg-white py-10"
     >
       <div className="mx-auto max-w-7xl px-4">
-
-        {/* 
-            HEADER
-      */}
+        {/* HEADER */}
         <div className="mb-8 flex items-center justify-between border-b border-gray-200 pb-4">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#0795A3]">
@@ -179,9 +225,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         </div>
 
-        {/*
-            SEARCH RESULT
-         */}
+        {/* SEARCH RESULT */}
         {searchFilter && (
           <div className="mb-6 flex items-center justify-between rounded-lg bg-[#F5FAFA] px-4 py-3">
             <p className="text-sm text-gray-600">
@@ -198,9 +242,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         )}
 
-        {/* 
-            NO PRODUCTS
-         */}
+        {/* NO PRODUCTS OR PRODUCTS GRID */}
         {filteredProducts.length === 0 ? (
           <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50">
             <div className="text-center">
@@ -217,20 +259,15 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           </div>
         ) : (
           <>
-            {/* 
-                PRODUCTS GRID
-             */}
+            {/* PRODUCTS GRID */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-[#35C6CF] hover:shadow-lg"
                 >
-
                   {/* IMAGE */}
                   <div className="relative flex h-48 items-center justify-center overflow-hidden bg-[#F5FAFA]">
-
                     {product.image ? (
                       <img
                         src={product.image}
@@ -254,7 +291,6 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   {/* PRODUCT INFO */}
                   <div className="flex flex-1 flex-col p-4">
-
                     {/* CATEGORY */}
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                       {product.category?.name || "Furniture"}
@@ -275,7 +311,10 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                     {/* PRICE */}
                     <div className="mt-3">
                       <span className="text-lg font-extrabold text-[#0795A3]">
-                        ₹{Number(product.price).toLocaleString("en-IN")}
+                        ₹
+                        {Number(product.price).toLocaleString(
+                          "en-IN"
+                        )}
                       </span>
 
                       <span className="ml-1 text-xs text-gray-500">
@@ -287,7 +326,8 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                     <button
                       type="button"
                       onClick={() => handleWhatsApp(product)}
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#123B63] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#0795A3]"
+                      disabled={!whatsappNumber}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#123B63] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#0795A3] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <MessageCircle size={15} />
                       Rent via WhatsApp

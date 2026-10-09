@@ -17,11 +17,14 @@ export const Footer: React.FC = () => {
 
   return (
     <>
-      {/* ========================================================= */}
+      
       {/* LIVEZY SERVICE FEATURES                                  */}
-      {/* ========================================================= */}
+      
 
-      <section className="w-full bg-[#123B63] text-white border-t border-[#0795A3]/30">
+      <section
+  id="contact"
+  className="w-full bg-[#123B63] text-white border-t border-[#0795A3]/30"
+>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -63,7 +66,7 @@ export const Footer: React.FC = () => {
             </div>
 
 
-            {/* ================= 24/7 SUPPORT ================= */}
+            {/*  24/7 SUPPORT  */}
             <div className="flex items-center gap-4 py-6 lg:py-7">
 
               <div
