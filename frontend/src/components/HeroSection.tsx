@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import heroImg from '../assets/hero-banner.jpeg';
+
+import React, { useEffect, useState } from "react";
+import { ArrowRight, PhoneCall, Sparkles } from "lucide-react";
+import heroImg from "../assets/hero-banner.jpeg";
 
 interface HeroSectionProps {
   onSearchSubmit?: (
@@ -24,26 +26,15 @@ interface BannerData {
   isActive?: boolean;
 }
 
-const defaultBanner: Required<
-  Pick<
-    BannerData,
-    | 'topLabel'
-    | 'heading'
-    | 'subtitle'
-    | 'button1Text'
-    | 'button1Link'
-    | 'button2Text'
-    | 'button2Link'
-  >
-> = {
-  topLabel: 'NO INVESTMENT, JUST COMFORT',
-  heading: 'Furnish Your Home in Just 2 Days.',
+const defaultBanner = {
+  topLabel: "NO INVESTMENT, JUST COMFORT",
+  heading: "Furnish Your Home in Just 2 Days.",
   subtitle:
-    'Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.',
-  button1Text: 'VIEW CATEGORIES',
-  button1Link: '#categories',
-  button2Text: 'CALL HOTLINE',
-  button2Link: 'tel:+919423838109',
+    "Delivery, Setup & Support — All Included. Enjoy comfortable living with affordable furniture rentals across Pune & PCMC.",
+  button1Text: "VIEW CATEGORIES",
+  button1Link: "#categories",
+  button2Text: "CALL HOTLINE",
+  button2Link: "tel:+919423838109",
 };
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -52,23 +43,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const API_URL = import.meta.env.VITE_API_URL;
 
   const [bannerImage, setBannerImage] = useState(heroImg);
-  const [bannerText, setBannerText] =
-    useState(defaultBanner);
+  const [bannerText, setBannerText] = useState(defaultBanner);
 
   useEffect(() => {
-    const fetchBanner = async () => {
+    async function fetchBanner() {
       try {
         const response = await fetch(`${API_URL}/banners`);
 
-        if (!response.ok) {
-          return;
-        }
+        if (!response.ok) return;
 
         const banner: BannerData | null = await response.json();
 
-        if (!banner) {
-          return;
-        }
+        if (!banner) return;
 
         if (banner.image) {
           setBannerImage(banner.image);
@@ -88,81 +74,101 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             banner.button2Link || defaultBanner.button2Link,
         });
       } catch (error) {
-        console.error('Failed to fetch banner:', error);
+        console.error("Failed to fetch banner:", error);
       }
-    };
+    }
 
     void fetchBanner();
   }, [API_URL]);
 
+  const handlePrimaryClick = (
+    event: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    if (bannerText.button1Link === "#categories") {
+      event.preventDefault();
+      onExploreClick?.();
+    }
+  };
+
   return (
-    <section className="relative overflow-hidden bg-gray-900">
-      <div className="relative h-[460px] w-full sm:h-[480px]">
-        {/* Background Image */}
+    <section
+      id="hero"
+      className="relative isolate overflow-hidden bg-[#0F2942]"
+    >
+      {/* Background image */}
+      <div className="absolute inset-0">
         <img
           src={bannerImage}
-          alt="Furnish Your Home With RentNest"
-          className="h-full w-full object-cover object-center opacity-45"
+          alt="Furniture rental for comfortable living"
+          className="h-full w-full object-cover object-center"
         />
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071827]/95 via-[#0F2942]/80 to-[#0F2942]/25" />
 
-        {/* Hero Content */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-7xl px-6">
-            <div className="max-w-2xl space-y-5 text-white">
-              {/* Top Label */}
-              <div className="inline-flex items-center space-x-2 rounded border border-[#0795A3]/50 bg-[#0795A3]/20 px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-[#35C6CF]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#35C6CF]" />
-                <span>{bannerText.topLabel}</span>
-              </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071827]/45 via-transparent to-transparent" />
+      </div>
 
-              {/* Heading */}
-              <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
-                {bannerText.heading}
-              </h1>
+      {/* Decorative accent */}
+      <div className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full border border-white/10 sm:h-96 sm:w-96" />
+      <div className="pointer-events-none absolute -right-12 top-24 h-56 w-56 rounded-full border border-white/10 sm:h-72 sm:w-72" />
 
-              {/* Subtitle */}
-              <p className="max-w-xl text-base font-light leading-relaxed text-gray-200 md:text-lg">
-                {bannerText.subtitle}
-              </p>
+      <div className="relative mx-auto flex min-h-[500px] max-w-[1440px] items-center px-5 py-16 sm:min-h-[540px] sm:px-8 sm:py-20 lg:min-h-[590px] lg:px-12">
+        <div className="max-w-3xl">
+          {/* Eyebrow label */}
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.14em] text-white backdrop-blur-md sm:text-sm">
+            <Sparkles size={15} className="text-[#FF6A3D]" />
+            <span>{bannerText.topLabel}</span>
+          </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <a
-                  className="rounded bg-[#123B63] px-7 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition duration-200 hover:bg-[#0795A3] md:text-sm"
-                  href={bannerText.button1Link}
-                  onClick={
-                    bannerText.button1Link === '#categories'
-                      ? onExploreClick
-                      : undefined
-                  }
-                >
-                  {bannerText.button1Text}
-                </a>
+          {/* Main heading */}
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            {bannerText.heading}
+          </h1>
 
-                <a
-                  className="rounded border border-white/80 px-7 py-3.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm transition duration-200 hover:bg-white hover:text-gray-900 md:text-sm"
-                  href={bannerText.button2Link}
-                >
-                  {bannerText.button2Text}
-                </a>
-              </div>
+          {/* Description */}
+          <p className="mt-6 max-w-2xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+            {bannerText.subtitle}
+          </p>
 
-              {/* Existing Slide Indicators */}
-              <div className="flex items-center space-x-4 pt-4 text-xs font-semibold text-gray-400 sm:pt-6">
-                <span className="text-sm font-bold text-white">
-                  01
-                </span>
+          {/* Action buttons */}
+          <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <a
+              href={bannerText.button1Link}
+              onClick={handlePrimaryClick}
+              className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#008A90] px-7 py-4 text-sm font-bold text-white shadow-lg shadow-black/15 transition duration-300 hover:-translate-y-0.5 hover:bg-[#00767B] sm:text-base"
+            >
+              {bannerText.button1Text}
+              <ArrowRight
+                size={19}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </a>
 
-                <div className="h-0.5 w-16 overflow-hidden bg-gray-600">
-                  <div className="h-full w-1/2 bg-[#0795A3]" />
-                </div>
+            <a
+              href={bannerText.button2Link}
+              className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-white/35 bg-white/10 px-7 py-4 text-sm font-bold text-white backdrop-blur-sm transition duration-300 hover:border-white hover:bg-white/20 sm:text-base"
+            >
+              <PhoneCall size={18} />
+              {bannerText.button2Text}
+            </a>
+          </div>
 
-                <span>02</span>
-              </div>
-            </div>
+          {/* Trust points */}
+          <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-white/80">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
+              Affordable rentals
+            </span>
+
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
+              Convenient delivery
+            </span>
+
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
+              Hassle-free setup
+            </span>
           </div>
         </div>
       </div>

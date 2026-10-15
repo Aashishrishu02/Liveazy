@@ -29,4 +29,31 @@ export class UpdateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // 12-month rental plan
+  @IsOptional()
+  @IsNumber()
+  rent12M?: number;
+
+  @IsOptional()
+  @IsNumber()
+  deposit12M?: number;
+
+  // 6-month rental plan
+  @IsOptional()
+  @IsNumber()
+  rent6M?: number;
+
+  @IsOptional()
+  @IsNumber()
+  deposit6M?: number;
+
+  // 3-month rental plan
+  @IsOptional()
+  @IsNumber()
+  rent3M?: number;
+
+  @IsOptional()
+  @IsNumber()
+  deposit3M?: number;
 }

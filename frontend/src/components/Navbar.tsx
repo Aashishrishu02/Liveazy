@@ -1,21 +1,45 @@
-import { Search, Menu, X } from "lucide-react";
-import { useState } from "react";
 
-export default function Navbar() {
+import { Search, Menu, X, ArrowRight } from "lucide-react";
+import { useState, type FormEvent } from "react";
+
+interface NavbarProps {
+  onSearchSubmit?: (query: string) => void;
+}
+
+export default function Navbar({ onSearchSubmit }: NavbarProps) {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSearchSubmit?.(searchQuery.trim());
+    setMobileMenu(false);
+
+    document.getElementById("products")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const closeMenu = () => setMobileMenu(false);
+
+  const linkClass =
+    "relative whitespace-nowrap text-sm font-semibold text-[#0F2942] transition-colors duration-200 hover:text-[#008A90]";
 
   return (
-    <nav className="w-full bg-white sticky top-0 z-50 border-b border-[#D8EEF0]">
+    <header id="home" className="sticky top-0 z-50 w-full">
+      {/* Announcement bar */}
+      <div className="bg-[#0F2942] px-4 py-2 text-center text-xs font-medium tracking-wide text-white sm:text-sm">
+        Make your space feel like home, without the heavy investment.
+      </div>
 
-      {/* Main Container */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-
-        {/*  MAIN NAVBAR  */}
-        <div className="min-h-20 flex items-center">
-
-          {/* LOGO  */}
+      <nav className="border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex min-h-[78px] max-w-[1440px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+          {/* Logo */}
           <a
             href="/"
+            aria-label="LIVEAZY home"
+            onClick={closeMenu}
             className="
               w-[200px]
               sm:w-[230px]
@@ -31,7 +55,7 @@ export default function Navbar() {
           >
             <img
               src="/liveazy-logo.png"
-              alt="LIVEZY Furniture Rental"
+              alt="LIVEAZY Furniture Rental"
               className="
                 w-full
                 h-full
@@ -41,347 +65,105 @@ export default function Navbar() {
             />
           </a>
 
-          {/* DESKTOP NAVIGATION  */}
-          <div
-            className="
-              hidden
-              lg:flex
-              items-center
-              ml-auto
-              gap-7
-              xl:gap-9
-            "
-          >
-
-            <a
-              href="#home"
-              className="
-                relative
-                text-[15px]
-                font-semibold
-                text-[#123B63]
-                hover:text-[#0795A3]
-                transition-colors
-                whitespace-nowrap
-                after:absolute
-                after:left-0
-                after:-bottom-2
-                after:w-0
-                after:h-[2px]
-                after:bg-[#0795A3]
-                hover:after:w-full
-                after:transition-all
-              "
-            >
+          {/* Desktop navigation */}
+          <div className="ml-auto hidden items-center gap-6 xl:gap-8 lg:flex">
+            <a href="#home" className={linkClass}>
               Home
             </a>
-
-            <a
-              href="#categories"
-              className="
-                relative
-                text-[15px]
-                font-semibold
-                text-[#123B63]
-                hover:text-[#0795A3]
-                transition-colors
-                whitespace-nowrap
-                after:absolute
-                after:left-0
-                after:-bottom-2
-                after:w-0
-                after:h-[2px]
-                after:bg-[#0795A3]
-                hover:after:w-full
-                after:transition-all
-              "
-            >
+            <a href="#categories" className={linkClass}>
               Categories
             </a>
-
-            <a
-              href="#products"
-              className="
-                relative
-                text-[15px]
-                font-semibold
-                text-[#123B63]
-                hover:text-[#0795A3]
-                transition-colors
-                whitespace-nowrap
-                after:absolute
-                after:left-0
-                after:-bottom-2
-                after:w-0
-                after:h-[2px]
-                after:bg-[#0795A3]
-                hover:after:w-full
-                after:transition-all
-              "
-            >
+            <a href="#products" className={linkClass}>
               Products
             </a>
-
-            <a
-              href="/about"
-              className="
-                relative
-                text-[15px]
-                font-semibold
-                text-[#123B63]
-                hover:text-[#0795A3]
-                transition-colors
-                whitespace-nowrap
-                after:absolute
-                after:left-0
-                after:-bottom-2
-                after:w-0
-                after:h-[2px]
-                after:bg-[#0795A3]
-                hover:after:w-full
-                after:transition-all
-              "
-            >
+            <a href="#about" className={linkClass}>
               About Us
             </a>
-
-            <a
-              href="/contact"
-              className="
-                relative
-                text-[15px]
-                font-semibold
-                text-[#123B63]
-                hover:text-[#0795A3]
-                transition-colors
-                whitespace-nowrap
-                after:absolute
-                after:left-0
-                after:-bottom-2
-                after:w-0
-                after:h-[2px]
-                after:bg-[#0795A3]
-                hover:after:w-full
-                after:transition-all
-              "
-            >
+            <a href="#contact" className={linkClass}>
               Contact
             </a>
-
           </div>
 
-          {/*  SEARCH  */}
-          <div className="hidden lg:block ml-8 xl:ml-10">
-
-            <div className="relative w-[220px] xl:w-[270px]">
-
+          {/* Desktop search */}
+          <form
+            onSubmit={handleSearch}
+            className="ml-5 hidden w-[210px] shrink-0 xl:w-[250px] lg:block"
+          >
+            <div className="relative">
               <Search
-                size={19}
-                className="
-                  absolute
-                  left-3
-                  top-1/2
-                  -translate-y-1/2
-                  text-[#0795A3]
-                "
+                size={18}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#008A90]"
               />
-
               <input
-                type="text"
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search furniture..."
-                className="
-                  w-full
-                  h-11
-                  pl-10
-                  pr-4
-                  text-sm
-                  text-[#123B63]
-                  bg-[#F5FAFA]
-                  border
-                  border-[#CDE7EA]
-                  rounded-xl
-                  outline-none
-                  placeholder:text-gray-400
-                  focus:border-[#0795A3]
-                  focus:ring-2
-                  focus:ring-[#0795A3]/10
-                  transition
-                "
+                aria-label="Search furniture"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] pl-10 pr-4 text-sm text-[#0F2942] outline-none transition placeholder:text-slate-400 focus:border-[#008A90] focus:bg-white focus:ring-4 focus:ring-[#008A90]/10"
               />
-
             </div>
+          </form>
 
-          </div>
-
-          {/*MOBILE BUTTON  */}
+          {/* Mobile menu button */}
           <button
             type="button"
-            onClick={() => setMobileMenu(!mobileMenu)}
-            className="
-              lg:hidden
-              ml-auto
-              w-10
-              h-10
-              flex
-              items-center
-              justify-center
-              rounded-lg
-              text-[#123B63]
-              hover:bg-[#F0FAFA]
-              hover:text-[#0795A3]
-              transition
-            "
-            aria-label="Toggle menu"
+            onClick={() => setMobileMenu((open) => !open)}
+            className="ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-[#0F2942] transition hover:border-[#008A90] hover:bg-[#008A90]/5 lg:hidden"
+            aria-label={mobileMenu ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenu}
           >
-            {mobileMenu ? (
-              <X size={26} />
-            ) : (
-              <Menu size={26} />
-            )}
+            {mobileMenu ? <X size={23} /> : <Menu size={23} />}
           </button>
-
         </div>
 
-        {/* MOBILE MENU  */}
+        {/* Mobile menu */}
         {mobileMenu && (
-          <div className="lg:hidden border-t border-[#D8EEF0] py-5">
-
-            <div className="flex flex-col gap-2">
-
-              <a
-                href="/"
-                onClick={() => setMobileMenu(false)}
-                className="
-                  px-3
-                  py-3
-                  rounded-lg
-                  text-[15px]
-                  font-semibold
-                  text-[#123B63]
-                  hover:text-[#0795A3]
-                  hover:bg-[#F0FAFA]
-                  transition
-                "
-              >
-                Home
-              </a>
-
-              <a
-                href="#Categories"
-                onClick={() => setMobileMenu(false)}
-                className="
-                  px-3
-                  py-3
-                  rounded-lg
-                  text-[15px]
-                  font-semibold
-                  text-[#123B63]
-                  hover:text-[#0795A3]
-                  hover:bg-[#F0FAFA]
-                  transition
-                "
-              >
-                Categories
-              </a>
-
-              <a
-                href="#products"
-                onClick={() => setMobileMenu(false)}
-                className="
-                  px-3
-                  py-3
-                  rounded-lg
-                  text-[15px]
-                  font-semibold
-                  text-[#123B63]
-                  hover:text-[#0795A3]
-                  hover:bg-[#F0FAFA]
-                  transition
-                "
-              >
-                Products
-              </a>
-
-              <a
-                href="/about"
-                onClick={() => setMobileMenu(false)}
-                className="
-                  px-3
-                  py-3
-                  rounded-lg
-                  text-[15px]
-                  font-semibold
-                  text-[#123B63]
-                  hover:text-[#0795A3]
-                  hover:bg-[#F0FAFA]
-                  transition
-                "
-              >
-                About Us
-              </a>
-
-              <a
-                href="/contact"
-                onClick={() => setMobileMenu(false)}
-                className="
-                  px-3
-                  py-3
-                  rounded-lg
-                  text-[15px]
-                  font-semibold
-                  text-[#123B63]
-                  hover:text-[#0795A3]
-                  hover:bg-[#F0FAFA]
-                  transition
-                "
-              >
-                Contact
-              </a>
-
-              {/* Mobile Search */}
-              <div className="relative mt-3">
-
+          <div className="border-t border-slate-100 bg-white px-4 pb-5 pt-4 shadow-lg lg:hidden sm:px-6">
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
                 <Search
-                  size={19}
-                  className="
-                    absolute
-                    left-3
-                    top-1/2
-                    -translate-y-1/2
-                    text-[#0795A3]
-                  "
+                  size={18}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#008A90]"
                 />
-
                 <input
-                  type="text"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search furniture..."
-                  className="
-                    w-full
-                    h-11
-                    pl-10
-                    pr-4
-                    text-sm
-                    text-[#123B63]
-                    bg-[#F5FAFA]
-                    border
-                    border-[#CDE7EA]
-                    rounded-xl
-                    outline-none
-                    placeholder:text-gray-400
-                    focus:border-[#0795A3]
-                    focus:ring-2
-                    focus:ring-[#0795A3]/10
-                  "
+                  aria-label="Search furniture"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-[#F5F7FA] pl-10 pr-4 text-sm outline-none focus:border-[#008A90] focus:ring-4 focus:ring-[#008A90]/10"
                 />
-
               </div>
+              <button
+                type="submit"
+                className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0F2942] text-sm font-semibold text-white transition hover:bg-[#008A90]"
+              >
+                Search products <ArrowRight size={17} />
+              </button>
+            </form>
 
+            <div className="flex flex-col gap-1">
+              {[
+                { label: "Home", href: "#home" },
+                { label: "Categories", href: "#categories" },
+                { label: "Products", href: "#products" },
+                { label: "About Us", href: "#about" },
+                { label: "Contact", href: "#contact" },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-[#0F2942] transition hover:bg-[#008A90]/5 hover:text-[#008A90]"
+                >
+                  {item.label}
+                </a>
+              ))}
             </div>
-
           </div>
         )}
-
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

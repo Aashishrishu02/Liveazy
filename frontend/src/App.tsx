@@ -139,7 +139,7 @@ function App() {
           element={
             <div className="min-h-screen bg-[#faf9f7] text-gray-900 font-sans">
 
-              <Navbar />
+              <Navbar onSearchSubmit={(query) => handleSearch(query)} />
 
               <HeroSection
                 onSearchSubmit={(

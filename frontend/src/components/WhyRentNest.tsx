@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Truck,
@@ -5,9 +6,10 @@ import {
   CreditCard,
   Clock,
   ChevronUp,
+  ArrowUpRight,
 } from "lucide-react";
 
-export const Footer: React.FC = () => {
+const Footer: React.FC = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -15,202 +17,95 @@ export const Footer: React.FC = () => {
     });
   };
 
+  const features = [
+    {
+      icon: Truck,
+      title: "Convenient Delivery",
+      description: "Furniture delivered to your doorstep",
+    },
+    {
+      icon: MessageCircle,
+      title: "WhatsApp Support",
+      description: "Get in touch with our team",
+    },
+    {
+      icon: CreditCard,
+      title: "Easy Payments",
+      description: "Convenient payment options",
+    },
+    {
+      icon: Clock,
+      title: "Flexible Rentals",
+      description: "Furniture for your lifestyle",
+    },
+  ];
+
   return (
     <>
-      
-      
-
+      {/* Service highlights */}
       <section
-  id="contact"
-  className="w-full bg-[#123B63] text-white border-t border-[#0795A3]/30"
->
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-
-            {/* ================= FREE SHIPPING ================= */}
-            <div className="flex items-center gap-4 py-6 lg:py-7">
-
+        id="contact"
+        className="border-t border-white/10 bg-[#0F2942] text-white"
+      >
+        <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 divide-y divide-white/10 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+            {features.map(({ icon: Icon, title, description }) => (
               <div
-                className="
-                  w-12
-                  h-12
-                  rounded-xl
-                  bg-[#0795A3]/15
-                  border
-                  border-[#0795A3]/30
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                "
+                key={title}
+                className="group flex items-center gap-4 py-6 sm:px-5 lg:px-6 lg:py-8 first:lg:pl-0 last:lg:pr-0"
               >
-                <Truck
-                  size={25}
-                  strokeWidth={2}
-                  className="text-[#35C6CF]"
-                />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#008A90]/30 bg-[#008A90]/10 transition-colors duration-300 group-hover:bg-[#008A90]/25">
+                  <Icon
+                    size={23}
+                    strokeWidth={1.8}
+                    className="text-[#70E1E4]"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-white sm:text-base">
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-white/60 sm:text-sm">
+                    {description}
+                  </p>
+                </div>
               </div>
-
-              <div>
-                <h3 className="text-white font-semibold text-sm sm:text-base">
-                  Free Shipping
-                </h3>
-
-                <p className="text-white/65 text-xs sm:text-sm mt-1">
-                  Free delivery, first order
-                </p>
-              </div>
-
-            </div>
-
-
-            {/*  24/7 SUPPORT  */}
-            <div className="flex items-center gap-4 py-6 lg:py-7">
-
-              <div
-                className="
-                  w-12
-                  h-12
-                  rounded-xl
-                  bg-[#0795A3]/15
-                  border
-                  border-[#0795A3]/30
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                "
-              >
-                <MessageCircle
-                  size={25}
-                  strokeWidth={2}
-                  className="text-[#35C6CF]"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-white font-semibold text-sm sm:text-base">
-                  24/7 Support
-                </h3>
-
-                <p className="text-white/65 text-xs sm:text-sm mt-1">
-                  Quick reply on WhatsApp
-                </p>
-              </div>
-
-            </div>
-
-
-            {/* ================= ONLINE PAYMENT ================= */}
-            <div className="flex items-center gap-4 py-6 lg:py-7">
-
-              <div
-                className="
-                  w-12
-                  h-12
-                  rounded-xl
-                  bg-[#0795A3]/15
-                  border
-                  border-[#0795A3]/30
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                "
-              >
-                <CreditCard
-                  size={25}
-                  strokeWidth={2}
-                  className="text-[#35C6CF]"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-white font-semibold text-sm sm:text-base">
-                  Online Payment
-                </h3>
-
-                <p className="text-white/65 text-xs sm:text-sm mt-1">
-                  Pay easily via UPI / Cards
-                </p>
-              </div>
-
-            </div>
-
-
-            {/* ================= FAST DELIVERY ================= */}
-            <div className="flex items-center gap-4 py-6 lg:py-7">
-
-              <div
-                className="
-                  w-12
-                  h-12
-                  rounded-xl
-                  bg-[#0795A3]/15
-                  border
-                  border-[#0795A3]/30
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                "
-              >
-                <Clock
-                  size={25}
-                  strokeWidth={2}
-                  className="text-[#35C6CF]"
-                />
-              </div>
-
-              <div>
-                <h3 className="text-white font-semibold text-sm sm:text-base">
-                  Fast Delivery
-                </h3>
-
-                <p className="text-white/65 text-xs sm:text-sm mt-1">
-                  Delivered within 2–4 days
-                </p>
-              </div>
-
-            </div>
-
+            ))}
           </div>
-
         </div>
       </section>
 
+      {/* Bottom brand strip */}
+      <div className="border-t border-white/10 bg-[#0A2034] text-white">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+          <a
+            href="#home"
+            onClick={scrollToTop}
+            className="group inline-flex w-fit items-center gap-2 text-lg font-extrabold tracking-wide"
+          >
+            LIVE
+            <span className="text-[#70E1E4]">AZY</span>
+            <ArrowUpRight
+              size={15}
+              className="text-white/40 transition group-hover:text-[#70E1E4]"
+            />
+          </a>
 
-      {/* ========================================================= */}
-      {/* SCROLL TO TOP                                             */}
-      {/* ========================================================= */}
+          <p className="text-xs leading-5 text-white/50 sm:text-right sm:text-sm">
+            Furniture rental for comfortable, flexible living.
+          </p>
+        </div>
+      </div>
 
+      {/* Back to top */}
       <button
+        type="button"
         aria-label="Back to top"
         onClick={scrollToTop}
-        className="
-          fixed
-          bottom-5
-          right-5
-          z-40
-          w-11
-          h-11
-          rounded-full
-          bg-white
-          text-[#123B63]
-          border
-          border-gray-200
-          shadow-lg
-          flex
-          items-center
-          justify-center
-          hover:bg-[#F0FAFA]
-          hover:text-[#0795A3]
-          transition-all
-          duration-300
-        "
+        className="fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-[#0F2942] shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#008A90] hover:bg-[#008A90] hover:text-white"
       >
-        <ChevronUp size={19} />
+        <ChevronUp size={20} />
       </button>
     </>
   );

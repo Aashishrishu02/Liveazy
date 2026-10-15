@@ -37,12 +37,23 @@ model Product {
   categoryId  String
   isActive    Boolean  @default(true)
 
-  category    Category @relation(fields: [categoryId], references: [id])
+  // 12-month rental plan
+  rent12M    Float?
+  deposit12M Float?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // 6-month rental plan
+  rent6M    Float?
+  deposit6M Float?
+
+  // 3-month rental plan
+  rent3M    Float?
+  deposit3M Float?
+
+  category Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 model Banner {
   id          String   @id @default(cuid())
   image       String

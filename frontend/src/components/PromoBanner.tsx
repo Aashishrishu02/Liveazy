@@ -1,4 +1,12 @@
+
 import React, { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
+
 import heroBannerImg from "../assets/hero-banner.jpeg";
 import table2Img from "../assets/products/table2.jpeg";
 import sofaImg from "../assets/products/sofa.jpeg";
@@ -22,7 +30,6 @@ interface PromoBannerProps {
   onCtaClick: () => void;
 }
 
-// Default banners shown when no active admin banners are available.
 const fallbackBanners: PromoBannerData[] = [
   {
     id: "fallback-1",
@@ -57,53 +64,35 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
     const fetchPromoBanners = async () => {
       try {
-        if (!API_URL) {
-          console.warn(
-            "VITE_API_URL is not configured. Showing default promo banners."
-          );
-          return;
-        }
+        if (!API_URL) return;
 
         const response = await fetch(`${API_URL}/promo-banners`);
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to load promo banners: ${response.status}`
-          );
+          throw new Error(`Failed to load promo banners: ${response.status}`);
         }
 
         const data: PromoBannerData[] = await response.json();
 
-        if (cancelled || !Array.isArray(data)) {
-          return;
-        }
+        if (cancelled || !Array.isArray(data)) return;
 
-        // Sort and display active banners from the admin panel.
         const activeBanners = data
           .filter((banner) => banner.isActive)
           .sort((a, b) => a.sortOrder - b.sortOrder);
 
-        // IMPORTANT:
-        // If there are no active banners, restore the old default banners.
         setBanners(
-          activeBanners.length > 0
-            ? activeBanners
-            : fallbackBanners
+          activeBanners.length > 0 ? activeBanners : fallbackBanners
         );
       } catch (error) {
-        console.error(
-          "Error loading promo banners. Showing default banners:",
-          error
-        );
+        console.error("Error loading promo banners:", error);
 
-        // Keep the default banners visible if the API fails.
         if (!cancelled) {
           setBanners(fallbackBanners);
         }
       }
     };
 
-    fetchPromoBanners();
+    void fetchPromoBanners();
 
     return () => {
       cancelled = true;
@@ -119,14 +108,11 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
     if (link.startsWith("#")) {
       document
         .getElementById(link.slice(1))
-        ?.scrollIntoView({ behavior: "smooth" });
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
-    if (
-      link.startsWith("https://") ||
-      link.startsWith("http://")
-    ) {
+    if (link.startsWith("https://") || link.startsWith("http://")) {
       window.open(link, "_blank", "noopener,noreferrer");
       return;
     }
@@ -137,97 +123,137 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* LIVEAZY Lifestyle Hero Section */}
-      <section className="bg-[#F5F8FA] py-8 sm:py-10">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-1 items-center gap-6 rounded-2xl border border-[#E2EBF0] bg-white p-4 shadow-sm sm:p-6 lg:grid-cols-12">
-            {/* Hero Image */}
-            <div className="group relative overflow-hidden rounded-xl lg:col-span-8">
+    <div className="bg-white">
+      {/* Lifestyle feature */}
+      <section className="px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid overflow-hidden rounded-3xl border border-slate-100 bg-[#F5F7FA] lg:grid-cols-12">
+            {/* Lifestyle image */}
+            <div className="group relative min-h-[280px] overflow-hidden sm:min-h-[380px] lg:col-span-8">
               <img
                 src={heroBannerImg}
-                alt="Modern living room with premium rental furniture"
-                className="h-64 w-full rounded-xl object-cover transition duration-500 group-hover:scale-105 sm:h-80"
+                alt="Modern living room furnished with rental furniture"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B2545]/50 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F2942]/80 via-[#0F2942]/10 to-transparent" />
 
-              <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 rounded-lg border border-white/50 bg-white/95 px-3 py-3 shadow-lg sm:bottom-5 sm:left-5 sm:right-auto sm:px-4">
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#0795A3]" />
+              <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-[#0F2942]/45 px-4 py-2 text-xs font-bold text-white backdrop-blur-md sm:left-7 sm:top-7">
+                <Sparkles size={15} className="text-[#FF6A3D]" />
+                Live comfortably. Rent smartly.
+              </div>
 
-                <span className="text-xs font-bold text-[#123B63] sm:text-sm">
-                  Premium Furniture. Flexible Rentals.
-                </span>
+              <div className="absolute bottom-6 left-5 right-5 sm:bottom-8 sm:left-8 sm:right-8">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#70E1E4]">
+                  YOUR HOME, YOUR WAY
+                </p>
+
+                <h3 className="max-w-xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
+                  A better home starts with the right furniture.
+                </h3>
+
+                <p className="mt-4 max-w-lg text-sm leading-6 text-white/80 sm:text-base">
+                  Discover flexible furniture rentals designed around
+                  your space, lifestyle and budget.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={onCtaClick}
+                  className="mt-6 inline-flex min-h-12 items-center gap-3 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#0F2942] transition hover:bg-[#70E1E4]"
+                >
+                  Explore furniture
+                  <ArrowRight size={18} />
+                </button>
               </div>
             </div>
 
-            {/* Popular Product */}
-            <div className="px-2 py-3 text-center sm:px-4 lg:col-span-4">
-              <span className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#E7F6F6] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#07838E]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0795A3]" />
-                Customer Favourite
+            {/* Feature panel */}
+            <div className="flex flex-col justify-center px-6 py-8 sm:px-9 sm:py-10 lg:col-span-4 lg:px-8">
+              <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-[#E6F5F5] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#008A90] sm:text-xs">
+                <span className="h-2 w-2 rounded-full bg-[#008A90]" />
+                Made for modern living
               </span>
 
-              <h3 className="mx-auto mb-5 max-w-xs text-sm leading-6 text-[#64748B]">
-                Thoughtfully selected furniture to make your house feel
-                like home.
+              <h3 className="text-2xl font-extrabold leading-tight text-[#0F2942] sm:text-3xl">
+                Your space.
+                <br />
+                Your style.
+                <br />
+                <span className="text-[#008A90]">Your choice.</span>
               </h3>
+
+              <p className="mt-4 text-sm leading-6 text-slate-500">
+                Find the essentials that make your house feel like home.
+              </p>
+
+              <div className="mt-7 space-y-4">
+                {[
+                  "Furniture for everyday living",
+                  "Flexible monthly rentals",
+                  "Convenient WhatsApp enquiries",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckCircle2
+                      size={19}
+                      className="shrink-0 text-[#008A90]"
+                    />
+                    <span className="text-sm font-medium text-[#0F2942]">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
               <button
                 type="button"
                 onClick={onCtaClick}
-                className="mx-auto block w-full max-w-xs rounded-xl border border-[#E2EBF0] bg-[#F8FAFC] p-4 transition duration-300 hover:-translate-y-1 hover:border-[#0795A3] hover:shadow-md"
+                className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F2942] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#008A90]"
               >
-                <div className="mb-3 flex h-40 items-center justify-center overflow-hidden rounded-lg bg-white sm:h-44">
-                  <img
-                    src={table2Img}
-                    alt="Modern shoe rack cabinet available for rent"
-                    className="h-full w-full object-contain p-2 transition duration-300 hover:scale-105"
-                  />
-                </div>
-
-                <h4 className="text-sm font-bold uppercase tracking-wide text-[#123B63]">
-                  Shoe Rack / Cabinet
-                </h4>
-
-                <p className="mt-1 text-xs text-[#64748B]">
-                  Smart Storage Solutions
-                </p>
-
-                <div className="mt-3 flex items-center justify-center gap-1">
-                  <span className="text-lg font-extrabold text-[#0795A3]">
-                    ₹400
-                  </span>
-
-                  <span className="text-xs text-[#64748B]">
-                    / month
-                  </span>
-                </div>
-
-                <span className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-[#123B63] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0795A3]">
-                  Explore Furniture
-                  <span aria-hidden="true">→</span>
-                </span>
+                Find your furniture
+                <ArrowRight size={17} />
               </button>
 
-              <div className="mt-4 flex justify-center gap-2">
-                <span className="h-2 w-6 rounded-full bg-[#0795A3]" />
-                <span className="h-2 w-2 rounded-full bg-[#CBD5E1]" />
+              <div className="mt-6 flex items-center gap-3 border-t border-slate-200 pt-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white">
+                  <img
+                    src={table2Img}
+                    alt="Storage furniture"
+                    className="h-10 w-10 object-contain"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#0F2942]">
+                    Furniture for every corner
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Explore the collection
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Dynamic Promo Cards with Default Fallback */}
+      {/* Admin-managed promotional banners */}
       {banners.length > 0 && (
-        <section className="bg-white py-6">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="px-5 pb-16 sm:px-8 sm:pb-20 lg:px-12">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-7">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#008A90]">
+                A little inspiration
+              </p>
+              <h3 className="text-2xl font-extrabold tracking-tight text-[#0F2942] sm:text-3xl">
+                More ways to love your space.
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               {banners.map((banner) => (
                 <article
                   key={banner.id}
-                  className="group relative flex min-h-48 items-center overflow-hidden rounded-xl bg-[#123B63] p-6 sm:p-8"
+                  className="group relative flex min-h-[250px] items-center overflow-hidden rounded-3xl bg-[#0F2942] p-6 sm:min-h-[280px] sm:p-9"
                 >
                   <img
                     src={banner.image || sofaImg}
@@ -236,33 +262,31 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
                       event.currentTarget.onerror = null;
                       event.currentTarget.src = sofaImg;
                     }}
-                    className="absolute inset-0 h-full w-full object-cover opacity-30 transition duration-500 group-hover:scale-105"
+                    className="absolute inset-0 h-full w-full object-cover opacity-35 transition-transform duration-700 group-hover:scale-105"
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0B2545]/95 via-[#123B63]/75 to-[#0795A3]/30" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0F2942]/95 via-[#0F2942]/75 to-[#008A90]/30" />
 
-                  <div className="relative z-10 max-w-lg space-y-2 text-white">
-                    <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[#70E1E4]">
+                  <div className="relative z-10 max-w-lg">
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#70E1E4] sm:text-xs">
                       {banner.label}
-                    </span>
+                    </p>
 
-                    <h4 className="text-lg font-extrabold sm:text-xl">
+                    <h4 className="text-2xl font-extrabold leading-tight text-white sm:text-3xl">
                       {banner.heading}
                     </h4>
 
-                    <p className="text-xs leading-5 text-gray-100 sm:text-sm">
+                    <p className="mt-3 max-w-md text-sm leading-6 text-white/80">
                       {banner.subtitle}
                     </p>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        handleBannerClick(banner.buttonLink)
-                      }
-                      className="inline-flex items-center gap-2 pt-2 text-xs font-bold uppercase tracking-wider text-white underline decoration-[#70E1E4] underline-offset-4 transition hover:text-[#70E1E4]"
+                      onClick={() => handleBannerClick(banner.buttonLink)}
+                      className="mt-6 inline-flex min-h-11 items-center gap-3 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-xs font-bold text-white backdrop-blur-sm transition hover:border-white hover:bg-white hover:text-[#0F2942] sm:text-sm"
                     >
                       {banner.buttonText}
-                      <span aria-hidden="true">→</span>
+                      <ArrowUpRight size={17} />
                     </button>
                   </div>
                 </article>
