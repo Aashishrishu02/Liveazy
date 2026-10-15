@@ -44,41 +44,61 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const [bannerImage, setBannerImage] = useState(heroImg);
   const [bannerText, setBannerText] = useState(defaultBanner);
+  const [isBannerLoading, setIsBannerLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchBanner() {
       try {
         const response = await fetch(`${API_URL}/banners`);
 
-        if (!response.ok) return;
+        if (!response.ok) {
+          throw new Error("Failed to fetch banner");
+        }
 
         const banner: BannerData | null = await response.json();
 
-        if (!banner) return;
+        if (cancelled) return;
 
-        if (banner.image) {
-          setBannerImage(banner.image);
+        if (banner) {
+          setBannerImage(banner.image || heroImg);
+
+          setBannerText({
+            topLabel: banner.topLabel || defaultBanner.topLabel,
+            heading: banner.heading || defaultBanner.heading,
+            subtitle: banner.subtitle || defaultBanner.subtitle,
+            button1Text:
+              banner.button1Text || defaultBanner.button1Text,
+            button1Link:
+              banner.button1Link || defaultBanner.button1Link,
+            button2Text:
+              banner.button2Text || defaultBanner.button2Text,
+            button2Link:
+              banner.button2Link || defaultBanner.button2Link,
+          });
+        } else {
+          setBannerImage(heroImg);
+          setBannerText(defaultBanner);
         }
-
-        setBannerText({
-          topLabel: banner.topLabel || defaultBanner.topLabel,
-          heading: banner.heading || defaultBanner.heading,
-          subtitle: banner.subtitle || defaultBanner.subtitle,
-          button1Text:
-            banner.button1Text || defaultBanner.button1Text,
-          button1Link:
-            banner.button1Link || defaultBanner.button1Link,
-          button2Text:
-            banner.button2Text || defaultBanner.button2Text,
-          button2Link:
-            banner.button2Link || defaultBanner.button2Link,
-        });
       } catch (error) {
-        console.error("Failed to fetch banner:", error);
+        if (!cancelled) {
+          console.error("Failed to fetch banner:", error);
+          setBannerImage(heroImg);
+          setBannerText(defaultBanner);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsBannerLoading(false);
+        }
       }
     }
 
     void fetchBanner();
+
+    return () => {
+      cancelled = true;
+    };
   }, [API_URL]);
 
   const handlePrimaryClick = (
@@ -89,6 +109,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       onExploreClick?.();
     }
   };
+
+  // Keep the hero area stable while the saved banner is loading.
+  if (isBannerLoading) {
+    return (
+      <section
+        id="hero"
+        aria-label="Loading banner"
+        className="min-h-[500px] animate-pulse bg-[#0F2942] sm:min-h-[540px] lg:min-h-[590px]"
+      />
+    );
+  }
 
   return (
     <section
@@ -101,6 +132,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           src={bannerImage}
           alt="Furniture rental for comfortable living"
           className="h-full w-full object-cover object-center"
+          fetchPriority="high"
+          onError={() => {
+            setBannerImage((currentImage) =>
+              currentImage === heroImg ? currentImage : heroImg
+            );
+          }}
         />
 
         <div className="absolute inset-0 bg-gradient-to-r from-[#071827]/95 via-[#0F2942]/80 to-[#0F2942]/25" />
