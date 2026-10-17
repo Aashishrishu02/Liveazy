@@ -4,44 +4,74 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
-export class ProductsService{
-    constructor(private prisma: PrismaService) {}
+export class ProductsService {
+  constructor(private prisma: PrismaService) {}
 
-    async create(createProductDto: CreateProductDto){
-        return this.prisma.product.create({
-            data: createProductDto,
-        });
-    }
+  // Create product with automatic or manually specified order
+  async create(createProductDto: CreateProductDto) {
+    const maxOrder = await this.prisma.product.aggregate({
+      _max: {
+        displayOrder: true,
+      },
+    });
 
-   async findAll() {
-  return this.prisma.product.findMany({
-    include: {
-      category: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-}
-    
-        
+    const displayOrder =
+      createProductDto.displayOrder ??
+      ((maxOrder._max.displayOrder ?? 0) + 1);
 
-    async findOne(id: string){
-        return this.prisma.product.findUnique({
-            where: {id},
-        });
-    }
+    return this.prisma.product.create({
+      data: {
+        ...createProductDto,
+        displayOrder,
+      },
+      include: {
+        category: true,
+      },
+    });
+  }
 
-    async update(id: string, updateProductDto: UpdateProductDto){
-        return this.prisma.product.update({
-            where: {id},
-            data: updateProductDto,
-        });
-    }
+  // Fetch products according to manual display order
+  async findAll() {
+    return this.prisma.product.findMany({
+      include: {
+        category: true,
+      },
+      orderBy: [
+        {
+          displayOrder: 'asc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ],
+    });
+  }
 
-    async remove(id:string){
-        return this.prisma.product.delete({
-            where: {id},
-        });
-    }
+  // Find one product
+  async findOne(id: string) {
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  // Update product details or display order
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    return this.prisma.product.update({
+      where: { id },
+      data: updateProductDto,
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  // Delete product
+  async remove(id: string) {
+    return this.prisma.product.delete({
+      where: { id },
+    });
+  }
 }

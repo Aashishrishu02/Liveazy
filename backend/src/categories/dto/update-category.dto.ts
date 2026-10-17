@@ -1,7 +1,9 @@
 import {
   IsBoolean,
+  IsInt,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 
 export class UpdateCategoryDto {
@@ -20,4 +22,9 @@ export class UpdateCategoryDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  displayOrder?: number;
 }

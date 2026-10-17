@@ -1,4 +1,3 @@
-
 import {
   Body,
   Controller,
@@ -6,29 +5,26 @@ import {
   Patch,
 } from '@nestjs/common';
 import { SettingsService } from './settings.service';
-
+interface UpdateWhatsAppSettingsBody {
+  whatsappNumber?: unknown;
+  whatsappMessage?: unknown;
+}
 @Controller('settings')
 export class SettingsController {
   constructor(
     private readonly settingsService: SettingsService,
   ) {}
-
   @Get('whatsapp')
   getWhatsAppSettings() {
     return this.settingsService.getWhatsAppSettings();
   }
-
   @Patch('whatsapp')
   updateWhatsAppSettings(
-    @Body()
-    body: {
-      whatsappNumber?: string;
-      whatsappMessage?: string;
-    },
+    @Body() body: UpdateWhatsAppSettingsBody,
   ) {
     return this.settingsService.updateWhatsAppSettings(
-      body.whatsappNumber,
-      body.whatsappMessage,
+      body?.whatsappNumber,
+      body?.whatsappMessage,
     );
   }
 }

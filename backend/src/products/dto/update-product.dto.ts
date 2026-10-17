@@ -3,6 +3,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsInt,
+  Min,
 } from 'class-validator';
 
 export class UpdateProductDto {
@@ -29,6 +31,12 @@ export class UpdateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Manual product display order
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  displayOrder?: number;
 
   // 12-month rental plan
   @IsOptional()

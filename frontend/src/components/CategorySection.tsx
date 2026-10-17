@@ -1,13 +1,13 @@
-
-import React, { useEffect, useState } from "react";
-import { ArrowUpRight, Package, Sparkles } from "lucide-react";
-
-import bedImg from "../assets/products/bed.jpeg";
-import sofaImg from "../assets/products/sofa.jpeg";
-import dinnerTableImg from "../assets/products/dinner-table.jpeg";
-import studyTableImg from "../assets/products/study-table.jpeg";
-import fridgeImg from "../assets/products/fridge.jpeg";
-import almirahImg from "../assets/products/almirah.jpeg";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Armchair,
+  BedDouble,
+  Refrigerator,
+  BriefcaseBusiness,
+  Monitor,
+  Sparkles,
+  Package,
+} from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,9 +19,10 @@ interface CategorySectionProps {
 interface Category {
   id: string;
   name: string;
-  description?: string;
-  image?: string;
+  description?: string | null;
+  image?: string | null;
   isActive: boolean;
+  displayOrder?: number | null;
 }
 
 interface Product {
@@ -29,15 +30,66 @@ interface Product {
   name: string;
   categoryId: string;
   isActive: boolean;
+  price?: number | string | null;
+  rent12M?: number | string | null;
+  rent6M?: number | string | null;
+  rent3M?: number | string | null;
 }
 
-const fallbackImages: Record<string, string> = {
-  bedroom: bedImg,
-  "living room": sofaImg,
-  dining: dinnerTableImg,
-  study: studyTableImg,
-  appliances: fridgeImg,
-  "combo offers": almirahImg,
+const categoryStyles: Record<
+  string,
+  {
+    description: string;
+    icon: React.ElementType;
+    rent: number;
+  }
+> = {
+  "living room": {
+    description: "Sofas, Tables & TV Units",
+    icon: Armchair,
+    rent: 499,
+  },
+  bedroom: {
+    description: "Queen Beds & Mattresses",
+    icon: BedDouble,
+    rent: 649,
+  },
+  appliances: {
+    description: "Fridges, Washers & Ovens",
+    icon: Refrigerator,
+    rent: 599,
+  },
+  "wfh office": {
+    description: "Ergo Chairs & Smart Desks",
+    icon: BriefcaseBusiness,
+    rent: 399,
+  },
+  electronics: {
+    description: "4K TVs, ACs & Coolers",
+    icon: Monitor,
+    rent: 749,
+  },
+  dining: {
+    description: "Dining Tables & Chairs",
+    icon: Armchair,
+    rent: 399,
+  },
+  study: {
+    description: "Study Tables & Chairs",
+    icon: BriefcaseBusiness,
+    rent: 299,
+  },
+  "combo offers": {
+    description: "Complete home essentials",
+    icon: Package,
+    rent: 0,
+  },
+};
+
+const defaultStyle = {
+  description: "Furniture & Home Essentials",
+  icon: Package,
+  rent: 499,
 };
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -49,6 +101,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -58,12 +112,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           fetch(`${API_URL}/products`),
         ]);
 
-        if (!categoriesResponse.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-
-        if (!productsResponse.ok) {
-          throw new Error("Failed to fetch products");
+        if (!categoriesResponse.ok || !productsResponse.ok) {
+          throw new Error("Failed to fetch category data");
         }
 
         const [categoriesData, productsData] = await Promise.all([
@@ -71,78 +121,131 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           productsResponse.json(),
         ]);
 
-        setCategories(categoriesData);
-        setProducts(productsData);
+        if (!cancelled) {
+          setCategories(
+            Array.isArray(categoriesData) ? (categoriesData as Category[]) : [],
+          );
+          setProducts(Array.isArray(productsData) ? (productsData as Product[]) : []);
+        }
       } catch (error) {
         console.error("Error loading categories:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     void fetchData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Keep active categories in the saved admin display order.
+  const activeCategories = useMemo(
+    () =>
+      categories
+        .filter(
+          (category) =>
+            category.isActive &&
+            !["full combos", "combo offers"].includes(
+              category.name.trim().toLowerCase(),
+            ),
+        )
+        .sort((a, b) => {
+          const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+          const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+          return orderA - orderB || a.name.localeCompare(b.name);
+        }),
+    [categories],
+  );
 
   const getProductCount = (categoryId: string) =>
     products.filter(
-      (product) =>
-        product.categoryId === categoryId && product.isActive
+      (product) => product.categoryId === categoryId && product.isActive,
     ).length;
 
-  const getCategoryImage = (category: Category) => {
-    if (category.image) return category.image;
-
+  const getCategoryStyle = (category: Category) => {
     const key = category.name.trim().toLowerCase();
-    return fallbackImages[key] || sofaImg;
+    return categoryStyles[key] || defaultStyle;
   };
 
-  const activeCategories = categories.filter(
-    (category) => category.isActive
-  );
+  const getStartingRent = (category: Category) => {
+    const categoryProducts = products.filter(
+      (product) => product.categoryId === category.id && product.isActive,
+    );
+
+    const rents = categoryProducts
+      .flatMap((product) => [
+        product.rent12M,
+        product.rent6M,
+        product.rent3M,
+        product.price,
+      ])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value > 0);
+
+    if (rents.length > 0) {
+      return Math.min(...rents);
+    }
+
+    return getCategoryStyle(category).rent;
+  };
+
+  const handleCategoryClick = (category: Category) => {
+    onSelectCategory?.(category.name);
+
+    const target = document.getElementById("products");
+
+    if (target) {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      window.location.hash = "products";
+    }
+  };
 
   return (
     <section
       id="categories"
-      className="scroll-mt-24 border-b border-slate-100 bg-white py-16 sm:py-20"
+      className="scroll-mt-24 border-b border-slate-100 bg-[#F7F8FD] py-14 sm:py-16 lg:py-20"
     >
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         {/* Section heading */}
-        <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-9 grid gap-4 md:mb-10 md:grid-cols-[1fr_1.2fr] md:items-end">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.16em] text-[#008A90]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#006B73] sm:text-sm">
               <Sparkles size={16} />
-              Explore our collection
+              Explore our catalog
             </div>
 
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#0F2942] sm:text-4xl">
-              Find your perfect fit.
+            <h2 className="max-w-md text-4xl font-semibold leading-tight tracking-[-0.045em] text-[#101B2D] sm:text-5xl">
+              Browse by
+              <br />
+              Category
             </h2>
-
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-              From everyday essentials to complete home setups, discover
-              furniture that fits your lifestyle.
-            </p>
           </div>
 
-          {!loading && activeCategories.length > 0 && (
-            <div className="flex w-fit items-center gap-2 rounded-full bg-[#F0F8F8] px-4 py-2 text-sm font-semibold text-[#0F2942]">
-              <Package size={17} className="text-[#008A90]" />
-              {activeCategories.length} categories
-            </div>
-          )}
+          <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base md:justify-self-end md:text-lg md:leading-8">
+            Sanitized, quality-inspected furniture and branded smart
+            appliances tailored for modern Indian city homes.
+          </p>
         </div>
 
-        {/* Loading state */}
+        {/* Loading skeleton */}
         {loading && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="animate-pulse rounded-2xl border border-slate-100 p-3"
+                className="animate-pulse rounded-[22px] bg-white p-5 shadow-sm"
               >
-                <div className="h-36 rounded-xl bg-slate-100 sm:h-40" />
-                <div className="mx-auto mt-4 h-4 w-3/4 rounded bg-slate-100" />
-                <div className="mx-auto mt-2 h-3 w-1/2 rounded bg-slate-100" />
+                <div className="mx-auto h-[84px] w-[84px] rounded-[22px] bg-slate-100" />
+                <div className="mx-auto mt-4 h-5 w-28 rounded bg-slate-100" />
+                <div className="mx-auto mt-3 h-3 w-36 rounded bg-slate-100" />
+                <div className="mx-auto mt-3 h-6 w-24 rounded-full bg-slate-100" />
               </div>
             ))}
           </div>
@@ -150,51 +253,60 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
         {/* Category cards */}
         {!loading && activeCategories.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {activeCategories.map((category) => {
-              const productCount = getProductCount(category.id);
+              const style = getCategoryStyle(category);
+              const Icon = style.icon;
               const isSelected = selectedCategory === category.name;
+              const rent = getStartingRent(category);
+              const imageUrl = category.image?.trim();
 
               return (
-                <a
+                <button
                   key={category.id}
-                  href="#products"
-                  onClick={() => onSelectCategory?.(category.name)}
-                  aria-label={`Explore ${category.name}, ${productCount} products`}
-                  className={`group relative overflow-hidden rounded-2xl border p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#0F2942]/10 sm:p-4 ${
+                  type="button"
+                  onClick={() => handleCategoryClick(category)}
+                  aria-label={`Explore ${category.name}, ${getProductCount(category.id)} products`}
+                  className={`group flex min-h-[210px] flex-col items-center justify-center rounded-[22px] border px-3 py-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:min-h-[225px] sm:px-5 ${
                     isSelected
-                      ? "border-[#008A90] bg-[#F0F8F8] shadow-md shadow-[#008A90]/10"
-                      : "border-slate-100 bg-white hover:border-[#008A90]/40"
+                      ? "border-[#008A90] bg-[#EAF8F8] shadow-md"
+                      : "border-white bg-white shadow-sm hover:border-[#008A90]/30"
                   }`}
                 >
-                  {/* Image */}
-                  <div className="relative flex h-32 items-center justify-center overflow-hidden rounded-xl bg-[#F5F7FA] sm:h-40">
-                    <img
-                      src={getCategoryImage(category)}
-                      alt={category.name}
-                      loading="lazy"
-                      className="h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-110"
+                  {/* Uploaded category image; icon remains visible as fallback. */}
+                  <span className="relative flex h-[84px] w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-[#EDF3FF] text-[#006B73] transition-all duration-300 group-hover:bg-[#DDF8FA] sm:h-[92px] sm:w-[92px]">
+                    <Icon
+                      size={34}
+                      strokeWidth={2.2}
+                      aria-hidden="true"
+                      className="absolute inset-0 m-auto"
                     />
+                    {imageUrl && (
+                      <img
+                        src={imageUrl}
+                        alt={category.name}
+                        loading="lazy"
+                        className="absolute inset-0 z-10 h-full w-full rounded-[22px] object-cover object-center"
+                        onError={(event) => {
+                          // Hide a broken image so the category icon underneath remains visible.
+                          event.currentTarget.style.display = "none";
+                        }}
+                      />
+                    )}
+                  </span>
 
-                    <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#0F2942] shadow-sm transition-colors duration-300 group-hover:bg-[#008A90] group-hover:text-white">
-                      <ArrowUpRight size={17} />
-                    </span>
-                  </div>
+                  <h3 className="mt-3 text-base font-semibold tracking-tight text-[#101B2D] sm:text-xl">
+                    {category.name}
+                  </h3>
 
-                  {/* Text */}
-                  <div className="px-1 pb-1 pt-4">
-                    <h3 className="line-clamp-2 min-h-10 text-sm font-bold leading-5 text-[#0F2942] transition-colors group-hover:text-[#008A90] sm:text-base">
-                      {category.name}
-                    </h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-600 sm:text-sm">
+                    {style.description}
+                  </p>
 
-                    <p className="mt-1 text-xs font-medium text-slate-500">
-                      {productCount}{" "}
-                      {productCount === 1 ? "product" : "products"}
-                    </p>
-
-                    <div className="mt-3 h-1 w-9 rounded-full bg-[#008A90]/25 transition-all duration-300 group-hover:w-full group-hover:bg-[#008A90]" />
-                  </div>
-                </a>
+                  <span className="mt-2 inline-flex rounded-full bg-[#E6EEFF] px-3 py-1 text-xs font-medium text-slate-700 sm:text-sm">
+                    Starts ₹{rent}/mo
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -202,14 +314,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
         {/* Empty state */}
         {!loading && activeCategories.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-200 px-5 py-14 text-center">
-            <Package
-              size={32}
-              className="mx-auto mb-3 text-slate-400"
-            />
-            <h3 className="font-bold text-[#0F2942]">
+          <div className="rounded-[22px] border border-dashed border-slate-300 bg-white px-5 py-14 text-center">
+            <Package size={34} className="mx-auto mb-3 text-slate-400" />
+
+            <h3 className="font-semibold text-[#0F2942]">
               No categories available
             </h3>
+
             <p className="mt-2 text-sm text-slate-500">
               Active categories will appear here once they are available.
             </p>

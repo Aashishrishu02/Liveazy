@@ -8,15 +8,41 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
+    let displayOrder = createCategoryDto.displayOrder;
+
+    // Automatically place a new category at the end
+    if (displayOrder === undefined) {
+      const result = await this.prisma.category.aggregate({
+        _max: {
+          displayOrder: true,
+        },
+      });
+
+      displayOrder = (result._max.displayOrder ?? 0) + 1;
+    }
+
     return this.prisma.category.create({
-      data: createCategoryDto,
+      data: {
+        name: createCategoryDto.name,
+        description: createCategoryDto.description,
+        image: createCategoryDto.image,
+        displayOrder,
+      },
     });
   }
 
   async findAll() {
     return this.prisma.category.findMany({
-      orderBy: {
-        createdAt: 'desc',
+      orderBy: [
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' },
+      ],
+      include: {
+        _count: {
+          select: {
+            products: true,
+          },
+        },
       },
     });
   }
@@ -24,10 +50,20 @@ export class CategoriesService {
   async findOne(id: string) {
     return this.prisma.category.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            products: true,
+          },
+        },
+      },
     });
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.prisma.category.update({
       where: { id },
       data: {
@@ -35,6 +71,7 @@ export class CategoriesService {
         description: updateCategoryDto.description,
         image: updateCategoryDto.image,
         isActive: updateCategoryDto.isActive,
+        displayOrder: updateCategoryDto.displayOrder,
       },
     });
   }

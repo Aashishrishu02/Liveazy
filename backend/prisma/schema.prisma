@@ -22,6 +22,7 @@ model Category{
   description String?
   image String?
   isActive Boolean @default(true)
+  displayOrder Int @default(0)
   products Product[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,6 +37,7 @@ model Product {
   image       String?
   categoryId  String
   isActive    Boolean  @default(true)
+  displayOrder Int @default(0)
 
   // 12-month rental plan
   rent12M    Float?
@@ -57,14 +59,31 @@ model Product {
 model Banner {
   id          String   @id @default(cuid())
   image       String
+
   topLabel    String   @default("NO INVESTMENT, JUST COMFORT")
   heading     String   @default("Furnish Your Home in Just 2 Days.")
   subtitle    String   @default("Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.")
+
   button1Text String   @default("VIEW CATEGORIES")
   button1Link String   @default("#categories")
   button2Text String   @default("CALL HOTLINE")
   button2Link String   @default("tel:+919423838109")
+
+  // Publishing status
   isActive    Boolean  @default(true)
+
+  // Banner placement and ordering
+  placement   String   @default("HOMEPAGE_HERO")
+  sortOrder   Int      @default(0)
+
+  // Optional publishing schedule
+  startsAt    DateTime?
+  endsAt      DateTime?
+
+  // Actual engagement counters
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -87,6 +106,7 @@ model PromoBanner {
   buttonLink String @default("#products")
   isActive   Boolean  @default(true)
   sortOrder  Int      @default(0)
+  placement String @default("HOMEPAGE_PROMO")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

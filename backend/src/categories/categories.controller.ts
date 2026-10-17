@@ -19,8 +19,8 @@ export class CategoriesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return (this.categoriesService as any).findOne(id);
-  }
+  return this.categoriesService.findOne(id);
+}
 
   @Patch(':id')
   update(

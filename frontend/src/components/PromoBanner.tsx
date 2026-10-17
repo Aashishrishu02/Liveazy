@@ -66,7 +66,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
       try {
         if (!API_URL) return;
 
-        const response = await fetch(`${API_URL}/promo-banners`);
+        const response = await fetch(`${API_URL}/promo-banners?placement=HOMEPAGE_PROMO`);
 
         if (!response.ok) {
           throw new Error(`Failed to load promo banners: ${response.status}`);
