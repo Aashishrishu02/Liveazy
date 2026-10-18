@@ -8,6 +8,9 @@ import { UploadModule } from './upload/upload.module';
 import { BannersModule } from './banners/banners.module';
 import { SettingsModule } from './settings/settings.module';
 import { PromoBannersModule } from './promo-banners/promo-banners.module';
+import { ContactSettingsModule } from './contact-settings/contact-settings.module';
+import { FaqsModule } from './faqs/faqs.module';
+import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { PromoBannersModule } from './promo-banners/promo-banners.module';
     BannersModule,
     SettingsModule,
     PromoBannersModule,
+    ContactSettingsModule,
+    FaqsModule,
+    ContactEnquiriesModule,
   ],
 })
 export class AppModule {}

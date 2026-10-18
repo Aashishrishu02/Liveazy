@@ -1,21 +1,20 @@
-import { useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import CategorySection from "./components/CategorySection";
 import PopularRentals from "./components/PopularRentals";
+import ProductDetails from "./components/ProductDetails";
 import PromoBanner from "./components/PromoBanner";
 import WhyRentNest from "./components/WhyRentNest";
 import Footer from "./components/Footer";
-
-import type { Product } from "./types/rental";
-import PromoBanners from "./pages/PromoBanners";
-
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -23,55 +22,91 @@ import Categories from "./pages/Categories";
 import Products from "./pages/Products";
 import Banner from "./pages/Banner";
 import WhatsAppSettings from "./pages/WhatsAppSettings";
+import PromoBanners from "./pages/PromoBanners";
+import ContactUs from "./pages/ContactUs";
+import ContactManagement from "./pages/ContactManagement";
 
-function App() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<string>("All");
+import type { Product } from "./types/rental";
 
-  const [searchFilter, setSearchFilter] =
-    useState<string>("");
+function HomePage() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [selectedCity, setSelectedCity] =
-    useState<string>("Pune (All Areas)");
-
-  const [wishlistIds, setWishlistIds] =
-    useState<Set<string>>(
-      new Set(["p-sofa-01", "p-bed-01"])
-    );
-
-  //  WISHLIST 
-  const handleToggleWishlist = useCallback(
-    (product: Product) => {
-      setWishlistIds((prev) => {
-        const next = new Set(prev);
-
-        if (next.has(product.id)) {
-          next.delete(product.id);
-        } else {
-          next.add(product.id);
-        }
-
-        return next;
-      });
-    },
-    []
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchFilter, setSearchFilter] = useState<string>("");
+  const [selectedCity, setSelectedCity] = useState<string>("Pune (All Areas)");
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(
+    new Set(["p-sofa-01", "p-bed-01"])
   );
 
-  // SEARCH 
+  // Handle footer links such as /#about and /#products.
+  useEffect(() => {
+    if (location.hash === "#about") {
+      const timeoutId = window.setTimeout(() => {
+        document.getElementById("about")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (location.hash === "#products") {
+      const timeoutId = window.setTimeout(() => {
+        document.getElementById("products")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    return undefined;
+  }, [location.hash, location.key]);
+
+  // Preserve a search query when returning from another page.
+  useEffect(() => {
+    const state = location.state as { searchQuery?: string } | null;
+
+    if (state?.searchQuery !== undefined) {
+      setSearchFilter(state.searchQuery);
+      setSelectedCategory("All");
+
+      navigate("/", { replace: true, state: null });
+
+      window.setTimeout(() => {
+        document.getElementById("products")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  }, [location.key, location.state, navigate]);
+
+  const handleToggleWishlist = useCallback((product: Product) => {
+    setWishlistIds((previous) => {
+      const updated = new Set(previous);
+
+      if (updated.has(product.id)) {
+        updated.delete(product.id);
+      } else {
+        updated.add(product.id);
+      }
+
+      return updated;
+    });
+  }, []);
 
   const handleSearch = (
     query: string,
     category = "All Categories",
     city?: string
   ) => {
-    if (city) {
-      setSelectedCity(city);
-    }
+    if (city) setSelectedCity(city);
 
-    if (
-      category &&
-      category !== "All Categories"
-    ) {
+    if (category && category !== "All Categories") {
       setSelectedCategory(category);
     } else {
       setSelectedCategory("All");
@@ -79,183 +114,124 @@ function App() {
 
     setSearchFilter(query);
 
-    const target =
-      document.getElementById("products");
-
-    if (target) {
-      target.scrollIntoView({
+    window.setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
-    }
+    }, 0);
   };
 
-  //  CATEGORY 
-  const handleSelectCategory = (
-    category: string
-  ) => {
+  const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
     setSearchFilter("");
 
-    const target =
-      document.getElementById("products");
-
-    if (target) {
-      target.scrollIntoView({
+    window.setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
-    }
+    }, 0);
   };
-
-  // SCROLL 
 
   const scrollToProducts = () => {
-    const target =
-      document.getElementById("products");
-
-    if (target) {
-      target.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
+    document.getElementById("products")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
-  //  RENT NOW 
-  const handleRentNow = (
-    product: Product
-  ) => {
-    alert(
-      `Booking initiated for ${product.name}. Our Pune team will contact you for delivery scheduling!`
+  const handleRentNow = (product: Product) => {
+    window.alert(
+      `Booking initiated for ${product.name}. Please continue through the product's WhatsApp rental option.`
     );
   };
 
   return (
+    <div className="min-h-screen bg-[#faf9f7] font-sans text-gray-900">
+      <Navbar onSearchSubmit={(query) => handleSearch(query)} />
+
+      <HeroSection
+        onSearchSubmit={(query, category, city) =>
+          handleSearch(query, category, city)
+        }
+        selectedCity={selectedCity}
+        onExploreClick={scrollToProducts}
+      />
+
+      <CategorySection
+        onSelectCategory={handleSelectCategory}
+        selectedCategory={selectedCategory}
+      />
+
+      <PopularRentals
+        products={[]}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        searchFilter={searchFilter}
+        onClearSearch={() => setSearchFilter("")}
+        wishlistIds={wishlistIds}
+        onToggleWishlist={handleToggleWishlist}
+        onRentNow={handleRentNow}
+      />
+
+      <PromoBanner onCtaClick={scrollToProducts} />
+
+      <div id="about" className="scroll-mt-24">
+        <WhyRentNest />
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
+
+function ContactPage() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash !== "#faqs") return;
+
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById("faqs")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.hash, location.key]);
+
+  return (
+    <ContactUs
+      onSearchSubmit={() => {
+        window.location.href = "/";
+      }}
+    />
+  );
+}
+
+function App() {
+  return (
     <BrowserRouter>
       <Routes>
+        {/* Public pages */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
 
-        {/* PUBLIC CUSTOMER WEBSITE */}
-
+        {/* Admin pages - existing routes preserved */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/categories" element={<Categories />} />
+        <Route path="/admin/products" element={<Products />} />
+        <Route path="/admin/banner" element={<Banner />} />
+        <Route path="/admin/settings" element={<WhatsAppSettings />} />
+        <Route path="/admin/promo-banners" element={<PromoBanners />} />
         <Route
-          path="/"
-          element={
-            <div className="min-h-screen bg-[#faf9f7] text-gray-900 font-sans">
-
-              <Navbar onSearchSubmit={(query) => handleSearch(query)} />
-
-              <HeroSection
-                onSearchSubmit={(
-                  query,
-                  category,
-                  city
-                ) =>
-                  handleSearch(
-                    query,
-                    category,
-                    city
-                  )
-                }
-                selectedCity={selectedCity}
-                onExploreClick={
-                  scrollToProducts
-                }
-              />
-
-              <CategorySection
-                onSelectCategory={
-                  handleSelectCategory
-                }
-                selectedCategory={
-                  selectedCategory
-                }
-              />
-
-              <PopularRentals
-                products={[]}
-                selectedCategory={
-                  selectedCategory
-                }
-                onSelectCategory={
-                  setSelectedCategory
-                }
-                searchFilter={
-                  searchFilter
-                }
-                onClearSearch={() =>
-                  setSearchFilter("")
-                }
-                wishlistIds={
-                  wishlistIds
-                }
-                onToggleWishlist={
-                  handleToggleWishlist
-                }
-                onRentNow={
-                  handleRentNow
-                }
-              />
-
-              <PromoBanner
-                onCtaClick={
-                  scrollToProducts
-                }
-              />
-
-              <div id="about" className="scroll-mt-24">
-  <WhyRentNest />
-</div>
-
-              <Footer />
-
-            </div>
-          }
+          path="/admin/contact-management"
+          element={<ContactManagement />}
         />
-
-        {/*  ADMIN LOGIN  */}
-
-        <Route
-          path="/admin"
-          element={<AdminLogin />}
-        />
-
-        {/*  ADMIN DASHBOARD */}
-
-        <Route
-          path="/admin/dashboard"
-          element={<AdminDashboard />}
-        />
-
-        {/*  CATEGORIES MASTER  */}
-
-        <Route
-          path="/admin/categories"
-          element={<Categories />}
-        />
-
-        {/*  PRODUCTS MASTER  */}
-
-        <Route
-          path="/admin/products"
-          element={<Products />}
-        />
-
-        {/* BANNER MANAGEMENT  */}
-
-        <Route
-          path="/admin/banner"
-          element={<Banner />}
-        />
-
-        {/* WHATSAPP SETTINGS */}
-
-<Route
-  path="/admin/settings"
-  element={<WhatsAppSettings />}
-/>
-
-<Route
-  path="/admin/promo-banners"
-  element={<PromoBanners />}
-/>
-
       </Routes>
     </BrowserRouter>
   );

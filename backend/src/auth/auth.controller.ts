@@ -1,48 +1,79 @@
-import { Body,Controller,Post ,Get,Req, Res} from '@nestjs/common';
+
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import type { Response } from 'express';
+
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-    @Post('register')
-    async register(@Body() registerUserDto: RegisterUserDto) {
-        return this.authService.createUser(registerUserDto);
+  // Normal user registration
+  @Post('register')
+  async register(@Body() dto: RegisterUserDto) {
+    return this.authService.createUser(dto);
+  }
+
+  // Normal user login — existing route preserved
+  @Post('login')
+  async login(@Body() dto: LoginUserDto) {
+    return this.authService.loginUser(dto);
+  }
+
+  // Dedicated LIVEAZY admin login
+  @Post('admin-login')
+  async adminLogin(
+    @Body() body: { email?: string; password?: string },
+  ) {
+    if (
+      typeof body?.email !== 'string' ||
+      typeof body?.password !== 'string'
+    ) {
+      throw new BadRequestException(
+        'Email and password are required.',
+      );
     }
 
-    @Post('login')
-    async login(@Body() loginUserDto: LoginUserDto) {
-        return this.authService.loginUser(loginUserDto);
-    }
+    return this.authService.adminLogin(
+      body.email,
+      body.password,
+    );
+  }
 
-    @Get('profile')
-    @UseGuards(JwtAuthGuard)
-    getProfile(@Req() req:any) {
-        return req.user;
-    }
+  // Protected profile
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Req() req: any) {
+    return req.user;
+  }
 
-    @Get('google')
-    @UseGuards(AuthGuard('google'))
-    googleLogin(){
+  // Google login
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleLogin() {}
 
-    }
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleLoginCallback(
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const result = await this.authService.googleLogin(req.user);
 
-    @Get('google/callback')
-@UseGuards(AuthGuard('google'))
-async googleLoginCallback(
-  @Req() req: any,
-  @Res() res: Response,
-) {
-  const result = await this.authService.googleLogin(req.user);
-
-  return res.redirect(
-    `${process.env.FRONTEND_URL}/?token=${result.access_token}`,
-  );
-}
-
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/?token=${encodeURIComponent(result.access_token)}`,
+    );
+  }
 }

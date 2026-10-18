@@ -1,75 +1,167 @@
-import { Injectable } from '@nestjs/common';
+
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
+import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private jwtService: JwtService) {}
-//register karne ke liye function
-    async createUser(registerUserDto: RegisterUserDto) {
-        const { name, email, password } = registerUserDto;
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+  // Register a normal user
+  async createUser(registerUserDto: RegisterUserDto) {
+    const { name, email, password } = registerUserDto;
 
-        const user = await this.prisma.user.create({
-            data: {name,email,password: hashedPassword},
-    
-        });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        return user;
-    }
-    //login karne ke liye function
-    async loginUser(loginUserDto: LoginUserDto) {
-        const { email, password } = loginUserDto;
-
-        const user = await this.prisma.user.findUnique({ 
-            where: { email },
-        });
-        if(!user){
-            return{message:'User not found'};
-        }
-        const isPasswordValid = await bcrypt.compare(password,user.password!,);//comapre karne ke liye bcrypt ka use kiya hai
-        if(!isPasswordValid){
-            return{message:'Invalid password'};
-        }
-        const token = this.jwtService.sign({ userId: user.id, email: user.email });
-        return {message:'Login successful',access_token: token, user:{id:user.id,name:user.name,email:user.email,} };
-    }
-    
-    //google login ke liye function
-    async googleLogin(user: any) {
-  let existingUser = await this.prisma.user.findUnique({
-    where: {
-      email: user.email,
-    },
-  });
-
-  if (!existingUser) {
-    existingUser = await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
-        name: user.name,
-        email: user.email,
-        googleId: user.googleId,
+        name,
+        email,
+        password: hashedPassword,
       },
     });
+
+    const { password: _password, ...safeUser } = user;
+
+    return safeUser;
   }
 
-  const token = this.jwtService.sign({
-    userId: existingUser.id,
-    email: existingUser.email,
-  });
+  // Normal user login
+  async loginUser(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
 
-  return {
-    message: 'Google login successful',
-    access_token: token,
-    user: {
-      id: existingUser.id,
-      name: existingUser.name,
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email.trim(),
+      },
+    });
+
+    if (!user || !user.password) {
+      throw new UnauthorizedException(
+        'Invalid email or password',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(
+        'Invalid email or password',
+      );
+    }
+
+    const access_token = await this.jwtService.signAsync({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return {
+      message: 'Login successful',
+      access_token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    };
+  }
+
+  // Separate LIVEAZY admin login
+  async adminLogin(email: string, password: string) {
+    const adminEmail = this.configService
+      .get<string>('ADMIN_EMAIL')
+      ?.trim()
+      .toLowerCase();
+
+    const adminPassword =
+      this.configService.get<string>('ADMIN_LOGIN_PASSWORD');
+
+    // Diagnostic: never print the actual password or secret
+    console.log('Admin configuration loaded:', {
+      emailLoaded: Boolean(adminEmail),
+      passwordLoaded: Boolean(adminPassword),
+    });
+
+    if (!adminEmail || !adminPassword) {
+      throw new InternalServerErrorException(
+        'Admin login configuration is missing on the server.',
+      );
+    }
+
+    if (
+      typeof email !== 'string' ||
+      typeof password !== 'string' ||
+      email.trim().toLowerCase() !== adminEmail ||
+      password !== adminPassword
+    ) {
+      throw new UnauthorizedException(
+        'Invalid email or password',
+      );
+    }
+
+    const access_token = await this.jwtService.signAsync({
+      userId: 0,
+      email: adminEmail,
+    });
+
+    return {
+      message: 'Admin login successful',
+      access_token,
+      user: {
+        id: 0,
+        name: 'LIVEAZY Admin',
+        email: adminEmail,
+        role: 'ADMIN',
+      },
+    };
+  }
+
+  // Google login
+  async googleLogin(user: any) {
+    let existingUser = await this.prisma.user.findUnique({
+      where: {
+        email: user.email,
+      },
+    });
+
+    if (!existingUser) {
+      existingUser = await this.prisma.user.create({
+        data: {
+          name: user.name,
+          email: user.email,
+          googleId: user.googleId,
+        },
+      });
+    }
+
+    const access_token = await this.jwtService.signAsync({
+      userId: existingUser.id,
       email: existingUser.email,
-    },
-  };
-}
+    });
+
+    return {
+      message: 'Google login successful',
+      access_token,
+      user: {
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
+      },
+    };
+  }
 }

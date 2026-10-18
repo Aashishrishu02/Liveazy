@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { GoogleStrategy } from './google.strategy';
+import { AdminEmailGuard } from './guards/admin-email.guard';
 
 @Module({
   imports: [PrismaModule,
@@ -20,6 +21,7 @@ import { GoogleStrategy } from './google.strategy';
 }), 
   ],
   controllers: [AuthController],
-  providers: [AuthService,JwtStrategy,GoogleStrategy],
+  providers: [AuthService,JwtStrategy,GoogleStrategy,AdminEmailGuard],
+  exports: [AdminEmailGuard],
 })
 export class AuthModule {}

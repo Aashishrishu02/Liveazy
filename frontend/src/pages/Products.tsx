@@ -26,6 +26,7 @@ import {
   Check,
   AlertCircle,
   SlidersHorizontal,
+  Contact,
 } from "lucide-react";
 
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
@@ -64,6 +65,7 @@ const navigation = [
   { label: "Banners", path: "/admin/banner", icon: Images },
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
+  { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
 ];
 
 function getErrorMessage(error: unknown, fallback: string) {

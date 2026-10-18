@@ -23,6 +23,7 @@ import {
   Settings,
   ShieldCheck,
   AlertCircle,
+  Contact,
 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -106,6 +107,11 @@ const navigation = [
     label: "WhatsApp Settings",
     path: "/admin/settings",
     icon: MessageCircle,
+  },
+  {
+    label: "Contact Management",
+    path: "/admin/contact-management",
+    icon: Contact,
   },
 ];
 
@@ -451,7 +457,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#142B43]">
-      {/* Mobile sidebar backdrop — same layout as other admin pages */}
+      {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <button
           type="button"
@@ -461,7 +467,7 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Sidebar: SAME as Products.tsx and Categories.tsx */}
+      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -585,6 +591,7 @@ export default function AdminDashboard() {
                 className="relative rounded-full p-2 text-slate-500 transition hover:bg-slate-100"
               >
                 <Bell size={20} />
+
                 {apiError && (
                   <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
                 )}
@@ -614,6 +621,7 @@ export default function AdminDashboard() {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D9F4F2] text-sm font-bold text-[#00696E]">
                 A
               </div>
+
               <div className="hidden sm:block">
                 <p className="text-sm font-bold text-[#0F2942]">Admin</p>
                 <p className="text-xs text-slate-500">LIVEAZY Console</p>
@@ -676,6 +684,7 @@ export default function AdminDashboard() {
                   size={19}
                   className="mt-0.5 shrink-0 text-amber-700"
                 />
+
                 <div>
                   <p className="text-sm font-bold text-amber-900">
                     Some dashboard data could not be loaded
@@ -705,6 +714,7 @@ export default function AdminDashboard() {
                 <h3 className="text-lg font-bold text-[#0F2942]">
                   Store Statistics
                 </h3>
+
                 <p className="mt-1 text-sm text-slate-500">
                   Current store data from your backend.
                 </p>
@@ -740,6 +750,7 @@ export default function AdminDashboard() {
                         <p className="text-sm font-medium text-slate-500">
                           {stat.title}
                         </p>
+
                         <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#0F2942]">
                           {loading ? "—" : stat.value}
                         </p>
@@ -756,6 +767,7 @@ export default function AdminDashboard() {
                       <span className="text-xs text-slate-500">
                         {stat.detail}
                       </span>
+
                       <ArrowUpRight size={15} className="text-slate-400" />
                     </div>
                   </button>
@@ -773,6 +785,7 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-bold text-[#0F2942]">
                     Recent Products
                   </h3>
+
                   <p className="mt-1 text-xs text-slate-500">
                     Latest products in your rental catalogue.
                   </p>
@@ -810,12 +823,15 @@ export default function AdminDashboard() {
                       <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         Product
                       </th>
+
                       <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         Category
                       </th>
+
                       <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         Rent / Month
                       </th>
+
                       <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                         Status
                       </th>
@@ -839,11 +855,13 @@ export default function AdminDashboard() {
                             size={28}
                             className="mx-auto mb-2 text-slate-300"
                           />
+
                           <p className="text-sm font-semibold text-slate-500">
                             {search
                               ? "No matching products found"
                               : "No products available yet"}
                           </p>
+
                           {!search && (
                             <button
                               type="button"
@@ -858,10 +876,12 @@ export default function AdminDashboard() {
                     ) : (
                       filteredProducts.map((product) => {
                         const rent = getMonthlyRent(product);
+
                         const categoryName = getCategoryName(
                           product,
                           categories,
                         );
+
                         const active = product.isActive !== false;
 
                         return (
@@ -897,6 +917,7 @@ export default function AdminDashboard() {
                                   >
                                     {product.name}
                                   </button>
+
                                   <p className="mt-1 max-w-[210px] truncate font-mono text-[9px] text-slate-400">
                                     ID: {product.id}
                                   </p>
@@ -914,6 +935,7 @@ export default function AdminDashboard() {
                               <p className="text-xs font-extrabold text-[#0F2942]">
                                 {formatCurrency(rent)}
                               </p>
+
                               <p className="mt-1 text-[9px] text-slate-400">
                                 {product.createdAt
                                   ? formatDate(product.createdAt)
@@ -934,6 +956,7 @@ export default function AdminDashboard() {
                                     active ? "bg-emerald-500" : "bg-slate-400"
                                   }`}
                                 />
+
                                 {active ? "Active" : "Inactive"}
                               </span>
                             </td>
@@ -970,6 +993,7 @@ export default function AdminDashboard() {
                     <h3 className="text-base font-bold text-[#0F2942]">
                       Homepage Banner
                     </h3>
+
                     <p className="mt-1 text-xs text-slate-500">
                       Homepage hero preview
                     </p>
@@ -1018,6 +1042,7 @@ export default function AdminDashboard() {
                       <span className="text-[10px] text-white/80">
                         LIVEAZY Homepage
                       </span>
+
                       <span className="rounded-md bg-white px-3 py-1.5 text-[10px] font-bold text-[#0F2942]">
                         Preview
                       </span>
@@ -1029,6 +1054,7 @@ export default function AdminDashboard() {
                       <p className="text-xs font-bold text-[#0F2942]">
                         Banner status
                       </p>
+
                       <p className="mt-1 text-[10px] text-slate-500">
                         {activeHeroBanner
                           ? "Active banner found"
@@ -1065,6 +1091,7 @@ export default function AdminDashboard() {
                     <h3 className="text-base font-bold text-[#0F2942]">
                       WhatsApp Gateway
                     </h3>
+
                     <p className="mt-1 text-xs text-slate-500">
                       Customer enquiry settings
                     </p>
@@ -1107,6 +1134,7 @@ export default function AdminDashboard() {
                           ? "Contact number configured"
                           : "Contact number needs attention"}
                       </p>
+
                       <p className="mt-1 text-[10px] leading-5 text-slate-500">
                         Used to open WhatsApp for customer rental enquiries.
                       </p>
@@ -1117,6 +1145,7 @@ export default function AdminDashboard() {
                     <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
                       Default enquiry message
                     </p>
+
                     <p className="mt-2 line-clamp-4 whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">
                       {whatsapp?.whatsappMessage || "No message configured."}
                     </p>
@@ -1144,6 +1173,7 @@ export default function AdminDashboard() {
                 <h3 className="text-base font-bold text-[#0F2942]">
                   Quick Actions
                 </h3>
+
                 <p className="mt-1 text-xs text-slate-500">
                   Jump directly to a store management section.
                 </p>
@@ -1158,15 +1188,18 @@ export default function AdminDashboard() {
                       <span className="rounded-lg bg-teal-50 p-2 text-[#008A90]">
                         <Tags size={17} />
                       </span>
+
                       <span>
                         <span className="block text-xs font-bold text-[#0F2942]">
                           Categories
                         </span>
+
                         <span className="mt-1 block text-[10px] text-slate-500">
                           Organise your catalogue
                         </span>
                       </span>
                     </span>
+
                     <ChevronRight size={16} className="text-slate-400" />
                   </button>
 
@@ -1179,15 +1212,18 @@ export default function AdminDashboard() {
                       <span className="rounded-lg bg-orange-50 p-2 text-[#E96B43]">
                         <Megaphone size={17} />
                       </span>
+
                       <span>
                         <span className="block text-xs font-bold text-[#0F2942]">
                           Promo Banners
                         </span>
+
                         <span className="mt-1 block text-[10px] text-slate-500">
                           Manage promotions and campaigns
                         </span>
                       </span>
                     </span>
+
                     <ChevronRight size={16} className="text-slate-400" />
                   </button>
 
@@ -1200,15 +1236,45 @@ export default function AdminDashboard() {
                       <span className="rounded-lg bg-emerald-50 p-2 text-emerald-700">
                         <ShieldCheck size={17} />
                       </span>
+
                       <span>
                         <span className="block text-xs font-bold text-[#0F2942]">
                           WhatsApp Settings
                         </span>
+
                         <span className="mt-1 block text-[10px] text-slate-500">
                           Update contact number and message
                         </span>
                       </span>
                     </span>
+
+                    <ChevronRight size={16} className="text-slate-400" />
+                  </button>
+
+                  {/* Contact Management Quick Action */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate("/admin/contact-management")
+                    }
+                    className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-100 p-3 text-left transition hover:border-[#B6E4E2] hover:bg-[#F4FBFA]"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="rounded-lg bg-teal-50 p-2 text-[#008A90]">
+                        <Contact size={17} />
+                      </span>
+
+                      <span>
+                        <span className="block text-xs font-bold text-[#0F2942]">
+                          Contact Management
+                        </span>
+
+                        <span className="mt-1 block text-[10px] text-slate-500">
+                          Manage contact details, FAQs and enquiries
+                        </span>
+                      </span>
+                    </span>
+
                     <ChevronRight size={16} className="text-slate-400" />
                   </button>
 
@@ -1220,15 +1286,18 @@ export default function AdminDashboard() {
                       <span className="rounded-lg bg-blue-50 p-2 text-blue-700">
                         <Store size={17} />
                       </span>
+
                       <span>
                         <span className="block text-xs font-bold text-[#0F2942]">
                           View Website
                         </span>
+
                         <span className="mt-1 block text-[10px] text-slate-500">
                           Open customer-facing website
                         </span>
                       </span>
                     </span>
+
                     <ExternalLink size={14} className="text-slate-400" />
                   </a>
                 </div>
@@ -1236,10 +1305,12 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Footer */}
           <footer className="flex flex-col justify-between gap-2 border-t border-slate-200 py-5 text-xs text-slate-400 sm:flex-row sm:items-center">
             <p>
               © {new Date().getFullYear()} LIVEAZY. Rental Commerce Hub.
             </p>
+
             <p>Admin Workspace</p>
           </footer>
         </main>

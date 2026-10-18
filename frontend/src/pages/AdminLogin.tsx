@@ -2,7 +2,24 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
+
+interface AdminLoginResponse {
+  message?: string;
+  access_token?: unknown;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    role?: string;
+  };
+}
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -14,32 +31,60 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (loading) return;
+
     setLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
+      const API_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
 
-      const response = await fetch(`${API_URL}/auth/login`, {
+      if (!API_URL) {
+        alert("VITE_API_URL is not configured.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/auth/admin-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AdminLoginResponse;
 
       if (!response.ok) {
-        alert(data.message || "Invalid email or password");
+        alert(
+          typeof data.message === "string"
+            ? data.message
+            : "Invalid email or password.",
+        );
         return;
       }
 
-      // Existing authentication flow preserved
-      localStorage.setItem("token", data.access_token);
-      navigate("/admin/dashboard");
+      const accessToken = data.access_token;
+
+      if (
+        typeof accessToken !== "string" ||
+        accessToken.split(".").length !== 3 ||
+        accessToken.split(".").some((part) => part.length === 0)
+      ) {
+        localStorage.removeItem("token");
+        console.error("Login response fields:", Object.keys(data));
+        alert("Server did not return a valid access token.");
+        return;
+      }
+
+      localStorage.setItem("token", accessToken);
+
+      navigate("/admin/dashboard", { replace: true });
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Unable to connect to server");
+      console.error("Admin login error:", error);
+      alert("Unable to connect to the server. Check your backend.");
     } finally {
       setLoading(false);
     }
@@ -47,12 +92,10 @@ export default function AdminLogin() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F5F7FA] px-4 py-10 sm:px-6">
-      {/* Background decoration */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-[#008A90]/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-24 h-96 w-96 rounded-full bg-[#0F2942]/10 blur-3xl" />
 
       <div className="relative grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-[#0F2942]/10 lg:grid-cols-2">
-        {/* Branding panel */}
         <section className="relative flex flex-col justify-between overflow-hidden bg-[#0F2942] p-8 text-white sm:p-10 lg:min-h-[610px] lg:p-12">
           <div className="absolute -right-20 top-24 h-64 w-64 rounded-full border border-white/10" />
           <div className="absolute -right-10 top-36 h-44 w-44 rounded-full border border-white/10" />
@@ -85,12 +128,11 @@ export default function AdminLogin() {
               LIVEAZY Rental Commerce Hub
             </p>
             <p className="mt-1 text-xs text-slate-400">
-              Administration & content management
+              Administration &amp; content management
             </p>
           </div>
         </section>
 
-        {/* Login form */}
         <section className="flex items-center justify-center p-7 sm:p-12 lg:p-14">
           <div className="w-full max-w-sm">
             <div className="mb-8">
@@ -131,7 +173,7 @@ export default function AdminLogin() {
                     autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
+                    placeholder="admin@liveazy.com"
                     required
                     className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-[#0F2942] outline-none transition placeholder:text-slate-400 focus:border-[#008A90] focus:bg-white focus:ring-4 focus:ring-[#008A90]/10"
                   />
@@ -139,14 +181,12 @@ export default function AdminLogin() {
               </div>
 
               <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label
-                    htmlFor="admin-password"
-                    className="block text-sm font-semibold text-[#0F2942]"
-                  >
-                    Password
-                  </label>
-                </div>
+                <label
+                  htmlFor="admin-password"
+                  className="mb-2 block text-sm font-semibold text-[#0F2942]"
+                >
+                  Password
+                </label>
 
                 <div className="relative">
                   <LockKeyhole
