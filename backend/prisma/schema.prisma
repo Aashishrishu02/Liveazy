@@ -104,6 +104,8 @@ model PromoBanner {
   buttonLink String   @default("#products")
   isActive   Boolean  @default(true)
   sortOrder  Int      @default(0)
+  impressions Int @default(0)
+  clicks      Int @default(0)
   placement  String   @default("HOMEPAGE_PROMO")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

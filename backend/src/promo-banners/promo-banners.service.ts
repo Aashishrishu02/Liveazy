@@ -1,3 +1,4 @@
+
 import {
   Injectable,
   NotFoundException,
@@ -35,7 +36,7 @@ export class PromoBannersService {
     });
   }
 
-  // Admin: return all promo banners.
+  // Admin: return all banners, including inactive banners.
   async findAll() {
     return this.prisma.promoBanner.findMany({
       orderBy: [
@@ -122,6 +123,52 @@ export class PromoBannersService {
 
     return this.prisma.promoBanner.delete({
       where: { id },
+    });
+  }
+
+  // Public: record a banner impression.
+  async recordImpression(id: string) {
+    const existing = await this.prisma.promoBanner.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Promo banner not found.');
+    }
+
+    return this.prisma.promoBanner.update({
+      where: { id },
+      data: {
+        impressions: { increment: 1 },
+      },
+      select: {
+        id: true,
+        impressions: true,
+      },
+    });
+  }
+
+  // Public: record a banner click.
+  async recordClick(id: string) {
+    const existing = await this.prisma.promoBanner.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Promo banner not found.');
+    }
+
+    return this.prisma.promoBanner.update({
+      where: { id },
+      data: {
+        clicks: { increment: 1 },
+      },
+      select: {
+        id: true,
+        clicks: true,
+      },
     });
   }
 

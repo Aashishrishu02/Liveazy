@@ -20,27 +20,33 @@ export class PromoBannersController {
     private readonly promoBannersService: PromoBannersService,
   ) {}
 
-  // Public: active banners, optionally filtered by placement.
   @Get()
-  findActive(
-    @Query('placement') placement?: string,
-  ) {
+  findActive(@Query('placement') placement?: string) {
     return this.promoBannersService.findActive(placement);
   }
 
-  // Admin: all banners, including inactive ones.
   @Get('admin')
   findAll() {
     return this.promoBannersService.findAll();
   }
 
-  // Create a promo banner.
+  // Record one promo banner impression.
+  @Post(':id/impression')
+  recordImpression(@Param('id') id: string) {
+    return this.promoBannersService.recordImpression(id);
+  }
+
+  // Record one promo banner click.
+  @Post(':id/click')
+  recordClick(@Param('id') id: string) {
+    return this.promoBannersService.recordClick(id);
+  }
+
   @Post()
   create(@Body() body: PromoBannerInput) {
     return this.promoBannersService.create(body);
   }
 
-  // Update banner content, placement, status, or order.
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -49,7 +55,6 @@ export class PromoBannersController {
     return this.promoBannersService.update(id, body);
   }
 
-  // Delete a promo banner.
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.promoBannersService.remove(id);

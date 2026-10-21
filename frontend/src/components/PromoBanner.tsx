@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -59,6 +59,10 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
   const [banners, setBanners] =
     useState<PromoBannerData[]>(fallbackBanners);
 
+  // Track each real promo banner once per component mount.
+  // Fallback/demo banners are not stored in the database and must not be counted.
+  const trackedImpressions = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     let cancelled = false;
 
@@ -99,7 +103,47 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
     };
   }, []);
 
-  const handleBannerClick = (link: string) => {
+  useEffect(() => {
+    if (!API_URL) return;
+
+    banners.forEach((banner) => {
+      if (
+        !banner.isActive ||
+        !banner.id ||
+        banner.id.startsWith("fallback-") ||
+        trackedImpressions.current.has(banner.id)
+      ) {
+        return;
+      }
+
+      trackedImpressions.current.add(banner.id);
+
+      void fetch(`${API_URL}/promo-banners/${encodeURIComponent(banner.id)}/impression`, {
+        method: "POST",
+      }).catch((error) => {
+        // Analytics should never break storefront rendering.
+        console.error("Failed to record promo banner impression:", error);
+      });
+    });
+  }, [banners]);
+
+  const handleBannerClick = (banner: PromoBannerData) => {
+    // Send analytics without waiting, so navigation/CTA behavior stays responsive.
+    if (
+      API_URL &&
+      banner.id &&
+      !banner.id.startsWith("fallback-")
+    ) {
+      void fetch(
+        `${API_URL}/promo-banners/${encodeURIComponent(banner.id)}/click`,
+        { method: "POST" }
+      ).catch((error) => {
+        console.error("Failed to record promo banner click:", error);
+      });
+    }
+
+    const link = banner.buttonLink;
+
     if (!link || link === "#products") {
       onCtaClick();
       return;
@@ -282,7 +326,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
                     <button
                       type="button"
-                      onClick={() => handleBannerClick(banner.buttonLink)}
+                      onClick={() => handleBannerClick(banner)}
                       className="mt-6 inline-flex min-h-11 items-center gap-3 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-xs font-bold text-white backdrop-blur-sm transition hover:border-white hover:bg-white hover:text-[#0F2942] sm:text-sm"
                     >
                       {banner.buttonText}

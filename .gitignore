@@ -1,2 +1,3 @@
 .vscode/
 backend/liveazy-backup.dump
+backend/.env.backup
