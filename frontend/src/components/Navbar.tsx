@@ -1,3 +1,4 @@
+
 import {
   Search,
   Menu,
@@ -7,6 +8,7 @@ import {
 import {
   useState,
   type SyntheticEvent,
+  type MouseEvent,
 } from "react";
 import {
   Link,
@@ -31,6 +33,22 @@ export default function Navbar({
 
   const closeMenu = () => setMobileMenu(false);
 
+  // Navigate to the homepage and scroll to the top.
+  const handleHomeClick = (
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    closeMenu();
+
+    if (isHomePage && !location.hash) {
+      event.preventDefault();
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
   const handleSearch = (
     event: SyntheticEvent<HTMLFormElement>
   ) => {
@@ -43,14 +61,13 @@ export default function Navbar({
     if (isHomePage) {
       onSearchSubmit?.(query);
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         document.getElementById("products")?.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
       }, 0);
     } else {
-      // Return to the homepage when searching from another page.
       navigate("/", {
         state: { searchQuery: query },
       });
@@ -83,7 +100,7 @@ export default function Navbar({
           <Link
             to="/"
             aria-label="LIVEAZY home"
-            onClick={closeMenu}
+            onClick={handleHomeClick}
             className="flex h-16 w-[200px] shrink-0 items-center overflow-hidden sm:w-[230px] md:h-20 md:w-[260px] lg:w-[290px]"
           >
             <img
@@ -100,6 +117,7 @@ export default function Navbar({
                 <Link
                   key={item.label}
                   to={item.href}
+                  onClick={handleHomeClick}
                   className={linkClass}
                 >
                   {item.label}
@@ -115,7 +133,7 @@ export default function Navbar({
               )
             )}
 
-            {/* Contact opens the separate page */}
+            {/* Contact page */}
             <Link
               to="/contact"
               className={linkClass}
@@ -151,13 +169,9 @@ export default function Navbar({
           {/* Mobile menu toggle */}
           <button
             type="button"
-            onClick={() =>
-              setMobileMenu((open) => !open)
-            }
+            onClick={() => setMobileMenu((open) => !open)}
             className="ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-[#0F2942] transition hover:border-[#008A90] hover:bg-[#008A90]/5 lg:hidden"
-            aria-label={
-              mobileMenu ? "Close menu" : "Open menu"
-            }
+            aria-label={mobileMenu ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenu}
           >
             {mobileMenu ? (
@@ -208,7 +222,7 @@ export default function Navbar({
                   <Link
                     key={item.label}
                     to={item.href}
-                    onClick={closeMenu}
+                    onClick={handleHomeClick}
                     className="rounded-xl px-4 py-3 text-sm font-semibold text-[#0F2942] transition hover:bg-[#008A90]/5 hover:text-[#008A90]"
                   >
                     {item.label}

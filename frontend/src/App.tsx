@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -28,6 +29,23 @@ import ContactManagement from "./pages/ContactManagement";
 
 import type { Product } from "./types/rental";
 
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    // Allow intentional anchor navigation, such as /contact#faqs.
+    if (hash) return;
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [pathname, hash]);
+
+  return null;
+}
+
 function HomePage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,7 +57,7 @@ function HomePage() {
     new Set(["p-sofa-01", "p-bed-01"])
   );
 
-  // Handle footer links such as /#about and /#products.
+  // Handle homepage section links.
   useEffect(() => {
     if (location.hash === "#about") {
       const timeoutId = window.setTimeout(() => {
@@ -55,6 +73,17 @@ function HomePage() {
     if (location.hash === "#products") {
       const timeoutId = window.setTimeout(() => {
         document.getElementById("products")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (location.hash === "#categories") {
+      const timeoutId = window.setTimeout(() => {
+        document.getElementById("categories")?.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
@@ -214,6 +243,8 @@ function ContactPage() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+
       <Routes>
         {/* Public pages */}
         <Route path="/" element={<HomePage />} />
