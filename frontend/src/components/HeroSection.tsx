@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, PhoneCall, Sparkles } from "lucide-react";
 import heroImg from "../assets/hero-banner.jpeg";
 
@@ -44,7 +44,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const [bannerImage, setBannerImage] = useState(heroImg);
   const [bannerText, setBannerText] = useState(defaultBanner);
+  const [bannerId, setBannerId] = useState<string | null>(null);
   const [isBannerLoading, setIsBannerLoading] = useState(true);
+
+  // Prevent duplicate impression requests for the same banner
+  // during this component's current mounted session.
+  const trackedImpressions = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +67,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         if (cancelled) return;
 
         if (banner) {
+          setBannerId(banner.id || null);
           setBannerImage(banner.image || heroImg);
 
           setBannerText({
@@ -78,12 +84,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               banner.button2Link || defaultBanner.button2Link,
           });
         } else {
+          setBannerId(null);
           setBannerImage(heroImg);
           setBannerText(defaultBanner);
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to fetch banner:", error);
+          setBannerId(null);
           setBannerImage(heroImg);
           setBannerText(defaultBanner);
         }
@@ -101,9 +109,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     };
   }, [API_URL]);
 
+  // Record an impression for the saved normal banner.
+  useEffect(() => {
+    if (!bannerId || !API_URL) return;
+
+    if (trackedImpressions.current.has(bannerId)) return;
+
+    trackedImpressions.current.add(bannerId);
+
+    void fetch(`${API_URL}/banners/${bannerId}/impression`, {
+      method: "POST",
+    }).catch((error) => {
+      trackedImpressions.current.delete(bannerId);
+      console.error("Failed to record banner impression:", error);
+    });
+  }, [bannerId, API_URL]);
+
+  // Record clicks without blocking the existing button navigation.
+  const trackBannerClick = () => {
+    if (!bannerId || !API_URL) return;
+
+    void fetch(`${API_URL}/banners/${bannerId}/click`, {
+      method: "POST",
+    }).catch((error) => {
+      console.error("Failed to record banner click:", error);
+    });
+  };
+
   const handlePrimaryClick = (
     event: React.MouseEvent<HTMLAnchorElement>
   ) => {
+    trackBannerClick();
+
     if (bannerText.button1Link === "#categories") {
       event.preventDefault();
       onExploreClick?.();
@@ -183,6 +220,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <a
               href={bannerText.button2Link}
+              onClick={trackBannerClick}
               className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-white/35 bg-white/10 px-7 py-4 text-sm font-bold text-white backdrop-blur-sm transition duration-300 hover:border-white hover:bg-white/20 sm:text-base"
             >
               <PhoneCall size={18} />
