@@ -11,6 +11,7 @@ import { PromoBannersModule } from './promo-banners/promo-banners.module';
 import { ContactSettingsModule } from './contact-settings/contact-settings.module';
 import { FaqsModule } from './faqs/faqs.module';
 import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.mo
     ContactSettingsModule,
     FaqsModule,
     ContactEnquiriesModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}

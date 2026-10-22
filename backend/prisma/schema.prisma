@@ -167,3 +167,23 @@ model ContactEnquiry {
   @@index([status, createdAt])
   @@index([email])
 }
+
+
+
+enum FeedbackStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Feedback {
+  id           String         @id @default(cuid())
+  customerName String
+  rating       Int
+  message      String
+  status       FeedbackStatus @default(PENDING)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([status, createdAt])
+}

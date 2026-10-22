@@ -26,11 +26,14 @@ async function bootstrap() {
 
 
   // Swagger configuration kiya 
-  const config = new DocumentBuilder()
-    .setTitle('LIVEZY Furniture Rental API')
-    .setDescription('LIVEZY Admin Panel API')
-    .setVersion('1.0')
-    .build();
+  
+const config = new DocumentBuilder()
+  .setTitle('LIVEZY Furniture Rental API')
+  .setDescription('LIVEZY Admin Panel API')
+  .setVersion('1.0')
+  .addBearerAuth()
+  .build();
+
 
   const document = SwaggerModule.createDocument(app, config);
 

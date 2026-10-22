@@ -9,6 +9,7 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -34,6 +35,22 @@ export class AuthController {
 
   // Dedicated LIVEAZY admin login
   @Post('admin-login')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['email', 'password'],
+      properties: {
+        email: {
+          type: 'string',
+          example: 'admin@liveazy.com',
+        },
+        password: {
+          type: 'string',
+          example: 'Enter your admin password',
+        },
+      },
+    },
+  })
   async adminLogin(
     @Body() body: { email?: string; password?: string },
   ) {
