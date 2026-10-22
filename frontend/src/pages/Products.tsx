@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -26,8 +27,7 @@ import {
   Check,
   AlertCircle,
   SlidersHorizontal,
-  Contact,
-} from "lucide-react";
+  Contact, MessageSquareText } from "lucide-react";
 
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -66,6 +66,7 @@ const navigation = [
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
+  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
 ];
 
 function getErrorMessage(error: unknown, fallback: string) {

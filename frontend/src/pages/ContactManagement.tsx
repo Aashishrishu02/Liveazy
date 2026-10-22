@@ -20,8 +20,7 @@ import {
   RefreshCw,
   CheckCircle2,
   Clock3,
-  Search,
-} from "lucide-react";
+  Search, MessageSquareText} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -78,6 +77,7 @@ const navigation = [
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
+  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
 ];
 
 const tabItems: { id: Tab; label: string; icon: typeof Contact }[] = [

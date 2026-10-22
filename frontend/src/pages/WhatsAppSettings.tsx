@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -27,8 +28,7 @@ import {
   X,
   Link2,
   CircleHelp,
-  Contact,
-} from "lucide-react";
+  Contact, MessageSquareText } from "lucide-react";
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 const MAX_MESSAGE_LENGTH = 1024;
 const navigation = [
@@ -39,6 +39,7 @@ const navigation = [
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
+  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
 ];
 const countryCodes = [
   { code: "+91", name: "India", flag: "🇮🇳" },

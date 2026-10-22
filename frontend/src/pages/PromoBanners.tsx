@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { NavLink, useNavigate } from "react-router-dom";
+import {
+  NavLink, useNavigate } from "react-router-dom";
 
 import {
 
@@ -24,9 +25,7 @@ import {
 
   X,
 
-  Contact,
-
-} from "lucide-react";
+  Contact, MessageSquareText } from "lucide-react";
 
 
 
@@ -128,6 +127,7 @@ const navigation = [
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
 
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
+  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
 
 ];
 

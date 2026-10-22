@@ -7,6 +7,7 @@ import {
   Images,
   Megaphone,
   MessageCircle,
+  MessageSquareText,
   Store,
   LogOut,
   Search,
@@ -112,6 +113,12 @@ const navigation = [
     label: "Contact Management",
     path: "/admin/contact-management",
     icon: Contact,
+  },
+    
+  {
+    label: "Feedback Master",
+    path: "/admin/feedback",
+    icon: MessageSquareText,
   },
 ];
 
