@@ -14,7 +14,7 @@ import CategorySection from "./components/CategorySection";
 import PopularRentals from "./components/PopularRentals";
 import ProductDetails from "./components/ProductDetails";
 import PromoBanner from "./components/PromoBanner";
-import WhyRentNest from "./components/WhyRentNest";
+
 import Footer from "./components/Footer";
 import CustomerReviews from "./components/CustomerReviews";
 
@@ -209,7 +209,7 @@ function HomePage() {
       <PromoBanner onCtaClick={scrollToProducts} />
 
       <div id="about" className="scroll-mt-24">
-  <WhyRentNest />
+ 
 </div>
 
 <CustomerReviews />
