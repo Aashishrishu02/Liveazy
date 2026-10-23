@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Armchair,
@@ -8,6 +9,7 @@ import {
   Sparkles,
   Package,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -93,9 +95,10 @@ const defaultStyle = {
 };
 
 const CategorySection: React.FC<CategorySectionProps> = ({
-  onSelectCategory,
   selectedCategory,
 }) => {
+  const navigate = useNavigate();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,9 +126,11 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
         if (!cancelled) {
           setCategories(
-            Array.isArray(categoriesData) ? (categoriesData as Category[]) : [],
+            Array.isArray(categoriesData) ? categoriesData : []
           );
-          setProducts(Array.isArray(productsData) ? (productsData as Product[]) : []);
+          setProducts(
+            Array.isArray(productsData) ? productsData : []
+          );
         }
       } catch (error) {
         console.error("Error loading categories:", error);
@@ -141,7 +146,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     };
   }, []);
 
-  // Keep active categories in the saved admin display order.
   const activeCategories = useMemo(
     () =>
       categories
@@ -149,30 +153,31 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           (category) =>
             category.isActive &&
             !["full combos", "combo offers"].includes(
-              category.name.trim().toLowerCase(),
-            ),
+              category.name.trim().toLowerCase()
+            )
         )
         .sort((a, b) => {
           const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
           const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+
           return orderA - orderB || a.name.localeCompare(b.name);
         }),
-    [categories],
+    [categories]
   );
 
   const getProductCount = (categoryId: string) =>
     products.filter(
-      (product) => product.categoryId === categoryId && product.isActive,
+      (product) =>
+        product.categoryId === categoryId && product.isActive
     ).length;
 
-  const getCategoryStyle = (category: Category) => {
-    const key = category.name.trim().toLowerCase();
-    return categoryStyles[key] || defaultStyle;
-  };
+  const getCategoryStyle = (category: Category) =>
+    categoryStyles[category.name.trim().toLowerCase()] || defaultStyle;
 
   const getStartingRent = (category: Category) => {
     const categoryProducts = products.filter(
-      (product) => product.categoryId === category.id && product.isActive,
+      (product) =>
+        product.categoryId === category.id && product.isActive
     );
 
     const rents = categoryProducts
@@ -182,29 +187,16 @@ const CategorySection: React.FC<CategorySectionProps> = ({
         product.rent3M,
         product.price,
       ])
-      .map((value) => Number(value))
+      .map(Number)
       .filter((value) => Number.isFinite(value) && value > 0);
 
-    if (rents.length > 0) {
-      return Math.min(...rents);
-    }
-
-    return getCategoryStyle(category).rent;
+    return rents.length > 0
+      ? Math.min(...rents)
+      : getCategoryStyle(category).rent;
   };
 
   const handleCategoryClick = (category: Category) => {
-    onSelectCategory?.(category.name);
-
-    const target = document.getElementById("products");
-
-    if (target) {
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      window.location.hash = "products";
-    }
+    navigate(`/category/${encodeURIComponent(category.id)}`);
   };
 
   return (
@@ -213,7 +205,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       className="scroll-mt-24 border-b border-slate-100 bg-[#F7F8FD] py-14 sm:py-16 lg:py-20"
     >
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-        {/* Section heading */}
         <div className="mb-9 grid gap-4 md:mb-10 md:grid-cols-[1fr_1.2fr] md:items-end">
           <div>
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#006B73] sm:text-sm">
@@ -234,7 +225,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           </p>
         </div>
 
-        {/* Loading skeleton */}
         {loading && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -251,7 +241,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           </div>
         )}
 
-        {/* Category cards */}
         {!loading && activeCategories.length > 0 && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {activeCategories.map((category) => {
@@ -273,7 +262,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                       : "border-white bg-white shadow-sm hover:border-[#008A90]/30"
                   }`}
                 >
-                  {/* Uploaded category image; icon remains visible as fallback. */}
                   <span className="relative flex h-[84px] w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-[#EDF3FF] text-[#006B73] transition-all duration-300 group-hover:bg-[#DDF8FA] sm:h-[92px] sm:w-[92px]">
                     <Icon
                       size={34}
@@ -281,6 +269,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                       aria-hidden="true"
                       className="absolute inset-0 m-auto"
                     />
+
                     {imageUrl && (
                       <img
                         src={imageUrl}
@@ -288,7 +277,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         loading="lazy"
                         className="absolute inset-0 z-10 h-full w-full rounded-[22px] object-cover object-center"
                         onError={(event) => {
-                          // Hide a broken image so the category icon underneath remains visible.
                           event.currentTarget.style.display = "none";
                         }}
                       />
@@ -306,13 +294,16 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   <span className="mt-2 inline-flex rounded-full bg-[#E6EEFF] px-3 py-1 text-xs font-medium text-slate-700 sm:text-sm">
                     Starts ₹{rent}/mo
                   </span>
+
+                  <span className="mt-2 text-xs font-semibold text-[#008A90]">
+                    {getProductCount(category.id)} products →
+                  </span>
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Empty state */}
         {!loading && activeCategories.length === 0 && (
           <div className="rounded-[22px] border border-dashed border-slate-300 bg-white px-5 py-14 text-center">
             <Package size={34} className="mx-auto mb-3 text-slate-400" />

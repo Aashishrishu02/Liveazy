@@ -1,3 +1,4 @@
+
 import {
   Injectable,
   BadRequestException,
@@ -7,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 export type BannerWriteInput = {
   image?: string;
+  images?: string[];
   topLabel?: string;
   heading?: string;
   subtitle?: string;
@@ -24,6 +26,12 @@ export type BannerWriteInput = {
 @Injectable()
 export class BannersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private readonly bannerInclude = {
+    images: {
+      orderBy: { sortOrder: 'asc' as const },
+    },
+  };
 
   private parseDate(
     value: string | Date | null | undefined,
@@ -43,12 +51,38 @@ export class BannersService {
   private validateSchedule(
     startsAt: Date | null | undefined,
     endsAt: Date | null | undefined,
-  ) {
+  ): void {
     if (startsAt && endsAt && endsAt <= startsAt) {
       throw new BadRequestException(
         'Banner end date must be after its start date.',
       );
     }
+  }
+
+  private normalizeImages(images?: string[]): string[] | undefined {
+    if (images === undefined) return undefined;
+
+    if (!Array.isArray(images)) {
+      throw new BadRequestException('Images must be an array.');
+    }
+
+    const normalized = images.map((url) => {
+      if (typeof url !== 'string' || !url.trim()) {
+        throw new BadRequestException(
+          'Every banner image must have a valid URL.',
+        );
+      }
+
+      return url.trim();
+    });
+
+    if (normalized.length === 0) {
+      throw new BadRequestException(
+        'At least one banner image is required.',
+      );
+    }
+
+    return normalized;
   }
 
   private getPublishWindow(now = new Date()) {
@@ -71,7 +105,6 @@ export class BannersService {
     };
   }
 
-  // Public: return the current highest-priority eligible banner.
   async getActiveBanner() {
     return this.prisma.banner.findFirst({
       where: this.getPublishWindow(),
@@ -79,36 +112,62 @@ export class BannersService {
         { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
+      include: this.bannerInclude,
     });
   }
 
-  // Public: return every active banner within its scheduled window.
   async getPublicBanners() {
     return this.prisma.banner.findMany({
-      where: this.getPublishWindow(),
+      where: {
+        ...this.getPublishWindow(),
+        placement: 'HOMEPAGE_HERO',
+      },
       orderBy: [
         { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
+      include: this.bannerInclude,
     });
   }
 
-  // Admin: return all banners, including inactive and scheduled ones.
   async findAllForAdmin() {
-    return this.prisma.banner.findMany({
+    const banners = await this.prisma.banner.findMany({
       orderBy: [
         { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
+      include: this.bannerInclude,
     });
+
+    // TEMPORARY DEBUG LOG: check whether image relations are returned.
+    console.log(
+      'BANNER IMAGE RELATIONS:',
+      JSON.stringify(
+        banners.map((banner) => ({
+          id: banner.id,
+          image: banner.image,
+          images: banner.images,
+        })),
+        null,
+        2,
+      ),
+    );
+
+    return banners;
   }
 
-  // Create a new banner without deactivating existing banners.
   async createBanner(
     image: string,
     options: BannerWriteInput = {},
   ) {
-    if (!image?.trim()) {
+    const images = this.normalizeImages(options.images);
+
+    const legacyImage =
+      typeof image === 'string' ? image.trim() : '';
+
+    const primaryImage = images?.[0] ?? legacyImage;
+
+    if (!primaryImage) {
       throw new BadRequestException('Banner image is required.');
     }
 
@@ -119,7 +178,7 @@ export class BannersService {
 
     return this.prisma.banner.create({
       data: {
-        image: image.trim(),
+        image: primaryImage,
         topLabel: options.topLabel,
         heading: options.heading,
         subtitle: options.subtitle,
@@ -132,19 +191,32 @@ export class BannersService {
         sortOrder: options.sortOrder ?? 0,
         startsAt,
         endsAt,
+        ...(images !== undefined
+          ? {
+              images: {
+                create: images.map((imageUrl, sortOrder) => ({
+                  imageUrl,
+                  sortOrder,
+                })),
+              },
+            }
+          : {}),
       },
+      include: this.bannerInclude,
     });
   }
 
-  // Admin: update an existing banner by ID.
   async updateBanner(id: string, data: BannerWriteInput) {
     const existing = await this.prisma.banner.findUnique({
       where: { id },
+      include: this.bannerInclude,
     });
 
     if (!existing) {
       throw new NotFoundException('Banner not found.');
     }
+
+    const images = this.normalizeImages(data.images);
 
     const startsAt =
       data.startsAt !== undefined
@@ -158,53 +230,78 @@ export class BannersService {
 
     this.validateSchedule(startsAt, endsAt);
 
-    return this.prisma.banner.update({
-      where: { id },
-      data: {
-        ...(data.image !== undefined
-          ? { image: data.image.trim() }
-          : {}),
-        ...(data.topLabel !== undefined
-          ? { topLabel: data.topLabel }
-          : {}),
-        ...(data.heading !== undefined
-          ? { heading: data.heading }
-          : {}),
-        ...(data.subtitle !== undefined
-          ? { subtitle: data.subtitle }
-          : {}),
-        ...(data.button1Text !== undefined
-          ? { button1Text: data.button1Text }
-          : {}),
-        ...(data.button1Link !== undefined
-          ? { button1Link: data.button1Link }
-          : {}),
-        ...(data.button2Text !== undefined
-          ? { button2Text: data.button2Text }
-          : {}),
-        ...(data.button2Link !== undefined
-          ? { button2Link: data.button2Link }
-          : {}),
-        ...(data.isActive !== undefined
-          ? { isActive: data.isActive }
-          : {}),
-        ...(data.placement !== undefined
-          ? { placement: data.placement }
-          : {}),
-        ...(data.sortOrder !== undefined
-          ? { sortOrder: data.sortOrder }
-          : {}),
-        ...(data.startsAt !== undefined
-          ? { startsAt: this.parseDate(data.startsAt) ?? null }
-          : {}),
-        ...(data.endsAt !== undefined
-          ? { endsAt: this.parseDate(data.endsAt) ?? null }
-          : {}),
-      },
+    const suppliedImage =
+      data.image !== undefined ? data.image.trim() : undefined;
+
+    if (suppliedImage === '' && images === undefined) {
+      throw new BadRequestException('Banner image cannot be empty.');
+    }
+
+    const primaryImage = images?.[0] ?? suppliedImage;
+
+    return this.prisma.$transaction(async (tx) => {
+      if (images !== undefined) {
+        await tx.bannerImage.deleteMany({
+          where: { bannerId: id },
+        });
+
+        await tx.bannerImage.createMany({
+          data: images.map((imageUrl, sortOrder) => ({
+            bannerId: id,
+            imageUrl,
+            sortOrder,
+          })),
+        });
+      }
+
+      return tx.banner.update({
+        where: { id },
+        data: {
+          ...(primaryImage !== undefined
+            ? { image: primaryImage }
+            : {}),
+          ...(data.topLabel !== undefined
+            ? { topLabel: data.topLabel }
+            : {}),
+          ...(data.heading !== undefined
+            ? { heading: data.heading }
+            : {}),
+          ...(data.subtitle !== undefined
+            ? { subtitle: data.subtitle }
+            : {}),
+          ...(data.button1Text !== undefined
+            ? { button1Text: data.button1Text }
+            : {}),
+          ...(data.button1Link !== undefined
+            ? { button1Link: data.button1Link }
+            : {}),
+          ...(data.button2Text !== undefined
+            ? { button2Text: data.button2Text }
+            : {}),
+          ...(data.button2Link !== undefined
+            ? { button2Link: data.button2Link }
+            : {}),
+          ...(data.isActive !== undefined
+            ? { isActive: data.isActive }
+            : {}),
+          ...(data.placement !== undefined
+            ? { placement: data.placement }
+            : {}),
+          ...(data.sortOrder !== undefined
+            ? { sortOrder: data.sortOrder }
+            : {}),
+          ...(data.startsAt !== undefined
+            ? { startsAt: this.parseDate(data.startsAt) ?? null }
+            : {}),
+          ...(data.endsAt !== undefined
+            ? { endsAt: this.parseDate(data.endsAt) ?? null }
+            : {}),
+        },
+        include: this.bannerInclude,
+      });
     });
   }
 
-  // Legacy endpoint: update the most recently created active banner.
   async updateActiveBanner(data: BannerWriteInput) {
     const activeBanner = await this.prisma.banner.findFirst({
       where: { isActive: true },
@@ -223,7 +320,6 @@ export class BannersService {
     return this.updateBanner(activeBanner.id, data);
   }
 
-  // Admin: delete a banner record.
   async deleteBanner(id: string) {
     const existing = await this.prisma.banner.findUnique({
       where: { id },
@@ -238,7 +334,6 @@ export class BannersService {
     });
   }
 
-  // Public tracking endpoints: increment actual stored counters.
   async recordImpression(id: string) {
     return this.prisma.banner.update({
       where: { id },

@@ -3,9 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   NavLink, useNavigate } from "react-router-dom";
 
-import {
-
-  LayoutDashboard,
+import { LayoutDashboard,
 
   Tags,
 
@@ -25,7 +23,7 @@ import {
 
   X,
 
-  Contact, MessageSquareText } from "lucide-react";
+  Contact, MessageSquareText, Star } from "lucide-react";
 
 
 
@@ -128,6 +126,7 @@ const navigation = [
 
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
+  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
 
 ];
 

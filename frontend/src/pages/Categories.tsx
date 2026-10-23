@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
+import { LayoutDashboard,
   Tags,
   Armchair,
   Images,
@@ -30,7 +29,7 @@ import {
   CircleSlash,
   Layers3,
   Check,
-  Contact, MessageSquareText} from "lucide-react";
+  Contact, MessageSquareText, Star } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PAGE_SIZE = 10;
@@ -61,6 +60,7 @@ const navigation = [
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
+  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
 ];
 
 const slugify = (value: string) =>

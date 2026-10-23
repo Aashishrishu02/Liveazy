@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type SyntheticEvent } from "react";
 import { NavLink } from "react-router-dom";
-import {
-  LayoutDashboard,
+import { LayoutDashboard,
   Tags,
   Armchair,
   Images,
@@ -20,7 +19,7 @@ import {
   RefreshCw,
   CheckCircle2,
   Clock3,
-  Search, MessageSquareText} from "lucide-react";
+  Search, MessageSquareText, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -78,6 +77,7 @@ const navigation = [
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
+  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
 ];
 
 const tabItems: { id: Tab; label: string; icon: typeof Contact }[] = [

@@ -28,7 +28,7 @@ import {
   X,
   Link2,
   CircleHelp,
-  Contact, MessageSquareText } from "lucide-react";
+  Contact, MessageSquareText, Star} from "lucide-react";
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 const MAX_MESSAGE_LENGTH = 1024;
 const navigation = [
@@ -40,6 +40,7 @@ const navigation = [
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
+  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
 ];
 const countryCodes = [
   { code: "+91", name: "India", flag: "🇮🇳" },

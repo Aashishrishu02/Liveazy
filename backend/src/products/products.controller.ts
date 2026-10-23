@@ -1,4 +1,13 @@
-import {Controller,Get,Post,Patch,Delete,Param,Body,} from '@nestjs/common';
+
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+} from '@nestjs/common';
 
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,6 +30,30 @@ export class ProductsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
+  }
+
+  @Post(':id/images')
+  addImages(
+    @Param('id') id: string,
+    @Body('imageUrls') imageUrls: string[],
+  ) {
+    return this.productsService.addImages(id, imageUrls);
+  }
+
+  @Patch(':id/images/reorder')
+  reorderImages(
+    @Param('id') id: string,
+    @Body('imageIds') imageIds: string[],
+  ) {
+    return this.productsService.reorderImages(id, imageIds);
+  }
+
+  @Delete(':id/images/:imageId')
+  removeImage(
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.productsService.removeImage(id, imageId);
   }
 
   @Patch(':id')

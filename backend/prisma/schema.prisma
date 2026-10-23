@@ -22,69 +22,75 @@ model Category {
   image        String?
   isActive     Boolean   @default(true)
   displayOrder Int       @default(0)
-  products     Product[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  products     Product[]
 }
 
 model Product {
-  id           String  @id @default(cuid())
+  id           String                  @id @default(cuid())
   name         String
   description  String?
   price        Float
   image        String?
   categoryId   String
-  isActive     Boolean @default(true)
-  displayOrder Int     @default(0)
+  isActive     Boolean                 @default(true)
+  displayOrder Int                     @default(0)
+  rent12M      Float?
+  deposit12M   Float?
+  rent6M       Float?
+  deposit6M    Float?
+  rent3M       Float?
+  deposit3M    Float?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  category     Category                @relation(fields: [categoryId], references: [id])
+  images       ProductImage[]
+  trendingIn   TrendingRentalProduct[]
+}
 
-  // 12-month rental plan
-  rent12M    Float?
-  deposit12M Float?
-
-  // 6-month rental plan
-  rent6M    Float?
-  deposit6M Float?
-
-  // 3-month rental plan
-  rent3M    Float?
-  deposit3M Float?
-
-  category Category @relation(fields: [categoryId], references: [id])
-
+model ProductImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  sortOrder Int      @default(0)
+  productId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
 }
 
 model Banner {
-  id    String @id @default(cuid())
-  image String
+  id          String        @id @default(cuid())
+  image       String
+  topLabel    String        @default("NO INVESTMENT, JUST COMFORT")
+  heading     String        @default("Furnish Your Home in Just 2 Days.")
+  subtitle    String        @default("Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.")
+  button1Text String        @default("VIEW CATEGORIES")
+  button1Link String        @default("#categories")
+  button2Text String        @default("CALL HOTLINE")
+  button2Link String        @default("tel:+919423838109")
+  isActive    Boolean       @default(true)
+  placement   String        @default("HOMEPAGE_HERO")
+  sortOrder   Int           @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  impressions Int           @default(0)
+  clicks      Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  images      BannerImage[]
+}
 
-  topLabel String @default("NO INVESTMENT, JUST COMFORT")
-  heading  String @default("Furnish Your Home in Just 2 Days.")
-  subtitle String @default("Delivery, Setup & Support — All Included. Starting at minimal rents across Pune & PCMC.")
-
-  button1Text String @default("VIEW CATEGORIES")
-  button1Link String @default("#categories")
-  button2Text String @default("CALL HOTLINE")
-  button2Link String @default("tel:+919423838109")
-
-  // Publishing status
-  isActive Boolean @default(true)
-
-  // Banner placement and ordering
-  placement String @default("HOMEPAGE_HERO")
-  sortOrder Int    @default(0)
-
-  // Optional publishing schedule
-  startsAt DateTime?
-  endsAt   DateTime?
-
-  // Actual engagement counters
-  impressions Int @default(0)
-  clicks      Int @default(0)
-
+model BannerImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  sortOrder Int      @default(0)
+  bannerId  String
+  banner    Banner   @relation(fields: [bannerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@index([bannerId, sortOrder])
 }
 
 model SiteSetting {
@@ -95,54 +101,42 @@ model SiteSetting {
 }
 
 model PromoBanner {
-  id         String   @id @default(cuid())
-  image      String
-  label      String
-  heading    String
-  subtitle   String
-  buttonText String
-  buttonLink String   @default("#products")
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  impressions Int @default(0)
-  clicks      Int @default(0)
-  placement  String   @default("HOMEPAGE_PROMO")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-enum ContactEnquiryStatus {
-  PENDING
-  CONTACTED
-  RESOLVED
+  id          String   @id @default(cuid())
+  image       String
+  label       String
+  heading     String
+  subtitle    String
+  buttonText  String
+  buttonLink  String   @default("#products")
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  placement   String   @default("HOMEPAGE_PROMO")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  clicks      Int      @default(0)
+  impressions Int      @default(0)
 }
 
 model ContactPageSetting {
-  id Int @id @default(1)
-
-  pageTitle       String @default("We're Here to Help")
-  pageDescription String @default("Contact LIVEAZY for help with rental plans, product availability, delivery, and support.")
-
-  supportEmail     String @default("help@liveazy.in")
-  supportPhone     String @default("919423838109")
-  serviceLocations String @default("Pune & PCMC")
-  supportHours     String @default("Contact us for current support hours")
-
-  updatedAt DateTime @updatedAt
+  id               Int      @id @default(1)
+  pageTitle        String   @default("We're Here to Help")
+  pageDescription  String   @default("Contact LIVEAZY for help with rental plans, product availability, delivery, and support.")
+  supportEmail     String   @default("help@liveazy.in")
+  supportPhone     String   @default("919423838109")
+  serviceLocations String   @default("Pune & PCMC")
+  supportHours     String   @default("Contact us for current support hours")
+  updatedAt        DateTime @updatedAt
 }
 
 model Faq {
-  id String @id @default(cuid())
-
-  label    String  @default("GENERAL")
-  question String
-  answer   String
-  foot     String?
-  iconName String  @default("help-circle")
-
-  isActive  Boolean @default(true)
-  sortOrder Int     @default(0)
-
+  id        String   @id @default(cuid())
+  label     String   @default("GENERAL")
+  question  String
+  answer    String
+  foot      String?
+  iconName  String   @default("help-circle")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -150,30 +144,19 @@ model Faq {
 }
 
 model ContactEnquiry {
-  id String @id @default(cuid())
-
-  fullName String
-  email    String
-  phone    String
-  category String
-  message  String
-
+  id         String               @id @default(cuid())
+  fullName   String
+  email      String
+  phone      String
+  category   String
+  message    String
   status     ContactEnquiryStatus @default(PENDING)
   adminNotes String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
 
   @@index([status, createdAt])
   @@index([email])
-}
-
-
-
-enum FeedbackStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
 
 model Feedback {
@@ -186,4 +169,43 @@ model Feedback {
   updatedAt    DateTime       @updatedAt
 
   @@index([status, createdAt])
+}
+
+model TrendingRentalSetting {
+  id        Int                     @id @default(1)
+  heading   String                  @default("Trending Rentals in Your City")
+  subtitle  String                  @default("Handpicked rentals for your home.")
+  isActive  Boolean                 @default(true)
+  updatedAt DateTime                @default(now()) @updatedAt
+  products  TrendingRentalProduct[]
+}
+
+model TrendingRentalProduct {
+  id        String                @id @default(cuid())
+  settingId Int
+  productId String
+  sortOrder Int                   @default(0)
+  product   Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  setting   TrendingRentalSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+
+  @@unique([settingId, productId])
+  @@index([settingId, sortOrder])
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
+}
+
+enum ContactEnquiryStatus {
+  PENDING
+  CONTACTED
+  RESOLVED
+}
+
+enum FeedbackStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

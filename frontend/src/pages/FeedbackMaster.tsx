@@ -71,6 +71,7 @@ const FEEDBACK_ADMIN_SIDEBAR = [
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
+  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
 ];
 
 export default function FeedbackMaster() {

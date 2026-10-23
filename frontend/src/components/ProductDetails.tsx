@@ -1,484 +1,1056 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
+
 import {
+
   ArrowLeft,
+
   ArrowRight,
+
   CheckCircle2,
+
   ChevronRight,
+
   Clock3,
+
   MessageCircle,
+
   PackageCheck,
+
   ShieldCheck,
+
 } from "lucide-react";
+
 import Navbar from "./Navbar";
 
+
+
 const API_URL = import.meta.env.VITE_API_URL;
+
 type RentalDuration = "12M" | "6M" | "3M";
 
+
+
 interface BackendProduct {
+
   id: string;
+
   name: string;
+
   description?: string | null;
+
   price: number;
+
   image?: string | null;
+
+  images?: { id: string; imageUrl: string; sortOrder: number }[];
+
   categoryId: string;
+
   isActive: boolean;
+
   category?: { id: string; name: string };
+
   rent12M?: number | null;
+
   deposit12M?: number | null;
+
   rent6M?: number | null;
+
   deposit6M?: number | null;
+
   rent3M?: number | null;
+
   deposit3M?: number | null;
+
 }
+
+
 
 interface RentalPlan {
+
   duration: RentalDuration;
+
   label: string;
+
   rent: number | null;
+
   deposit: number | null;
+
 }
+
+
 
 interface WhatsAppSettings {
+
   whatsappNumber?: string;
+
   whatsappMessage?: string;
+
 }
 
+
+
 const formatPrice = (value: number) =>
+
   `₹${Number(value).toLocaleString("en-IN")}`;
+
+
 
 const escapeRegExp = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+
 /** Removes a mistakenly appended Prisma CUID from a product display name. */
+
 const getCleanProductName = (name: unknown, productId: unknown) => {
+
   const originalName = String(name ?? "").trim();
+
   const id = String(productId ?? "").trim();
+
   let cleanName = originalName;
 
+
+
   if (id && cleanName.toLowerCase().endsWith(id.toLowerCase())) {
+
     cleanName = cleanName.slice(0, -id.length).trim();
+
   }
 
+
+
   cleanName = cleanName.replace(/c[a-z0-9]{24}$/i, "").trim();
+
   return cleanName || originalName;
+
 };
 
+
+
 const getPlans = (product: BackendProduct): RentalPlan[] => [
+
   {
+
     duration: "3M",
+
     label: "3 Months",
+
     rent: product.rent3M ?? null,
+
     deposit: product.deposit3M ?? null,
+
   },
+
   {
+
     duration: "6M",
+
     label: "6 Months",
+
     rent: product.rent6M ?? null,
+
     deposit: product.deposit6M ?? null,
+
   },
+
   {
+
     duration: "12M",
+
     label: "12 Months",
+
     rent: product.rent12M ?? null,
+
     deposit: product.deposit12M ?? null,
+
   },
+
 ];
 
+
+
 const isPlanAvailable = (plan: RentalPlan) =>
+
   plan.rent !== null &&
+
   Number.isFinite(Number(plan.rent)) &&
+
   Number(plan.rent) >= 0;
 
+
+
 export default function ProductDetails() {
+
   const { id = "" } = useParams();
+
   const navigate = useNavigate();
+
   const [product, setProduct] = useState<BackendProduct | null>(null);
+
   const [whatsappNumber, setWhatsappNumber] = useState("");
+
   const [whatsappMessage, setWhatsappMessage] = useState("");
+
   const [selectedDuration, setSelectedDuration] =
+
     useState<RentalDuration>("12M");
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+
 
   useEffect(() => {
+
     let cancelled = false;
+
+
 
     const loadProduct = async () => {
+
       setLoading(true);
+
       setError("");
+
       try {
+
         const response = await fetch(`${API_URL}/products`, {
+
           cache: "no-store",
+
         });
+
         if (!response.ok) throw new Error("Could not load products.");
 
+
+
         const products: BackendProduct[] = await response.json();
+
         const found = products.find(
+
           (item) => item.id === decodeURIComponent(id) && item.isActive,
+
         );
 
+
+
         if (!found) {
+
           if (!cancelled) setError("This product is not available right now.");
+
           return;
+
         }
 
+
+
         if (!cancelled) {
+
           setProduct(found);
+
           const plans = getPlans(found);
+
           const preferredPlan =
+
             plans.find((plan) => plan.duration === "12M" && isPlanAvailable(plan)) ??
+
             plans.find((plan) => plan.duration === "6M" && isPlanAvailable(plan)) ??
+
             plans.find((plan) => plan.duration === "3M" && isPlanAvailable(plan));
+
           setSelectedDuration(preferredPlan?.duration ?? "12M");
+
         }
+
       } catch (loadError) {
+
         console.error("Product details fetch failed:", loadError);
+
         if (!cancelled) {
+
           setError("We could not load this product. Please try again.");
+
         }
+
       } finally {
+
         if (!cancelled) setLoading(false);
+
       }
+
     };
+
+
 
     void loadProduct();
+
     return () => {
+
       cancelled = true;
+
     };
+
   }, [id]);
 
+
+
   useEffect(() => {
+
     let cancelled = false;
 
+
+
     const loadSettings = async () => {
+
       try {
+
         const response = await fetch(`${API_URL}/settings/whatsapp`, {
+
           cache: "no-store",
+
         });
+
         if (!response.ok) throw new Error("Could not load WhatsApp settings.");
+
         const settings: WhatsAppSettings = await response.json();
 
+
+
         if (!cancelled) {
+
           setWhatsappNumber(
+
             String(settings.whatsappNumber ?? "").replace(/\D/g, ""),
+
           );
+
           setWhatsappMessage(
+
             typeof settings.whatsappMessage === "string"
+
               ? settings.whatsappMessage
+
               : "",
+
           );
+
         }
+
       } catch (settingsError) {
+
         console.error("WhatsApp settings fetch failed:", settingsError);
+
       }
+
     };
+
+
 
     void loadSettings();
+
     return () => {
+
       cancelled = true;
+
     };
+
   }, []);
 
+
+
   const plans = useMemo(() => (product ? getPlans(product) : []), [product]);
+
   const selectedPlan =
+
     plans.find((plan) => plan.duration === selectedDuration) ?? plans[0];
+
   const productName = product
+
     ? getCleanProductName(product.name, product.id)
+
     : "";
 
-  const contactOnWhatsApp = () => {
-    if (!product || !selectedPlan) return;
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
 
-    if (!whatsappNumber) {
-      window.alert("WhatsApp number is not configured. Please contact LIVEAZY.");
-      return;
-    }
-    if (!whatsappMessage.trim()) {
-      window.alert(
-        "The WhatsApp message template is not configured yet. Please contact LIVEAZY.",
-      );
-      return;
-    }
-    if (!isPlanAvailable(selectedPlan)) {
-      window.alert("Please select an available rental duration.");
-      return;
+    const orderedImages = [...(product.images ?? [])]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => item.imageUrl)
+      .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+
+    // Include the legacy primary image if it is not already in the gallery.
+    if (product.image && !orderedImages.includes(product.image)) {
+      orderedImages.unshift(product.image);
     }
 
-    const finalNumber =
-      whatsappNumber.length === 10 ? `91${whatsappNumber}` : whatsappNumber;
-    const amount = (value: number | null | undefined) =>
-      value !== null && value !== undefined && Number.isFinite(Number(value))
-        ? formatPrice(Number(value))
-        : "Not specified";
+    return [...new Set(orderedImages)];
+  }, [product]);
 
-    const replacements: Record<string, string> = {
-      productname: productName,
-      productid: product.id,
-      categoryname: product.category?.name ?? "Not specified",
-      rentalduration: selectedPlan.label,
-      monthlyrent: amount(selectedPlan.rent),
-      refundabledeposit: amount(selectedPlan.deposit),
-    };
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [id]);
 
-    let message = whatsappMessage.trim().replace(
-      /\{(productName|productId|categoryName|rentalDuration|monthlyRent|refundableDeposit)\}/gi,
-      (placeholder, key: string) => replacements[key.toLowerCase()] ?? placeholder,
+  const showPreviousImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((current) =>
+      (current - 1 + galleryImages.length) % galleryImages.length,
     );
-
-    // Keep product name and ID separated if the saved template joins them together.
-    if (productName && product.id) {
-      const joinedNameAndId = new RegExp(
-        `${escapeRegExp(productName)}\\s*${escapeRegExp(product.id)}`,
-        "gi",
-      );
-      message = message.replace(joinedNameAndId, productName);
-    }
-
-    // Ensure the owner's message contains a standalone product ID line.
-    if (!/product\s*id\s*:/i.test(message)) {
-      message = `${message.trim()}\n\nProduct ID: ${product.id}`;
-    }
-
-    const url = `https://wa.me/${finalNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const showNextImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((current) => (current + 1) % galleryImages.length);
+  };
+
+  const handleGalleryTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) return;
+    const endX = event.changedTouches[0]?.clientX;
+    if (endX !== undefined) {
+      const deltaX = endX - touchStartX;
+      if (Math.abs(deltaX) > 45) {
+        if (deltaX < 0) showNextImage();
+        else showPreviousImage();
+      }
+    }
+    setTouchStartX(null);
+  };
+
+
+
+  const contactOnWhatsApp = () => {
+
+    if (!product || !selectedPlan) return;
+
+
+
+    if (!whatsappNumber) {
+
+      window.alert("WhatsApp number is not configured. Please contact LIVEAZY.");
+
+      return;
+
+    }
+
+    if (!whatsappMessage.trim()) {
+
+      window.alert(
+
+        "The WhatsApp message template is not configured yet. Please contact LIVEAZY.",
+
+      );
+
+      return;
+
+    }
+
+    if (!isPlanAvailable(selectedPlan)) {
+
+      window.alert("Please select an available rental duration.");
+
+      return;
+
+    }
+
+
+
+    const finalNumber =
+
+      whatsappNumber.length === 10 ? `91${whatsappNumber}` : whatsappNumber;
+
+    const amount = (value: number | null | undefined) =>
+
+      value !== null && value !== undefined && Number.isFinite(Number(value))
+
+        ? formatPrice(Number(value))
+
+        : "Not specified";
+
+
+
+    const replacements: Record<string, string> = {
+
+      productname: productName,
+
+      productid: product.id,
+
+      categoryname: product.category?.name ?? "Not specified",
+
+      rentalduration: selectedPlan.label,
+
+      monthlyrent: amount(selectedPlan.rent),
+
+      refundabledeposit: amount(selectedPlan.deposit),
+
+    };
+
+
+
+    let message = whatsappMessage.trim().replace(
+
+      /\{(productName|productId|categoryName|rentalDuration|monthlyRent|refundableDeposit)\}/gi,
+
+      (placeholder, key: string) => replacements[key.toLowerCase()] ?? placeholder,
+
+    );
+
+
+
+    // Keep product name and ID separated if the saved template joins them together.
+
+    if (productName && product.id) {
+
+      const joinedNameAndId = new RegExp(
+
+        `${escapeRegExp(productName)}\\s*${escapeRegExp(product.id)}`,
+
+        "gi",
+
+      );
+
+      message = message.replace(joinedNameAndId, productName);
+
+    }
+
+
+
+    // Ensure the owner's message contains a standalone product ID line.
+
+    if (!/product\s*id\s*:/i.test(message)) {
+
+      message = `${message.trim()}\n\nProduct ID: ${product.id}`;
+
+    }
+
+
+
+    const url = `https://wa.me/${finalNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, "_blank", "noopener,noreferrer");
+
+  };
+
+
+
   return (
+
     <div className="min-h-screen bg-[#F6F8FC] text-[#102A43]">
+
       <Navbar onSearchSubmit={() => navigate("/#products")} />
 
+
+
       <main className="mx-auto max-w-[1280px] px-4 pb-12 pt-5 sm:px-6 lg:px-8">
+
         <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
+
           <button onClick={() => navigate("/")} className="hover:text-[#008A90]">
+
             Home
+
           </button>
+
           <ChevronRight size={14} />
+
           <button
+
             onClick={() => navigate("/#products")}
+
             className="hover:text-[#008A90]"
+
           >
+
             Products
+
           </button>
+
           <ChevronRight size={14} />
+
           <span className="truncate font-semibold text-[#102A43]">
+
             {productName || "Product details"}
+
           </span>
+
         </div>
 
+
+
         {loading ? (
+
           <div className="grid animate-pulse gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+
             <div className="h-[420px] rounded-3xl bg-slate-200" />
+
             <div className="h-[420px] rounded-3xl bg-slate-200" />
+
           </div>
+
         ) : error || !product || !selectedPlan ? (
+
           <section className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
+
             <PackageCheck size={42} className="mx-auto text-[#008A90]" />
+
             <h1 className="mt-4 text-2xl font-extrabold">Product unavailable</h1>
+
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+
               {error || "This product could not be found."}
+
             </p>
+
             <button
+
               onClick={() => navigate("/")}
+
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#102A43] px-5 py-3 text-sm font-bold text-white hover:bg-[#008A90]"
+
             >
+
               <ArrowLeft size={16} /> Back to products
+
             </button>
+
           </section>
+
         ) : (
+
           <>
+
             <section className="grid items-start gap-5 lg:grid-cols-[1.12fr_0.88fr] lg:gap-7">
+
               {/* Product image and identity */}
+
               <div className="space-y-4">
+
                 <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-5 sm:min-h-[460px] sm:p-8">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={productName}
-                      className="max-h-[420px] w-full object-contain"
-                    />
-                  ) : (
-                    <PackageCheck size={72} className="text-slate-300" />
-                  )}
+
+                  <div
+                    className="relative flex min-h-[280px] w-full items-center justify-center sm:min-h-[400px]"
+                    onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
+                    onTouchEnd={handleGalleryTouchEnd}
+                  >
+                    {galleryImages.length > 0 ? (
+                      <img
+                        src={galleryImages[activeImageIndex] ?? galleryImages[0]}
+                        alt={`${productName} image ${activeImageIndex + 1}`}
+                        className="max-h-[420px] w-full select-none object-contain"
+                        draggable={false}
+                      />
+                    ) : (
+                      <PackageCheck size={72} className="text-slate-300" />
+                    )}
+                    {galleryImages.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Previous product image"
+                          onClick={showPreviousImage}
+                          className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#102A43] shadow-md transition hover:bg-[#E6F7F5] sm:left-3"
+                        >
+                          <ArrowLeft size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Next product image"
+                          onClick={showNextImage}
+                          className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#102A43] shadow-md transition hover:bg-[#E6F7F5] sm:right-3"
+                        >
+                          <ArrowRight size={18} />
+                        </button>
+                        <span className="absolute bottom-3 right-3 rounded-full bg-[#102A43]/80 px-3 py-1.5 text-xs font-bold text-white">
+                          {activeImageIndex + 1} / {galleryImages.length}
+                        </span>
+                      </>
+                    )}
+                  </div>
                   <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-[#E6F7F5] px-3 py-1.5 text-xs font-bold text-[#007B80]">
+
                     <CheckCircle2 size={14} /> In stock
+
                   </span>
+
                 </div>
+
+
+
+                {galleryImages.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto pb-1" aria-label="Product image thumbnails">
+                    {galleryImages.map((imageUrl, index) => (
+                      <button
+                        key={`${imageUrl}-${index}`}
+                        type="button"
+                        onClick={() => setActiveImageIndex(index)}
+                        aria-label={`Show product image ${index + 1}`}
+                        aria-pressed={activeImageIndex === index}
+                        className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition sm:h-24 sm:w-24 ${
+                          activeImageIndex === index
+                            ? "border-[#008A90] ring-2 ring-[#008A90]/15"
+                            : "border-slate-200 hover:border-slate-400"
+                        }`}
+                      >
+                        <img src={imageUrl} alt={`${productName} thumbnail ${index + 1}`} className="h-full w-full rounded-lg object-contain" loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-white px-4 py-3 text-xs text-slate-600 sm:text-sm">
+
                   <span className="inline-flex items-center gap-2">
+
                     <PackageCheck size={16} className="text-[#008A90]" />
+
                     Product ID: <strong className="break-all text-[#102A43]">{product.id}</strong>
+
                   </span>
+
                   <button
+
                     onClick={() => navigate("/")}
+
                     className="inline-flex items-center gap-1 font-bold text-[#008A90] hover:underline"
+
                   >
+
                     More rentals <ArrowRight size={14} />
+
                   </button>
+
                 </div>
+
               </div>
+
+
 
               {/* Booking information. WhatsApp is the only contact action. */}
+
               <div className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-sm">
+
                 <div className="p-5 sm:p-7">
+
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.17em] text-[#008A90]">
+
                     LIVEAZY curated rental
+
                   </p>
+
                   <p className="mt-2 text-xs font-medium text-slate-400">
+
                     {product.category?.name ?? "Rental product"}
+
                   </p>
+
                   <h1 className="mt-1 text-2xl font-extrabold leading-tight text-[#102A43] sm:text-3xl">
+
                     {productName}
+
                   </h1>
+
                   <p className="mt-3 text-sm leading-6 text-slate-500">
+
                     {product.description?.trim() || "Choose a rental duration below to view the available monthly rent and refundable deposit."}
+
                   </p>
+
+
 
                   <div className="mt-5 rounded-2xl bg-[#EDF3FF] p-4 sm:p-5">
+
                     <p className="text-xs font-semibold text-slate-500">
+
                       Monthly rental price
+
                     </p>
+
                     <div className="mt-1 flex items-baseline gap-2">
+
                       <span className="text-3xl font-black tracking-tight text-[#102A43] sm:text-4xl">
+
                         {isPlanAvailable(selectedPlan)
+
                           ? formatPrice(Number(selectedPlan.rent))
+
                           : "Not available"}
+
                       </span>
+
                       {isPlanAvailable(selectedPlan) && (
+
                         <span className="text-sm text-slate-500">/ month</span>
+
                       )}
+
                     </div>
+
                     <p className="mt-1 text-xs text-slate-500">
+
                       Price depends on the selected rental duration.
+
                     </p>
+
                   </div>
+
+
 
                   <div className="mt-6">
+
                     <div className="flex items-center justify-between gap-3">
+
                       <h2 className="text-sm font-extrabold text-[#102A43]">
+
                         Choose rental duration
+
                       </h2>
+
                       <span className="text-[11px] font-semibold text-[#008A90]">
+
                         <Clock3 className="mr-1 inline" size={13} /> Flexible tenure
+
                       </span>
+
                     </div>
+
                     <div className="mt-3 grid grid-cols-3 gap-2">
+
                       {plans.map((plan) => {
+
                         const available = isPlanAvailable(plan);
+
                         const selected = plan.duration === selectedDuration;
+
                         return (
+
                           <button
+
                             key={plan.duration}
+
                             type="button"
+
                             disabled={!available}
+
                             onClick={() => setSelectedDuration(plan.duration)}
+
                             className={`rounded-xl border p-3 text-left transition ${
+
                               selected
+
                                 ? "border-[#008A90] bg-[#E8F7F6] ring-1 ring-[#008A90]"
+
                                 : available
+
                                 ? "border-slate-200 bg-white hover:border-[#008A90]"
+
                                 : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+
                             }`}
+
                           >
+
                             <span className="block text-xs font-extrabold">
+
                               {plan.label}
+
                             </span>
+
                             <span className="mt-1 block text-sm font-black text-[#102A43]">
+
                               {available ? formatPrice(Number(plan.rent)) : "N/A"}
+
                             </span>
+
                             <span className="text-[10px] text-slate-500">per month</span>
+
                           </button>
+
                         );
+
                       })}
+
                     </div>
+
                   </div>
+
+
 
                   <div className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F3F7FF] p-4">
+
                     <ShieldCheck size={20} className="mt-0.5 shrink-0 text-[#008A90]" />
+
                     <div className="min-w-0">
+
                       <p className="text-xs font-bold text-[#102A43]">
+
                         Refundable security deposit
+
                       </p>
+
                       <p className="mt-1 text-lg font-extrabold text-[#102A43]">
+
                         {selectedPlan.deposit !== null && Number.isFinite(Number(selectedPlan.deposit))
+
                           ? formatPrice(Number(selectedPlan.deposit))
+
                           : "Not specified"}
+
                       </p>
+
                       <p className="mt-1 text-xs leading-5 text-slate-500">
+
                         The selected plan's deposit is shown here. Confirm the final terms with LIVEAZY.
+
                       </p>
+
                     </div>
+
                   </div>
 
+
+
                   <button
+
                     type="button"
+
                     onClick={contactOnWhatsApp}
+
                     disabled={!whatsappNumber || !whatsappMessage.trim() || !isPlanAvailable(selectedPlan)}
+
                     className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#008A90] px-4 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#00767B] disabled:cursor-not-allowed disabled:opacity-50"
+
                   >
+
                     <MessageCircle size={18} />
+
                     Contact on WhatsApp
+
                   </button>
+
                   <p className="mt-3 text-center text-[11px] text-slate-400">
+
                     This starts an enquiry; your rental is not confirmed until LIVEAZY confirms it.
+
                   </p>
+
                 </div>
+
               </div>
+
             </section>
 
+
+
             {/* Product details and factual specifications from the current record */}
+
             <section className="mt-8 rounded-3xl border border-slate-200/70 bg-white p-5 shadow-sm sm:mt-10 sm:p-7">
+
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">
+
                 Product information
+
               </p>
+
               <h2 className="mt-1 text-xl font-extrabold text-[#102A43] sm:text-2xl">
+
                 Product details & specifications
+
               </h2>
+
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Product name</p>
+
                   <p className="mt-1 font-bold text-[#102A43]">{productName}</p>
+
                 </div>
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Category</p>
+
                   <p className="mt-1 font-bold text-[#102A43]">{product.category?.name ?? "Not specified"}</p>
+
                 </div>
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Selected rental duration</p>
+
                   <p className="mt-1 font-bold text-[#102A43]">{selectedPlan.label}</p>
+
                 </div>
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Monthly rent</p>
+
                   <p className="mt-1 font-bold text-[#102A43]">{isPlanAvailable(selectedPlan) ? formatPrice(Number(selectedPlan.rent)) : "Not available"}</p>
+
                 </div>
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Refundable deposit</p>
+
                   <p className="mt-1 font-bold text-[#102A43]">
+
                     {selectedPlan.deposit !== null && Number.isFinite(Number(selectedPlan.deposit))
+
                       ? formatPrice(Number(selectedPlan.deposit))
+
                       : "Not specified"}
+
                   </p>
+
                 </div>
+
                 <div className="rounded-2xl bg-[#F0F5FF] p-4">
+
                   <p className="text-xs font-semibold text-slate-500">Availability</p>
+
                   <p className="mt-1 inline-flex items-center gap-1.5 font-bold text-[#008A90]">
+
                     <CheckCircle2 size={15} /> Available to enquire
+
                   </p>
+
                 </div>
+
               </div>
+
               {product.description?.trim() && (
+
                 <div className="mt-4 rounded-2xl border border-slate-100 p-4">
+
                   <h3 className="text-sm font-bold text-[#102A43]">Description</h3>
+
                   <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">
+
                     {product.description}
+
                   </p>
+
                 </div>
+
               )}
+
             </section>
+
           </>
+
         )}
+
       </main>
+
     </div>
+
   );
+
 }

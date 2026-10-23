@@ -1,7 +1,15 @@
+
 export interface Product {
   id: string;
   name: string;
-  category: 'Furniture' | 'Appliances' | 'Electronics' | 'Bikes' | 'Cameras' | 'Gaming' | 'Home & Living';
+  category:
+    | "Furniture"
+    | "Appliances"
+    | "Electronics"
+    | "Bikes"
+    | "Cameras"
+    | "Gaming"
+    | "Home & Living";
   monthlyPrice: number;
   originalPrice?: number;
   rating: number;
@@ -9,7 +17,7 @@ export interface Product {
   image: string;
   tag?: string;
   deposit: number;
-  availableTenures: number[]; // e.g. [3, 6, 12, 24]
+  availableTenures: number[];
   specs: string[];
 }
 

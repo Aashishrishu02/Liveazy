@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -11,10 +11,9 @@ import {
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import CategorySection from "./components/CategorySection";
-import PopularRentals from "./components/PopularRentals";
+import TrendingRentals from "./components/TrendingRentals";
 import ProductDetails from "./components/ProductDetails";
 import PromoBanner from "./components/PromoBanner";
-
 import Footer from "./components/Footer";
 import CustomerReviews from "./components/CustomerReviews";
 
@@ -28,14 +27,13 @@ import PromoBanners from "./pages/PromoBanners";
 import ContactUs from "./pages/ContactUs";
 import ContactManagement from "./pages/ContactManagement";
 import FeedbackMaster from "./pages/FeedbackMaster";
-
-import type { Product } from "./types/rental";
+import CategoryProducts from "./pages/CategoryProducts";
+import TrendingRentalsAdmin from "./pages/TrendingRentalsAdmin";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    // Allow intentional anchor navigation, such as /contact#faqs.
     if (hash) return;
 
     window.scrollTo({
@@ -52,110 +50,71 @@ function HomePage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [searchFilter, setSearchFilter] = useState<string>("");
-  const [selectedCity, setSelectedCity] = useState<string>("Pune (All Areas)");
-  const [wishlistIds, setWishlistIds] = useState<Set<string>>(
-    new Set(["p-sofa-01", "p-bed-01"])
-  );
-
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCity, setSelectedCity] = useState("Pune (All Areas)");
+  
   // Handle homepage section links.
   useEffect(() => {
-    if (location.hash === "#about") {
-      const timeoutId = window.setTimeout(() => {
-        document.getElementById("about")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
+    const sectionIds: Record<string, string> = {
+      "#about": "about",
+      "#products": "products",
+      "#categories": "categories",
+    };
 
-      return () => window.clearTimeout(timeoutId);
-    }
+    const targetId = sectionIds[location.hash];
+    if (!targetId) return;
 
-    if (location.hash === "#products") {
-      const timeoutId = window.setTimeout(() => {
-        document.getElementById("products")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
 
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    if (location.hash === "#categories") {
-      const timeoutId = window.setTimeout(() => {
-        document.getElementById("categories")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
-
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    return undefined;
+    return () => window.clearTimeout(timeoutId);
   }, [location.hash, location.key]);
 
-  // Preserve a search query when returning from another page.
+  // Handle search submitted from another page or component.
   useEffect(() => {
     const state = location.state as { searchQuery?: string } | null;
 
-    if (state?.searchQuery !== undefined) {
-      setSearchFilter(state.searchQuery);
-      setSelectedCategory("All");
+    if (state?.searchQuery === undefined) return;
 
-      navigate("/", { replace: true, state: null });
+    
+    setSelectedCategory("All");
 
-      window.setTimeout(() => {
-        document.getElementById("products")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
-    }
-  }, [location.key, location.state, navigate]);
-
-  const handleToggleWishlist = useCallback((product: Product) => {
-    setWishlistIds((previous) => {
-      const updated = new Set(previous);
-
-      if (updated.has(product.id)) {
-        updated.delete(product.id);
-      } else {
-        updated.add(product.id);
-      }
-
-      return updated;
-    });
-  }, []);
-
-  const handleSearch = (
-    query: string,
-    category = "All Categories",
-    city?: string
-  ) => {
-    if (city) setSelectedCity(city);
-
-    if (category && category !== "All Categories") {
-      setSelectedCategory(category);
-    } else {
-      setSelectedCategory("All");
-    }
-
-    setSearchFilter(query);
+    navigate("/", { replace: true, state: null });
 
     window.setTimeout(() => {
       document.getElementById("products")?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    }, 0);
-  };
+    }, 100);
+  }, [location.key, location.state, navigate]);
+
+  const handleSearch = (
+  _query: string,
+  category = "All Categories",
+  city?: string
+) => {
+  if (city) setSelectedCity(city);
+
+  setSelectedCategory(
+    category && category !== "All Categories" ? category : "All"
+  );
+
+  window.setTimeout(() => {
+    document.getElementById("products")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 0);
+};
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
-    setSearchFilter("");
+    
 
     window.setTimeout(() => {
       document.getElementById("products")?.scrollIntoView({
@@ -170,12 +129,6 @@ function HomePage() {
       behavior: "smooth",
       block: "start",
     });
-  };
-
-  const handleRentNow = (product: Product) => {
-    window.alert(
-      `Booking initiated for ${product.name}. Please continue through the product's WhatsApp rental option.`
-    );
   };
 
   return (
@@ -195,28 +148,14 @@ function HomePage() {
         selectedCategory={selectedCategory}
       />
 
-      <PopularRentals
-        products={[]}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        searchFilter={searchFilter}
-        onClearSearch={() => setSearchFilter("")}
-        wishlistIds={wishlistIds}
-        onToggleWishlist={handleToggleWishlist}
-        onRentNow={handleRentNow}
-      />
+      <TrendingRentals />
 
       <PromoBanner onCtaClick={scrollToProducts} />
 
-      <div id="about" className="scroll-mt-24">
- 
-</div>
+      <div id="about" className="scroll-mt-24" />
 
-<CustomerReviews />
-
-<Footer />
-
-     
+      <CustomerReviews />
+      <Footer />
     </div>
   );
 }
@@ -252,12 +191,14 @@ function App() {
       <ScrollToTop />
 
       <Routes>
-        {/* Public pages */}
         <Route path="/" element={<HomePage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
 
-        {/* Admin pages - existing routes preserved */}
+        {/* Category-specific product listing */}
+        <Route path="/category/:id" element={<CategoryProducts />} />
+
+        {/* Existing admin routes */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/categories" element={<Categories />} />
@@ -271,13 +212,11 @@ function App() {
           element={<ContactManagement />}
         />
 
-        {/* Feedback Master */}
-        <Route
-          path="/admin/feedback"
-          element={<FeedbackMaster />}
-        />
+        <Route path="/admin/feedback" element={<FeedbackMaster />} />
+        <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 

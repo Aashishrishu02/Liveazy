@@ -12,6 +12,7 @@ import { ContactSettingsModule } from './contact-settings/contact-settings.modul
 import { FaqsModule } from './faqs/faqs.module';
 import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { TrendingRentalsModule } from './trending-rentals/trending-rentals.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     FaqsModule,
     ContactEnquiriesModule,
     FeedbackModule,
+    TrendingRentalsModule,
   ],
 })
 export class AppModule {}
