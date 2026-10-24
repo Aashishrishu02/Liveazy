@@ -87,8 +87,8 @@ model BannerImage {
   imageUrl  String
   sortOrder Int      @default(0)
   bannerId  String
-  banner    Banner   @relation(fields: [bannerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  banner    Banner   @relation(fields: [bannerId], references: [id], onDelete: Cascade)
 
   @@index([bannerId, sortOrder])
 }

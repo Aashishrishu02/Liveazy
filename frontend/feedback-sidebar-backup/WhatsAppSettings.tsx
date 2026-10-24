@@ -563,11 +563,7 @@ export default function WhatsAppSettings() {
                 </div>
               </section>
               <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <SectionTitle icon={<CircleHelp size={18} />} title="Automation & Connection Status" subtitle="Live connection checks are limited to the features currently installed." />
-                <div className="space-y-3 p-4 sm:p-5">
-                  <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3.5"><span className="mt-0.5 text-amber-700"><AlertCircle size={17} /></span><div className="min-w-0 flex-1"><p className="text-xs font-bold text-amber-900">Meta Cloud API / webhook not connected</p><p className="mt-1 text-[10px] leading-4 text-amber-800">Automated replies, delivery receipts, inbound events, and response-time metrics need a Meta app, verified business setup, server credentials and webhook endpoints.</p><button type="button" onClick={() => setShowBotInfo((value) => !value)} className="mt-2 text-[10px] font-bold text-amber-900 underline">{showBotInfo ? "Hide requirements" : "View setup requirements"}</button>{showBotInfo && <ul className="mt-2 list-disc space-y-1 pl-4 text-[10px] leading-4 text-amber-900"><li>Meta Business Portfolio and WhatsApp Business Account</li><li>Phone Number ID and access token stored securely on the backend</li><li>Webhook verification endpoint and incoming-message processing</li><li>Database logging for delivery events and response-time metrics</li></ul>}</div></div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div className="rounded-lg border border-slate-200 p-3"><div className="flex items-center gap-2"><ShieldCheck size={15} className="text-[#087D82]" /><p className="text-[10px] font-bold text-[#0F2942]">Link encoding</p></div><p className="mt-1.5 text-[10px] leading-4 text-slate-500">Message text is URL-encoded before redirecting, including punctuation and spaces.</p></div><div className="rounded-lg border border-slate-200 p-3"><div className="flex items-center gap-2"><Activity size={15} className="text-[#087D82]" /><p className="text-[10px] font-bold text-[#0F2942]">Attribution &amp; delivery events</p></div><p className="mt-1.5 text-[10px] leading-4 text-slate-500">Not tracked in the current click-to-chat integration. No webhook event data is available yet.</p></div></div>
-                </div>
+                
               </section>
             </div>
           </div>
