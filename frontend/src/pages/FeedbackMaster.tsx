@@ -487,7 +487,7 @@ export default function FeedbackMaster() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
             Operations &amp; Catalog
           </p>
           <nav className="space-y-1.5">

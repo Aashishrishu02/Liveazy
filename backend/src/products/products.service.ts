@@ -205,4 +205,34 @@ export class ProductsService {
 
     return this.findOne(id);
   }
+
+  async findSimilar(id: string) {
+  const currentProduct = await this.prisma.product.findUnique({
+    where: { id },
+    select: { categoryId: true },
+  });
+
+  if (!currentProduct) {
+    throw new NotFoundException('Product not found');
+  }
+
+  return this.prisma.product.findMany({
+    where: {
+      categoryId: currentProduct.categoryId,
+      id: { not: id },
+      isActive: true,
+    },
+    include: {
+      category: true,
+      images: {
+        orderBy: { sortOrder: 'asc' },
+      },
+    },
+    orderBy: [
+      { displayOrder: 'asc' },
+      { createdAt: 'desc' },
+    ],
+    take: 8,
+  });
+}
 }

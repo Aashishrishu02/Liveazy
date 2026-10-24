@@ -158,9 +158,10 @@ const getErrorMessage = (body: unknown, fallback: string): string => {
 const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
   const [settings, setSettings] = useState<ContactPageSettings>(DEFAULT_SETTINGS);
   const [whatsappNumber, setWhatsappNumber] = useState("919423838109");
-  const [faqs, setFaqs] = useState<FaqItem[]>(FALLBACK_FAQS);
+  const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [faqUsingFallback, setFaqUsingFallback] = useState(false);
-
+  const [faqsLoading, setFaqsLoading] = useState(true);
+  
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -245,6 +246,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
     const fetchFaqs = async () => {
       if (!API_URL) {
         setFaqUsingFallback(true);
+        setFaqsLoading(false);
         return;
       }
 
@@ -269,6 +271,10 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
       } catch (error) {
         console.error("Unable to load FAQs:", error);
         if (!cancelled) setFaqUsingFallback(true);
+      } finally {
+        if (!cancelled) {
+          setFaqsLoading(false);
+        }
       }
     };
 
@@ -548,7 +554,10 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
         </section>
 
         {/* FAQs load from the FAQ Master API. */}
-        <section className="border-y border-[#E4EBFB] bg-[#EEF3FF] py-12 sm:py-16">
+        <section
+  id="faqs"
+  className="scroll-mt-24 border-y border-[#E4EBFB] bg-[#EEF3FF] py-12 sm:py-16"
+>
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D7E7FF] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#315D9B]"><CheckCircle2 size={12} /> Instant clarity</span>
@@ -556,7 +565,15 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
               <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">Quick answers to common questions about booking, payments, delivery times, and rental tenures.</p>
             </div>
 
-            {displayFaqs.length > 0 ? (
+            {faqsLoading ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mt-8 py-8 text-center text-sm text-slate-500"
+              >
+                Loading FAQs...
+              </div>
+            ) : displayFaqs.length > 0 ? (
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {displayFaqs.map((faq, index) => {
                   const Icon = FAQ_ICONS[(faq.iconName ?? "help-circle").toLowerCase()] ?? HelpCircle;

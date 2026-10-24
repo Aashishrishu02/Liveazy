@@ -1,3 +1,4 @@
+
 import {
   BadRequestException,
   Injectable,
@@ -37,17 +38,22 @@ export class FaqsService {
       if (required) {
         throw new BadRequestException(`${field} is required.`);
       }
+
       return undefined;
     }
 
     if (typeof value !== 'string') {
-      throw new BadRequestException(`${field} must be a string.`);
+      throw new BadRequestException(
+        `${field} must be a string.`,
+      );
     }
 
     const trimmed = value.trim();
 
     if (required && !trimmed) {
-      throw new BadRequestException(`${field} cannot be empty.`);
+      throw new BadRequestException(
+        `${field} cannot be empty.`,
+      );
     }
 
     if (trimmed.length > maxLength) {
@@ -65,19 +71,27 @@ export class FaqsService {
   ): boolean | undefined {
     const value = input[field];
 
-    if (value === undefined) return undefined;
+    if (value === undefined) {
+      return undefined;
+    }
 
     if (typeof value !== 'boolean') {
-      throw new BadRequestException(`${field} must be true or false.`);
+      throw new BadRequestException(
+        `${field} must be true or false.`,
+      );
     }
 
     return value;
   }
 
-  private readSortOrder(input: FaqInput): number | undefined {
+  private readSortOrder(
+    input: FaqInput,
+  ): number | undefined {
     const value = input.sortOrder;
 
-    if (value === undefined) return undefined;
+    if (value === undefined) {
+      return undefined;
+    }
 
     if (
       typeof value !== 'number' ||
@@ -92,10 +106,46 @@ export class FaqsService {
     return value;
   }
 
-  // Public: return active FAQs for the customer Contact page.
-  async findPublic() {
+  /**
+   * Validate that the product exists.
+   * Returns null for general FAQs.
+   */
+  private async validateProductId(
+    productId: string | null | undefined,
+  ): Promise<string | null> {
+    if (!productId) {
+      return null;
+    }
+
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found.');
+    }
+
+    return product.id;
+  }
+
+  /**
+   * Public:
+   * - No productId: return active general FAQs.
+   * - With productId: return active FAQs for that product.
+   */
+  async findPublic(productId?: string) {
+    const normalizedProductId = productId?.trim() || null;
+
+    if (normalizedProductId) {
+      await this.validateProductId(normalizedProductId);
+    }
+
     return this.prisma.faq.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        productId: normalizedProductId,
+      },
       orderBy: [
         { sortOrder: 'asc' },
         { createdAt: 'asc' },
@@ -103,7 +153,9 @@ export class FaqsService {
     });
   }
 
-  // Admin: return all FAQs, including inactive ones.
+  /**
+   * Admin: return all FAQs, including inactive FAQs.
+   */
   async findAll() {
     return this.prisma.faq.findMany({
       orderBy: [
@@ -113,16 +165,39 @@ export class FaqsService {
     });
   }
 
+  /**
+   * Create a general FAQ or a product-specific FAQ.
+   *
+   * Omit productId or send null/empty string for a general FAQ.
+   */
   async create(input: unknown) {
     const body = this.validateInput(input);
 
-    const question = this.readString(body, 'question', true, 300)!;
-    const answer = this.readString(body, 'answer', true, 2000)!;
+    const question = this.readString(
+      body,
+      'question',
+      true,
+      300,
+    )!;
+
+    const answer = this.readString(
+      body,
+      'answer',
+      true,
+      2000,
+    )!;
 
     const label =
-      this.readString(body, 'label', false, 80) ?? 'GENERAL';
+      this.readString(body, 'label', false, 80) ??
+      'GENERAL';
 
-    const foot = this.readString(body, 'foot', false, 180);
+    const foot = this.readString(
+      body,
+      'foot',
+      false,
+      180,
+    );
+
     const iconName =
       this.readString(body, 'iconName', false, 60) ??
       'help-circle';
@@ -132,6 +207,26 @@ export class FaqsService {
 
     const sortOrder = this.readSortOrder(body) ?? 0;
 
+    let productId: string | null = null;
+
+    if ('productId' in body) {
+      const rawProductId = body.productId;
+
+      if (rawProductId === null || rawProductId === '') {
+        productId = null;
+      } else {
+        productId =
+          this.readString(
+            body,
+            'productId',
+            true,
+            100,
+          ) ?? null;
+      }
+    }
+
+    productId = await this.validateProductId(productId);
+
     return this.prisma.faq.create({
       data: {
         label,
@@ -140,11 +235,16 @@ export class FaqsService {
         iconName,
         isActive,
         sortOrder,
+        productId,
         ...(foot !== undefined ? { foot } : {}),
       },
     });
   }
 
+  /**
+   * Update an existing FAQ.
+   * productId can be changed or set to null to make it general.
+   */
   async update(id: string, input: unknown) {
     if (!id?.trim()) {
       throw new BadRequestException('FAQ ID is required.');
@@ -160,10 +260,16 @@ export class FaqsService {
       iconName?: string;
       isActive?: boolean;
       sortOrder?: number;
+      productId?: string | null;
     } = {};
 
     if ('label' in body) {
-      data.label = this.readString(body, 'label', true, 80)!;
+      data.label = this.readString(
+        body,
+        'label',
+        true,
+        80,
+      )!;
     }
 
     if ('question' in body) {
@@ -207,11 +313,35 @@ export class FaqsService {
     }
 
     if ('isActive' in body) {
-      data.isActive = this.readBoolean(body, 'isActive')!;
+      data.isActive = this.readBoolean(
+        body,
+        'isActive',
+      )!;
     }
 
     if ('sortOrder' in body) {
       data.sortOrder = this.readSortOrder(body)!;
+    }
+
+    if ('productId' in body) {
+      const rawProductId = body.productId;
+
+      if (
+        rawProductId === null ||
+        rawProductId === ''
+      ) {
+        data.productId = null;
+      } else {
+        const productId = this.readString(
+          body,
+          'productId',
+          true,
+          100,
+        )!;
+
+        data.productId =
+          await this.validateProductId(productId);
+      }
     }
 
     if (Object.keys(data).length === 0) {
@@ -239,6 +369,9 @@ export class FaqsService {
     }
   }
 
+  /**
+   * Delete an FAQ.
+   */
   async remove(id: string) {
     if (!id?.trim()) {
       throw new BadRequestException('FAQ ID is required.');
@@ -249,7 +382,9 @@ export class FaqsService {
         where: { id },
       });
 
-      return { message: 'FAQ deleted successfully.' };
+      return {
+        message: 'FAQ deleted successfully.',
+      };
     } catch (error) {
       if (
         typeof error === 'object' &&

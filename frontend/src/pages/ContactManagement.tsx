@@ -45,6 +45,12 @@ interface Faq {
   iconName: string;
   isActive: boolean;
   sortOrder: number;
+  productId?: string | null;
+}
+
+interface ProductOption {
+  id: string;
+  name: string;
 }
 
 interface Enquiry {
@@ -97,9 +103,11 @@ export default function ContactManagement() {
 
   const [settings, setSettings] = useState<ContactSettings>(emptySettings);
   const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
 
   const [faqLabel, setFaqLabel] = useState("GENERAL");
+  const [faqProductId, setFaqProductId] = useState("");
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
   const [faqFoot, setFaqFoot] = useState("");
@@ -149,6 +157,22 @@ export default function ContactManagement() {
     setFaqs(Array.isArray(data) ? data : []);
   }, []);
 
+  const fetchProducts = useCallback(async () => {
+    const response = await fetch(`${API_URL}/products`, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(await readError(response, "Unable to load products for FAQ selection."));
+    }
+    const data = await response.json();
+    setProducts(
+      Array.isArray(data)
+        ? data.filter(
+            (item): item is ProductOption =>
+              typeof item?.id === "string" && typeof item?.name === "string",
+          )
+        : [],
+    );
+  }, []);
+
   const fetchEnquiries = useCallback(async () => {
     const endpoint = statusFilter === "ALL"
       ? `${API_URL}/contact-enquiries`
@@ -173,14 +197,16 @@ export default function ContactManagement() {
     setNotice("");
     try {
       if (activeTab === "settings") await fetchSettings();
-      if (activeTab === "faqs") await fetchFaqs();
+      if (activeTab === "faqs") {
+        await Promise.all([fetchFaqs(), fetchProducts()]);
+      }
       if (activeTab === "enquiries") await fetchEnquiries();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load Contact Management data.");
     } finally {
       setLoading(false);
     }
-  }, [activeTab, fetchSettings, fetchFaqs, fetchEnquiries]);
+  }, [activeTab, fetchSettings, fetchFaqs, fetchProducts, fetchEnquiries]);
 
   useEffect(() => {
     void loadCurrentTab();
@@ -232,12 +258,14 @@ export default function ContactManagement() {
           iconName: "help-circle",
           isActive: true,
           sortOrder: faqs.length,
+          productId: faqProductId || null,
         }),
       });
       if (!response.ok) throw new Error(await readError(response, "Unable to create FAQ."));
       setFaqQuestion("");
       setFaqAnswer("");
       setFaqFoot("");
+      setFaqProductId("");
       await fetchFaqs();
       setNotice("FAQ created successfully.");
     } catch (err) {
@@ -431,8 +459,17 @@ export default function ContactManagement() {
               {activeTab === "faqs" && (
                 <div className="space-y-5">
                   <form onSubmit={createFaq} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-                    <div className="mb-5"><h3 className="text-lg font-extrabold text-[#0F2942]">Add a FAQ</h3><p className="mt-1 text-sm text-slate-500">Active questions appear on the public Contact Us page.</p></div>
+                    <div className="mb-5"><h3 className="text-lg font-extrabold text-[#0F2942]">Add a FAQ</h3><p className="mt-1 text-sm text-slate-500">Leave product unselected for a general FAQ, or select a product to show the FAQ on its detail page.</p></div>
                     <div className="grid gap-4 md:grid-cols-2">
+                      <label className="text-sm font-semibold text-[#0F2942] md:col-span-2">Link to product
+                        <select value={faqProductId} onChange={(event) => setFaqProductId(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] px-3 text-sm font-normal outline-none focus:border-[#008A90]">
+                          <option value="">General FAQ (not linked to a product)</option>
+                          {products.map((product) => (
+                            <option key={product.id} value={product.id}>{product.name}</option>
+                          ))}
+                        </select>
+                        <span className="mt-1 block text-xs font-normal text-slate-500">Select a product to show this FAQ only on that product’s detail page.</span>
+                      </label>
                       <label className="text-sm font-semibold text-[#0F2942]">Label<input value={faqLabel} onChange={(e) => setFaqLabel(e.target.value)} maxLength={80} placeholder="GENERAL" className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] px-3 text-sm font-normal outline-none focus:border-[#008A90]" /></label>
                       <label className="text-sm font-semibold text-[#0F2942]">Footer note (optional)<input value={faqFoot} onChange={(e) => setFaqFoot(e.target.value)} maxLength={180} placeholder="Check details with our team" className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] px-3 text-sm font-normal outline-none focus:border-[#008A90]" /></label>
                       <label className="text-sm font-semibold text-[#0F2942] md:col-span-2">Question<input value={faqQuestion} onChange={(e) => setFaqQuestion(e.target.value)} required maxLength={300} placeholder="How does rental delivery work?" className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] px-3 text-sm font-normal outline-none focus:border-[#008A90]" /></label>
@@ -443,7 +480,7 @@ export default function ContactManagement() {
 
                   <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><h3 className="font-extrabold text-[#0F2942]">FAQ entries</h3><p className="mt-1 text-xs text-slate-500">{faqs.length} total</p></div><button type="button" onClick={() => void fetchFaqs()} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50"><RefreshCw size={14} />Refresh</button></div>
-                    {faqs.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">No FAQs created yet.</div> : <div className="divide-y divide-slate-100">{faqs.map((faq) => <article key={faq.id} className="p-5"><div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div className="min-w-0"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full bg-[#E8F7F6] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#007B80]">{faq.label}</span><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${faq.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{faq.isActive ? "Active" : "Inactive"}</span></div><h4 className="font-bold text-[#0F2942]">{faq.question}</h4><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">{faq.answer}</p>{faq.foot && <p className="mt-3 text-xs font-semibold text-slate-400">{faq.foot}</p>}</div><div className="flex shrink-0 flex-wrap gap-2"><button type="button" onClick={() => void editFaq(faq)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#0F2942] hover:bg-slate-50">Edit</button><button type="button" onClick={() => void toggleFaq(faq)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#0F2942] hover:bg-slate-50">{faq.isActive ? "Deactivate" : "Activate"}</button><button type="button" onClick={() => void deleteFaq(faq)} aria-label="Delete FAQ" className="rounded-lg border border-red-100 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50"><Trash2 size={14} /></button></div></div></article>)}</div>}
+                    {faqs.length === 0 ? <div className="p-10 text-center text-sm text-slate-500">No FAQs created yet.</div> : <div className="divide-y divide-slate-100">{faqs.map((faq) => <article key={faq.id} className="p-5"><div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div className="min-w-0"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full bg-[#E8F7F6] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#007B80]">{faq.label}</span><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${faq.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{faq.isActive ? "Active" : "Inactive"}</span></div>{faq.productId && <p className="mb-2 text-xs font-semibold text-[#008A90]">Product: {products.find((product) => product.id === faq.productId)?.name ?? faq.productId}</p>}<h4 className="font-bold text-[#0F2942]">{faq.question}</h4><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">{faq.answer}</p>{faq.foot && <p className="mt-3 text-xs font-semibold text-slate-400">{faq.foot}</p>}</div><div className="flex shrink-0 flex-wrap gap-2"><button type="button" onClick={() => void editFaq(faq)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#0F2942] hover:bg-slate-50">Edit</button><button type="button" onClick={() => void toggleFaq(faq)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#0F2942] hover:bg-slate-50">{faq.isActive ? "Deactivate" : "Activate"}</button><button type="button" onClick={() => void deleteFaq(faq)} aria-label="Delete FAQ" className="rounded-lg border border-red-100 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50"><Trash2 size={14} /></button></div></div></article>)}</div>}
                   </section>
                 </div>
               )}

@@ -79,33 +79,35 @@ export default function Footer() {
   };
 
   const navigateToSection = (
-    section: "about" | "products" | "faqs"
-  ) => {
-    if (section === "faqs") {
-      if (location.pathname === "/contact") {
-        window.setTimeout(() => {
-          document.getElementById("faqs")?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 100);
-      } else {
-        navigate("/contact#faqs");
-      }
-      return;
-    }
+  section: "about" | "products" | "categories" | "faqs"
+) => {
+  if (section === "faqs") {
+  if (location.pathname === "/contact") {
+    window.setTimeout(() => {
+      document.getElementById("faqs")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 300);
+  } else {
+    navigate("/contact#faqs");
+  }
+  return;
+}
 
-    if (location.pathname === "/") {
-      window.setTimeout(() => {
-        document.getElementById(section)?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 0);
-    } else {
-      navigate(section === "about" ? "/#about" : "/#products");
-    }
-  };
+  if (location.pathname === "/") {
+    window.setTimeout(() => {
+      document.getElementById(section)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  } else {
+    navigate(`/#${section}`);
+  }
+};
+
+  
 
   const phoneDigits = contact.supportPhone.replace(/\D/g, "");
   const whatsappNumber =
@@ -140,7 +142,7 @@ export default function Footer() {
 
             <button
               type="button"
-              onClick={() => navigateToSection("products")}
+              onClick={() => navigateToSection("categories")}
               className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#42DADA] transition hover:text-white"
             >
               Explore rentals <ArrowRight size={16} />
@@ -161,7 +163,7 @@ export default function Footer() {
               <li>
                 <button
                   type="button"
-                  onClick={() => navigateToSection("products")}
+                  onClick={() => navigateToSection("categories")}
                   className="transition hover:text-[#42DADA]"
                 >
                   Browse Rentals
@@ -266,7 +268,7 @@ export default function Footer() {
             </p>
             <button
               type="button"
-              onClick={() => navigateToSection("faqs")}
+              onClick={() => navigate("/contact")}
               className="mt-5 inline-flex items-center gap-2 rounded-lg border border-[#42DADA]/50 px-4 py-2.5 text-sm font-semibold text-[#42DADA] transition hover:bg-[#42DADA] hover:text-[#071D33]"
             >
               Visit Help Centre <ArrowRight size={16} />

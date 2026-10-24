@@ -68,6 +68,13 @@ interface BackendProduct {
 
 
 
+interface ProductFaq {
+  id: string;
+  question: string;
+  answer: string;
+  label?: string;
+}
+
 interface RentalPlan {
 
   duration: RentalDuration;
@@ -189,6 +196,12 @@ export default function ProductDetails() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<BackendProduct | null>(null);
+
+  const [faqs, setFaqs] = useState<ProductFaq[]>([]);
+
+  const [similarProducts, setSimilarProducts] = useState<BackendProduct[]>([]);
+
+  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
 
   const [whatsappNumber, setWhatsappNumber] = useState("");
 
@@ -363,6 +376,56 @@ export default function ProductDetails() {
   }, []);
 
 
+
+  useEffect(() => {
+    if (!id) {
+      setFaqs([]);
+      setSimilarProducts([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadRelatedContent = async () => {
+      setFaqs([]);
+      setSimilarProducts([]);
+      const encodedId = encodeURIComponent(id);
+
+      const [faqResult, similarResult] = await Promise.allSettled([
+        fetch(`${API_URL}/faqs?productId=${encodedId}`, { cache: "no-store" }),
+        fetch(`${API_URL}/products/${encodedId}/similar`, { cache: "no-store" }),
+      ]);
+
+      if (cancelled) return;
+
+      if (faqResult.status === "fulfilled" && faqResult.value.ok) {
+        try {
+          const data: ProductFaq[] = await faqResult.value.json();
+          if (!cancelled && Array.isArray(data)) setFaqs(data);
+        } catch (relatedError) {
+          console.error("Product FAQs parsing failed:", relatedError);
+        }
+      } else {
+        console.error("Could not load product FAQs.");
+      }
+
+      if (similarResult.status === "fulfilled" && similarResult.value.ok) {
+        try {
+          const data: BackendProduct[] = await similarResult.value.json();
+          if (!cancelled && Array.isArray(data)) {
+            setSimilarProducts(data.filter((item) => item.id !== id && item.isActive));
+          }
+        } catch (relatedError) {
+          console.error("Similar products parsing failed:", relatedError);
+        }
+      } else {
+        console.error("Could not load similar products.");
+      }
+    };
+
+    void loadRelatedContent();
+    return () => { cancelled = true; };
+  }, [id]);
 
   const plans = useMemo(() => (product ? getPlans(product) : []), [product]);
 
@@ -1042,6 +1105,59 @@ export default function ProductDetails() {
               )}
 
             </section>
+
+            {/* Product-specific FAQs */}
+            {faqs.length > 0 && (
+              <section className="mt-8 rounded-3xl border border-slate-200/70 bg-white p-5 shadow-sm sm:p-7">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">Product support</p>
+                <h2 className="mt-1 text-xl font-extrabold text-[#102A43] sm:text-2xl">Frequently asked questions</h2>
+                <p className="mt-2 text-sm text-slate-500">Common questions about {productName}.</p>
+                <div className="mt-5 divide-y divide-slate-100">
+                  {faqs.map((faq) => (
+                    <div key={faq.id} className="py-4">
+                      <button type="button" onClick={() => setOpenFaqId((current) => current === faq.id ? null : faq.id)} aria-expanded={openFaqId === faq.id} className="flex w-full items-center justify-between gap-4 text-left">
+                        <span className="text-sm font-bold text-[#102A43]">{faq.question}</span>
+                        <ChevronRight size={18} className={`shrink-0 text-[#008A90] transition-transform ${openFaqId === faq.id ? "rotate-90" : ""}`} />
+                      </button>
+                      {openFaqId === faq.id && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{faq.answer}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Similar products from the same category */}
+            {similarProducts.length > 0 && (
+              <section className="mt-8 sm:mt-10">
+                <div className="mb-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">Discover more</p>
+                  <h2 className="mt-1 text-xl font-extrabold text-[#102A43] sm:text-2xl">Similar products</h2>
+                  <p className="mt-2 text-sm text-slate-500">Explore more rentals from the same category.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {similarProducts.map((item) => {
+                    const itemName = getCleanProductName(item.name, item.id);
+                    const itemImages = [...(item.images ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+                    const itemImage = itemImages[0]?.imageUrl || item.image;
+                    const availablePlan = getPlans(item).find(isPlanAvailable);
+                    return (
+                      <button key={item.id} type="button" onClick={() => { navigate(`/product/${encodeURIComponent(item.id)}`); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:border-[#008A90] hover:shadow-md">
+                        <div className="flex h-36 items-center justify-center bg-white p-3 sm:h-48">
+                          {itemImage ? <img src={itemImage} alt={itemName} loading="lazy" className="h-full w-full object-contain" /> : <PackageCheck size={40} className="text-slate-300" />}
+                        </div>
+                        <div className="p-3 sm:p-4">
+                          <p className="text-[10px] font-semibold text-[#008A90]">{item.category?.name ?? "Rental product"}</p>
+                          <h3 className="mt-1 line-clamp-2 text-sm font-bold text-[#102A43]">{itemName}</h3>
+                          <p className="mt-2 text-sm font-extrabold text-[#102A43]">{availablePlan ? `${formatPrice(Number(availablePlan.rent))}/month` : "Price on request"}</p>
+                          <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#008A90]">View details <ArrowRight size={14} /></span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
 
           </>
 

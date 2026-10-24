@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 
 import { FaqsService } from './faqs.service';
@@ -19,9 +20,9 @@ export class FaqsController {
 
   // Public endpoint: only active FAQs.
   @Get()
-  findPublic() {
-    return this.faqsService.findPublic();
-  }
+findPublic(@Query('productId') productId?: string) {
+  return this.faqsService.findPublic(productId);
+}
 
   // Admin endpoint: all FAQs, including inactive ones.
   @Get('admin')

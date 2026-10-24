@@ -47,6 +47,7 @@ model Product {
   category     Category                @relation(fields: [categoryId], references: [id])
   images       ProductImage[]
   trendingIn   TrendingRentalProduct[]
+  faqs         Faq[]
 }
 
 model ProductImage {
@@ -137,10 +138,13 @@ model Faq {
   iconName  String   @default("help-circle")
   isActive  Boolean  @default(true)
   sortOrder Int      @default(0)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([isActive, sortOrder])
+  @@index([productId, isActive, sortOrder])
 }
 
 model ContactEnquiry {
