@@ -58,6 +58,12 @@ const fallbackBanners: PromoBannerData[] = [
 const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
   const [banners, setBanners] =
     useState<PromoBannerData[]>(fallbackBanners);
+    const handleExploreCategories = () => {
+  document.getElementById("categories")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+};
 
   // Track each real promo banner once per component mount.
   // Fallback/demo banners are not stored in the database and must not be counted.
@@ -203,7 +209,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
                 <button
                   type="button"
-                  onClick={onCtaClick}
+                  onClick={handleExploreCategories}
                   className="mt-6 inline-flex min-h-12 items-center gap-3 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#0F2942] transition hover:bg-[#70E1E4]"
                 >
                   Explore furniture
@@ -251,7 +257,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
               <button
                 type="button"
-                onClick={onCtaClick}
+                onClick={handleExploreCategories}
                 className="mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F2942] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#008A90]"
               >
                 Find your furniture

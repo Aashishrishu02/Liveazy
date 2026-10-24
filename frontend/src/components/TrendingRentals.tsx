@@ -116,7 +116,7 @@ export default function TrendingRentals() {
 
           <button
             type="button"
-            onClick={() => navigate("/#products")}
+            onClick={() => navigate("/#categories")}
             className="inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-xl border border-[#087F8C]/25 bg-white px-5 py-3 text-sm font-semibold text-[#087F8C] transition hover:border-[#087F8C] hover:bg-[#087F8C] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#087F8C]/30"
           >
             Explore rentals
