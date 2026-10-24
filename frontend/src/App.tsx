@@ -130,6 +130,12 @@ function HomePage() {
       block: "start",
     });
   };
+  const scrollToCategories = () => {
+  document.getElementById("categories")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+};
 
   return (
     <div className="min-h-screen bg-[#faf9f7] font-sans text-gray-900">
@@ -140,13 +146,15 @@ function HomePage() {
           handleSearch(query, category, city)
         }
         selectedCity={selectedCity}
-        onExploreClick={scrollToProducts}
+        onExploreClick={scrollToCategories}
       />
 
-      <CategorySection
-        onSelectCategory={handleSelectCategory}
-        selectedCategory={selectedCategory}
-      />
+      <section id="categories">
+  <CategorySection
+    onSelectCategory={handleSelectCategory}
+    selectedCategory={selectedCategory}
+  />
+</section>
 
       <TrendingRentals />
 
