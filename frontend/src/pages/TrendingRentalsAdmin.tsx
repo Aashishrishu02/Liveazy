@@ -21,6 +21,7 @@ import {
   X,
   Contact,
   MessageSquareText,
+  FileText,
 } from "lucide-react";
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const MAX_PRODUCTS = 4;
@@ -71,6 +72,7 @@ const navigation = [
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 ];
 function AdminAvatar() {
   return (

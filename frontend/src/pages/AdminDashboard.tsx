@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Contact,
   Star,
+  FileText,
 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -122,6 +123,11 @@ const navigation = [
     icon: MessageSquareText,
   },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  {
+  label: "Blog Management",
+  path: "/admin/blogs",
+  icon: FileText,
+},
 ];
 
 async function fetchJson<T>(path: string): Promise<T> {

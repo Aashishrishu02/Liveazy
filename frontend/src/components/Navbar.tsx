@@ -208,6 +208,7 @@ export default function Navbar({
     { label: "Categories", href: sectionHref("categories") },
     { label: "Products", href: "/#categories" },
     { label: "About Us", href: sectionHref("about") },
+    { label: "Blog", href: "/blogs" },
   ];
 
   return (

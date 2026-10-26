@@ -26,6 +26,7 @@ import {
   Pencil,
   Trash2,
   X,
+  FileText,
 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -72,6 +73,7 @@ const FEEDBACK_ADMIN_SIDEBAR = [
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 ];
 
 export default function FeedbackMaster() {

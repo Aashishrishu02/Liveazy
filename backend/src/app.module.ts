@@ -13,6 +13,7 @@ import { FaqsModule } from './faqs/faqs.module';
 import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { TrendingRentalsModule } from './trending-rentals/trending-rentals.module';
+import { BlogsModule } from './blogs/blogs.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TrendingRentalsModule } from './trending-rentals/trending-rentals.modul
     ContactEnquiriesModule,
     FeedbackModule,
     TrendingRentalsModule,
+    BlogsModule,
   ],
 })
 export class AppModule {}

@@ -19,7 +19,8 @@ import { LayoutDashboard,
   RefreshCw,
   CheckCircle2,
   Clock3,
-  Search, MessageSquareText, Star } from "lucide-react";
+  Search, MessageSquareText, Star,
+  FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -84,6 +85,7 @@ const navigation = [
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 ];
 
 const tabItems: { id: Tab; label: string; icon: typeof Contact }[] = [

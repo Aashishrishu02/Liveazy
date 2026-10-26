@@ -26,7 +26,8 @@ CircleSlash,
 Check,
 AlertCircle,
 SlidersHorizontal,
-Contact, MessageSquareText, Star } from "lucide-react";
+Contact, MessageSquareText, Star,
+  FileText } from "lucide-react";
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 type StatusFilter = "all" | "active" | "inactive";
@@ -63,6 +64,7 @@ const navigation = [
 { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
 { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 ];
 function getErrorMessage(error: unknown, fallback: string) {
 return error instanceof Error ? error.message : fallback;

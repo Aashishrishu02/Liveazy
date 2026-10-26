@@ -29,6 +29,9 @@ import ContactManagement from "./pages/ContactManagement";
 import FeedbackMaster from "./pages/FeedbackMaster";
 import CategoryProducts from "./pages/CategoryProducts";
 import TrendingRentalsAdmin from "./pages/TrendingRentalsAdmin";
+import Blogs from "./pages/Blogs";
+import BlogListing from "./pages/BlogListing";
+import BlogDetails from "./pages/BlogDetails";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -215,6 +218,7 @@ function App() {
         <Route path="/admin/settings" element={<WhatsAppSettings />} />
         <Route path="/admin/promo-banners" element={<PromoBanners />} />
 
+
         <Route
           path="/admin/contact-management"
           element={<ContactManagement />}
@@ -222,6 +226,9 @@ function App() {
 
         <Route path="/admin/feedback" element={<FeedbackMaster />} />
         <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
+        <Route path="/admin/blogs" element={<Blogs />} />
+        <Route path="/blogs" element={<BlogListing />} />
+<Route path="/blogs/:slug" element={<BlogDetails />} />
       </Routes>
     </BrowserRouter>
 

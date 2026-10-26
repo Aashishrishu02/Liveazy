@@ -62,7 +62,9 @@ import {
 
   Clock3,
 
-  Contact, MessageSquareText, Star} from "lucide-react";
+  Contact, MessageSquareText, Star,
+  FileText,
+ } from "lucide-react";
 
 const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
@@ -219,6 +221,7 @@ const navigation = [
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
 
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 
 ];
 

@@ -23,7 +23,8 @@ import { LayoutDashboard,
 
   X,
 
-  Contact, MessageSquareText, Star } from "lucide-react";
+  Contact, MessageSquareText, Star,
+  FileText } from "lucide-react";
 
 
 
@@ -127,6 +128,7 @@ const navigation = [
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
+  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
 
 ];
 
