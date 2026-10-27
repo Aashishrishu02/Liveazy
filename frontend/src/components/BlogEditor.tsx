@@ -132,8 +132,17 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       const formData = new FormData();
       formData.append("file", file);
 
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Login session nahi mila. Admin panel mein dobara login karo.");
+      }
+
       const response = await fetch(`${API_URL}/upload/${endpoint}`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -185,7 +194,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       setUploadError(
         error instanceof Error
           ? error.message
-          : "Media upload nahi ho paya. Dobara try karein.",
+          : "Retry again ",
       );
     } finally {
       setUploading(false);
@@ -484,7 +493,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
 
       {uploading && (
         <p className="border-b border-slate-100 bg-cyan-50 px-4 py-2 text-sm text-cyan-800">
-          Media upload ho raha hai...
+          Media uploading...
         </p>
       )}
 
