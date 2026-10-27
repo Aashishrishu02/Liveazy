@@ -6,6 +6,7 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import BlogVideo from "./BlogVideo";
 import BlogYoutube from "./BlogYoutube";
+
 import {
   Bold,
   Italic,
@@ -34,13 +35,19 @@ type BlogEditorProps = {
 export default function BlogEditor({ value, onChange }: BlogEditorProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+
   const selectionRef = useRef<{ from: number; to: number } | null>(null);
+  const linkSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: false,
+      }),
+
       Image.configure({
         inline: false,
         allowBase64: false,
@@ -48,6 +55,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           class: "blog-content-image my-6 max-w-full rounded-xl",
         },
       }),
+
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -56,14 +64,18 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           target: "_blank",
         },
       }),
+
       BlogYoutube,
       BlogVideo,
     ],
+
     content: value || "<p></p>",
     immediatelyRender: false,
+
     onUpdate: ({ editor: currentEditor }) => {
       onChange(currentEditor.getHTML());
     },
+
     editorProps: {
       attributes: {
         class:
@@ -74,7 +86,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
   });
 
   useEffect(() => {
-    if (!editor || editor.getHTML() === (value || "<p></p>")) return;
+    if (!editor || editor.getHTML() === (value || "<p></p>")) {
+      return;
+    }
 
     editor.commands.setContent(value || "<p></p>");
   }, [editor, value]);
@@ -119,8 +133,8 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
     if (file.size > maxSize) {
       setUploadError(
         type === "image"
-          ? "Image ka maximum size 10 MB hai."
-          : "Video ka maximum size 100 MB hai.",
+          ? "Image size must not exceed 10 MB."
+          : "Video size must not exceed 100 MB.",
       );
       return;
     }
@@ -129,13 +143,16 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
 
     try {
       const endpoint = type === "image" ? "blog-image" : "blog-video";
+
       const formData = new FormData();
       formData.append("file", file);
 
       const token = localStorage.getItem("token");
 
       if (!token) {
-        throw new Error("Login session nahi mila. Admin panel mein dobara login karo.");
+        throw new Error(
+          "Login session not found. Please sign in to the admin panel again.",
+        );
       }
 
       const response = await fetch(`${API_URL}/upload/${endpoint}`, {
@@ -157,7 +174,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
         data.url || data.imageUrl || data.videoUrl || data.location;
 
       if (!mediaUrl || typeof mediaUrl !== "string") {
-        throw new Error("Upload response mein media URL nahi mila.");
+        throw new Error("The upload response did not include a media URL.");
       }
 
       const savedSelection = selectionRef.current;
@@ -191,10 +208,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       selectionRef.current = null;
     } catch (error) {
       console.error("Blog media upload failed:", error);
+
       setUploadError(
-        error instanceof Error
-          ? error.message
-          : "Retry again ",
+        error instanceof Error ? error.message : "Please try again.",
       );
     } finally {
       setUploading(false);
@@ -204,16 +220,30 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
   function insertLink() {
     if (!editor) return;
 
-    const { from, to } = editor.state.selection;
+    const savedSelection = linkSelectionRef.current;
+    const currentSelection = editor.state.selection;
+
+    const from = savedSelection?.from ?? currentSelection.from;
+    const to = savedSelection?.to ?? currentSelection.to;
+    const hasSelectedText = from !== to;
+
     const previousUrl = editor.getAttributes("link").href as
       | string
       | undefined;
 
-    const url = window.prompt("Enter link URL:", previousUrl || "https://");
+    const urlInput = window.prompt(
+      "Enter link URL:",
+      previousUrl || "https://",
+    );
 
-    if (url === null) return;
+    if (urlInput === null) {
+      linkSelectionRef.current = null;
+      return;
+    }
 
-    if (!url.trim()) {
+    const trimmedUrl = urlInput.trim();
+
+    if (!trimmedUrl) {
       editor
         .chain()
         .focus()
@@ -221,21 +251,58 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
         .extendMarkRange("link")
         .unsetLink()
         .run();
+
+      linkSelectionRef.current = null;
+      setUploadError("");
       return;
     }
 
     try {
-      const parsed = new URL(url.trim());
+      const normalizedUrl =
+        /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmedUrl)
+          ? trimmedUrl
+          : `https://${trimmedUrl}`;
 
-      if (!["http:", "https:"].includes(parsed.protocol)) {
-        throw new Error("Invalid protocol");
+      const parsedUrl = new URL(normalizedUrl);
+
+      if (
+        !["http:", "https:"].includes(parsedUrl.protocol) ||
+        !parsedUrl.hostname.includes(".")
+      ) {
+        throw new Error("Invalid URL");
       }
 
-      const chain = editor.chain().focus().setTextSelection({ from, to });
+      const href = parsedUrl.href;
 
-      chain.setLink({ href: parsed.href }).run();
+      if (hasSelectedText) {
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .setMark("link", { href })
+          .run();
+      } else {
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from, to })
+          .insertContent({
+            type: "text",
+            text: href,
+            marks: [
+              {
+                type: "link",
+                attrs: { href },
+              },
+            ],
+          })
+          .run();
+      }
+
+      linkSelectionRef.current = null;
       setUploadError("");
     } catch {
+      linkSelectionRef.current = null;
       setUploadError("Please enter a valid HTTP or HTTPS URL.");
     }
   }
@@ -253,11 +320,12 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       return;
     }
 
-    setUploadError("Pehle image ya uploaded video select karo.");
+    setUploadError("Select an image or uploaded video first.");
   }
 
   function removeLink() {
     if (!editor) return;
+
     editor.chain().focus().extendMarkRange("link").unsetLink().run();
   }
 
@@ -267,11 +335,13 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
     setUploadError("");
 
     const urlInput = window.prompt("Enter YouTube video URL:");
+
     if (!urlInput?.trim()) return;
 
     try {
       const url = new URL(urlInput.trim());
       const host = url.hostname.toLowerCase();
+
       let videoId = "";
 
       if (host === "youtu.be") {
@@ -287,7 +357,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       ) {
         videoId =
           url.searchParams.get("v") ||
-          url.pathname.match(/^\/(?:embed|shorts|live|v)\/([^/?]+)/)?.[1] ||
+          url.pathname.match(
+            /^\/(?:embed|shorts|live|v)\/([^/?]+)/,
+          )?.[1] ||
           "";
       }
 
@@ -313,7 +385,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
   if (!editor) {
     return (
       <div className="p-4 text-sm text-slate-500">
-        Editor load ho raha hai...
+        Loading editor...
       </div>
     );
   }
@@ -330,7 +402,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
+
           if (file) void uploadMedia(file, "image");
+
           event.currentTarget.value = "";
         }}
       />
@@ -342,7 +416,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
+
           if (file) void uploadMedia(file, "video");
+
           event.currentTarget.value = "";
         }}
       />
@@ -353,6 +429,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Bold"
           aria-label="Bold"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
           <Bold size={17} />
@@ -363,6 +440,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Italic"
           aria-label="Italic"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
           <Italic size={17} />
@@ -374,7 +452,9 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           aria-label="Heading"
           className={toolButton}
           onMouseDown={(event) => event.preventDefault()}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
         >
           <Heading2 size={17} />
         </button>
@@ -417,7 +497,16 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Insert link"
           aria-label="Insert link"
           className={toolButton}
-          onMouseDown={(event) => event.preventDefault()}
+          onMouseDown={(event) => {
+            if (editor) {
+              linkSelectionRef.current = {
+                from: editor.state.selection.from,
+                to: editor.state.selection.to,
+              };
+            }
+
+            event.preventDefault();
+          }}
           onClick={insertLink}
         >
           <LinkIcon size={17} />
@@ -508,6 +597,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
       {uploadError && (
         <div className="flex items-start justify-between gap-3 border-b border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           <span className="break-words">{uploadError}</span>
+
           <button
             type="button"
             className="shrink-0"
@@ -523,8 +613,8 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
 
       <div className="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">
         Images, uploaded videos, and YouTube videos are inserted at the cursor
-        position. Har YouTube video ka ✕ button sirf usi video ko remove karta
-        hai.
+        position. Each YouTube video has its own ✕ button to remove only that
+        video.
       </div>
     </div>
   );
