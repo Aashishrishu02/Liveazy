@@ -10,6 +10,7 @@ import {
   Package,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { fetchCategoriesDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -110,19 +111,16 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       try {
         setLoading(true);
 
-        const [categoriesResponse, productsResponse] = await Promise.all([
-          fetch(`${API_URL}/categories`),
+        const [categoriesData, productsResponse] = await Promise.all([
+          fetchCategoriesDeduplicated(API_URL),
           fetch(`${API_URL}/products`),
         ]);
 
-        if (!categoriesResponse.ok || !productsResponse.ok) {
+        if (!productsResponse.ok) {
           throw new Error("Failed to fetch category data");
         }
 
-        const [categoriesData, productsData] = await Promise.all([
-          categoriesResponse.json(),
-          productsResponse.json(),
-        ]);
+        const productsData = await productsResponse.json();
 
         if (!cancelled) {
           setCategories(

@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
+  private readonly logger = new Logger(CategoriesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -32,19 +35,29 @@ export class CategoriesService {
   }
 
   async findAll() {
-    return this.prisma.category.findMany({
-      orderBy: [
-        { displayOrder: 'asc' },
-        { createdAt: 'desc' },
-      ],
-      include: {
-        _count: {
-          select: {
-            products: true,
+    const startTime = performance.now();
+
+    try {
+      return await this.prisma.category.findMany({
+        orderBy: [
+          { displayOrder: 'asc' },
+          { createdAt: 'desc' },
+        ],
+        include: {
+          _count: {
+            select: {
+              products: true,
+            },
           },
         },
-      },
-    });
+      });
+    } finally {
+      const duration = performance.now() - startTime;
+
+      this.logger.log(
+        `findAll completed in ${duration.toFixed(2)} ms`,
+      );
+    }
   }
 
   async findOne(id: string) {

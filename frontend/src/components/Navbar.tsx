@@ -18,6 +18,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import { fetchCategoriesDeduplicated } from "../utils/api";
 
 interface NavbarProps {
   onSearchSubmit?: (query: string) => void;
@@ -65,13 +66,7 @@ export default function Navbar({
       }
 
       try {
-        const response = await fetch(`${API_URL}/categories`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch categories: ${response.status}`);
-        }
-
-        const result: unknown = await response.json();
+        const result: unknown = await fetchCategoriesDeduplicated(API_URL);
 
         // Supports both an array and a { data: [...] } response.
         let categoryList: Category[] = [];

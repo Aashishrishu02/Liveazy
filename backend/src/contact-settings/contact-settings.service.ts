@@ -20,6 +20,14 @@ export class ContactSettingsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getSettings() {
+    const existing = await this.prisma.contactPageSetting.findUnique({
+      where: { id: 1 },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
     return this.prisma.contactPageSetting.upsert({
       where: { id: 1 },
       update: {},

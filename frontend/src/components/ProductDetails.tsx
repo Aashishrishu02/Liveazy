@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "./Navbar";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 
 
@@ -245,313 +246,149 @@ export default function ProductDetails() {
 
 
    useEffect(() => {
-
      let cancelled = false;
-
-
+     const controller = new AbortController();
 
      const loadProduct = async () => {
-
        setLoading(true);
-
        setError("");
 
        try {
-
-         const response = await fetch(`${API_URL}/products`, {
-
-           cache: "no-store",
-
-         });
-
-         if (!response.ok) throw new Error("Could not load products.");
-
-
-
-         const products: BackendProduct[] = await response.json();
-
-         const found = products.find(
-
-           (item) => item.id === decodeURIComponent(id) && item.isActive,
-
+         const encodedId = encodeURIComponent(decodeURIComponent(id));
+         const found = await fetchJsonDeduplicated<BackendProduct>(
+           `${API_URL}/products/${encodedId}`,
+           { signal: controller.signal }
          );
 
-
-
-         if (!found) {
-
+         if (!found || !found.isActive) {
            if (!cancelled) setError("This product is not available right now.");
-
            return;
-
          }
 
-
-
          if (!cancelled) {
-
            setProduct(found);
-
            const plans = getPlans(found);
-
            const preferredPlan =
-
              plans.find((plan) => plan.duration === "12M" && isPlanAvailable(plan)) ??
-
              plans.find((plan) => plan.duration === "6M" && isPlanAvailable(plan)) ??
-
              plans.find((plan) => plan.duration === "3M" && isPlanAvailable(plan));
 
            setSelectedDuration(preferredPlan?.duration ?? "12M");
-
          }
-
-       } catch (loadError) {
-
+       } catch (loadError: unknown) {
+         if (controller.signal.aborted) return;
+         const status = (loadError as { status?: number })?.status;
+         if (status === 404) {
+           if (!cancelled) setError("This product is not available right now.");
+           return;
+         }
          console.error("Product details fetch failed:", loadError);
-
          if (!cancelled) {
-
            setError("We could not load this product. Please try again.");
-
          }
-
        } finally {
-
          if (!cancelled) setLoading(false);
-
        }
-
      };
-
-
 
      void loadProduct();
 
      return () => {
-
        cancelled = true;
-
+       controller.abort();
      };
-
    }, [id]);
 
 
 
    useEffect(() => {
-
      let cancelled = false;
-
-
+     const controller = new AbortController();
 
      const loadSettings = async () => {
-
        try {
-
-         const response = await fetch(`${API_URL}/settings/whatsapp`, {
-
-           cache: "no-store",
-
-         });
-
-         if (!response.ok) throw new Error("Could not load WhatsApp settings.");
-
-         const settings: WhatsAppSettings = await response.json();
-
-
+         const settings = await fetchJsonDeduplicated<WhatsAppSettings>(
+           `${API_URL}/settings/whatsapp`,
+           { signal: controller.signal }
+         );
 
          if (!cancelled) {
-
            setWhatsappNumber(
-
-             String(settings.whatsappNumber ?? "").replace(/\D/g, ""),
-
+             String(settings.whatsappNumber ?? "").replace(/\D/g, "")
            );
-
            setWhatsappMessage(
-
              typeof settings.whatsappMessage === "string"
-
                ? settings.whatsappMessage
-
-               : "",
-
+               : ""
            );
-
          }
-
        } catch (settingsError) {
-
+         if (controller.signal.aborted) return;
          console.error("WhatsApp settings fetch failed:", settingsError);
-
        }
-
      };
-
-
 
      void loadSettings();
 
      return () => {
-
        cancelled = true;
-
+       controller.abort();
      };
-
    }, []);
 
 
 
    useEffect(() => {
-
-
-
      if (!id) {
-
-
-
        setFaqs([]);
-
-
-
        setSimilarProducts([]);
-
-
-
        return;
-
-
-
      }
 
      let cancelled = false;
+     const controller = new AbortController();
 
      const loadRelatedContent = async () => {
-
-
-
        setFaqs([]);
-
-
-
        setSimilarProducts([]);
 
-
-
        const encodedId = encodeURIComponent(id);
-
        const [faqResult, similarResult] = await Promise.allSettled([
-
-
-
-         fetch(`${API_URL}/faqs?productId=${encodedId}`, { cache: "no-store" }),
-
-
-
-         fetch(`${API_URL}/products/${encodedId}/similar`, { cache: "no-store" }),
-
-
-
+         fetchJsonDeduplicated<ProductFaq[]>(
+           `${API_URL}/faqs?productId=${encodedId}`,
+           { signal: controller.signal }
+         ),
+         fetchJsonDeduplicated<BackendProduct[]>(
+           `${API_URL}/products/${encodedId}/similar`,
+           { signal: controller.signal }
+         ),
        ]);
 
-       if (cancelled) return;
+       if (cancelled || controller.signal.aborted) return;
 
-       if (faqResult.status === "fulfilled" && faqResult.value.ok) {
-
-
-
-         try {
-
-
-
-           const data: ProductFaq[] = await faqResult.value.json();
-
-
-
-           if (!cancelled && Array.isArray(data)) setFaqs(data);
-
-
-
-         } catch (relatedError) {
-
-
-
-           console.error("Product FAQs parsing failed:", relatedError);
-
-
-
-         }
-
-
-
+       if (faqResult.status === "fulfilled") {
+         const data = faqResult.value;
+         if (!cancelled && Array.isArray(data)) setFaqs(data);
        } else {
-
-
-
-         console.error("Could not load product FAQs.");
-
-
-
+         console.error("Product FAQs parsing failed:", faqResult.reason);
        }
 
-       if (similarResult.status === "fulfilled" && similarResult.value.ok) {
-
-
-
-         try {
-
-
-
-           const data: BackendProduct[] = await similarResult.value.json();
-
-
-
-           if (!cancelled && Array.isArray(data)) {
-
-
-
-             setSimilarProducts(data.filter((item) => item.id !== id && item.isActive));
-
-
-
-           }
-
-
-
-         } catch (relatedError) {
-
-
-
-           console.error("Similar products parsing failed:", relatedError);
-
-
-
+       if (similarResult.status === "fulfilled") {
+         const data = similarResult.value;
+         if (!cancelled && Array.isArray(data)) {
+           setSimilarProducts(data.filter((item) => item.id !== id && item.isActive));
          }
-
-
-
        } else {
-
-
-
-         console.error("Could not load similar products.");
-
-
-
+         console.error("Similar products fetch failed:", similarResult.reason);
        }
-
-
-
      };
 
      void loadRelatedContent();
 
-
-
-     return () => { cancelled = true; };
-
-
-
+     return () => {
+       cancelled = true;
+       controller.abort();
+     };
    }, [id]);
 
    const plans = useMemo(() => (product ? getPlans(product) : []), [product]);

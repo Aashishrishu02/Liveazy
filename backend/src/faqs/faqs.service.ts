@@ -138,13 +138,34 @@ export class FaqsService {
     const normalizedProductId = productId?.trim() || null;
 
     if (normalizedProductId) {
-      await this.validateProductId(normalizedProductId);
+      const [product, faqs] = await Promise.all([
+        this.prisma.product.findUnique({
+          where: { id: normalizedProductId },
+          select: { id: true },
+        }),
+        this.prisma.faq.findMany({
+          where: {
+            isActive: true,
+            productId: normalizedProductId,
+          },
+          orderBy: [
+            { sortOrder: 'asc' },
+            { createdAt: 'asc' },
+          ],
+        }),
+      ]);
+
+      if (!product) {
+        throw new NotFoundException('Product not found.');
+      }
+
+      return faqs;
     }
 
     return this.prisma.faq.findMany({
       where: {
         isActive: true,
-        productId: normalizedProductId,
+        productId: null,
       },
       orderBy: [
         { sortOrder: 'asc' },

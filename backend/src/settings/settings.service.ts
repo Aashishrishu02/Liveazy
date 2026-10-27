@@ -48,15 +48,21 @@ export class SettingsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getWhatsAppSettings(): Promise<WhatsAppSettingsResponse> {
-    let setting = await this.prisma.siteSetting.upsert({
+    let setting = await this.prisma.siteSetting.findUnique({
       where: { id: 1 },
-      update: {},
-      create: {
-        id: 1,
-        whatsappNumber: DEFAULT_WHATSAPP_NUMBER,
-        whatsappMessage: '',
-      },
     });
+
+    if (!setting) {
+      setting = await this.prisma.siteSetting.upsert({
+        where: { id: 1 },
+        update: {},
+        create: {
+          id: 1,
+          whatsappNumber: DEFAULT_WHATSAPP_NUMBER,
+          whatsappMessage: '',
+        },
+      });
+    }
 
     const storedMessage = setting.whatsappMessage ?? '';
     const isLegacyMessage = isLegacyWhatsAppMessage(storedMessage);
