@@ -10,7 +10,7 @@ import {
   Package,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { fetchCategoriesDeduplicated } from "../utils/api";
+import { fetchCategoriesDeduplicated, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -106,31 +106,29 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        const [categoriesData, productsResponse] = await Promise.all([
+        const [categoriesData, productsData] = await Promise.all([
           fetchCategoriesDeduplicated(API_URL),
-          fetch(`${API_URL}/products`),
+          fetchJsonDeduplicated<Product[]>(`${API_URL}/products`, {
+            signal: controller.signal,
+          }),
         ]);
-
-        if (!productsResponse.ok) {
-          throw new Error("Failed to fetch category data");
-        }
-
-        const productsData = await productsResponse.json();
 
         if (!cancelled) {
           setCategories(
-            Array.isArray(categoriesData) ? categoriesData : []
+            Array.isArray(categoriesData) ? (categoriesData as Category[]) : []
           );
           setProducts(
             Array.isArray(productsData) ? productsData : []
           );
         }
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Error loading categories:", error);
       } finally {
         if (!cancelled) setLoading(false);
@@ -141,6 +139,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 

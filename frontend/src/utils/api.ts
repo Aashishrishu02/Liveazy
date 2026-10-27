@@ -46,11 +46,15 @@ function getDeduplicationKey(url: string, init?: RequestInit): string {
 
   // Signal and method are explicitly excluded: method is always GET here,
   // and caller signal cancellation is handled in the per-caller wrapper promise.
-  const { signal: _, method: _m, headers, ...rest } = init;
+  const rest: Record<string, unknown> = { ...init };
+  delete rest.signal;
+  delete rest.method;
+  const headers = rest.headers as HeadersInit | undefined;
+  delete rest.headers;
 
   const normalizedHeaders = normalizeHeaders(headers);
   const sortedRestEntries = Object.entries(rest)
-    .filter(([_, value]) => value !== undefined)
+    .filter(([, value]) => value !== undefined)
     .sort(([a], [b]) => a.localeCompare(b));
 
   const hasHeaders = normalizedHeaders.length > 0;
@@ -99,7 +103,8 @@ export async function fetchJsonDeduplicated<T>(
       try {
         // Shared fetch runs without a single caller's signal so one caller's abort
         // does not tear down the connection for other listeners.
-        const { signal: _, ...restInit } = init || {};
+        const restInit: RequestInit = { ...init };
+        delete restInit.signal;
         const res = await fetch(url, restInit);
         if (!res.ok) {
           const err = new Error(`HTTP ${res.status}`);

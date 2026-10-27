@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import heroImg from "../assets/hero-banner.jpeg";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 
 
@@ -278,63 +279,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   useEffect(() => {
 
     let cancelled = false;
-
-
+    const controller = new AbortController();
 
     async function fetchBanners() {
-
       try {
-
-        const response = await fetch(`${API_URL}/banners`);
-
-        if (!response.ok) throw new Error("Failed to fetch banners");
-
-
-
-        const payload: unknown = await response.json();
+        const payload = await fetchJsonDeduplicated<unknown>(
+          `${API_URL}/banners`,
+          { signal: controller.signal }
+        );
 
         if (cancelled) return;
 
-
-
         const publicBanners = normalizeBanners(payload);
-
         setBanners(publicBanners);
-
         setActiveIndex(0);
-
       } catch (error) {
-
+        if (controller.signal.aborted) return;
         if (!cancelled) {
-
           console.error("Failed to fetch banners:", error);
-
           setBanners([]);
-
           setActiveIndex(0);
-
         }
-
       } finally {
-
         if (!cancelled) setIsBannerLoading(false);
-
       }
-
     }
-
-
 
     void fetchBanners();
 
-
-
     return () => {
-
       cancelled = true;
-
+      controller.abort();
     };
-
   }, [API_URL]);
 
 

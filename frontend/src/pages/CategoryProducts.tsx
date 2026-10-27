@@ -7,6 +7,7 @@ import PopularRentals from "../components/PopularRentals";
 import Footer from "../components/Footer";
 
 import type { Product } from "../types/rental";
+import { fetchCategoriesDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -43,13 +44,12 @@ export default function CategoryProducts() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`${API_URL}/categories`);
-
-        if (!response.ok) {
-          throw new Error("Unable to load categories.");
-        }
-
-        const data: Category[] = await response.json();
+        const result: unknown = await fetchCategoriesDeduplicated(API_URL);
+        const data: Category[] = Array.isArray(result)
+          ? (result as Category[])
+          : result && typeof result === "object" && "data" in result && Array.isArray((result as { data: unknown }).data)
+            ? ((result as { data: Category[] }).data)
+            : [];
 
         const foundCategory = data.find(
           (item) => item.id === id && item.isActive

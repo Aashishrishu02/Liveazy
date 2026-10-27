@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -177,19 +178,16 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
   // Public contact details are managed from the backend Contact Settings master.
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchContactSettings = async () => {
       if (!API_URL) return;
 
       try {
-        const response = await fetch(`${API_URL}/contact-settings`, {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch contact settings");
-        }
-
-        const data: Partial<ContactPageSettings> = await response.json();
+        const data = await fetchJsonDeduplicated<Partial<ContactPageSettings>>(
+          `${API_URL}/contact-settings`,
+          { signal: controller.signal }
+        );
         if (cancelled) return;
 
         setSettings((previous) => ({
@@ -201,6 +199,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
           supportHours: data.supportHours ?? previous.supportHours,
         }));
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Unable to load Contact Us settings:", error);
       }
     };
@@ -208,27 +207,28 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
     void fetchContactSettings();
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 
   // Keep WhatsApp number controlled by the existing WhatsApp Settings master.
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchWhatsAppSettings = async () => {
       if (!API_URL) return;
 
       try {
-        const response = await fetch(`${API_URL}/settings/whatsapp`, {
-          cache: "no-store",
-        });
-        if (!response.ok) return;
-
-        const data: { whatsappNumber?: string } = await response.json();
+        const data = await fetchJsonDeduplicated<{ whatsappNumber?: string }>(
+          `${API_URL}/settings/whatsapp`,
+          { signal: controller.signal }
+        );
         if (!cancelled && data.whatsappNumber) {
           setWhatsappNumber(String(data.whatsappNumber).replace(/\D/g, ""));
         }
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Unable to load WhatsApp contact settings:", error);
       }
     };
@@ -236,12 +236,14 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
     void fetchWhatsAppSettings();
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 
   // The public endpoint returns only active FAQs maintained in the FAQ Master.
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchFaqs = async () => {
       if (!API_URL) {
@@ -251,14 +253,10 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
       }
 
       try {
-        const response = await fetch(`${API_URL}/faqs`, {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch FAQs");
-        }
-
-        const data: FaqItem[] = await response.json();
+        const data = await fetchJsonDeduplicated<FaqItem[]>(
+          `${API_URL}/faqs`,
+          { signal: controller.signal }
+        );
         if (cancelled) return;
 
         if (Array.isArray(data) && data.length > 0) {
@@ -269,6 +267,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
           setFaqUsingFallback(false);
         }
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Unable to load FAQs:", error);
         if (!cancelled) setFaqUsingFallback(true);
       } finally {
@@ -281,6 +280,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
     void fetchFaqs();
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 

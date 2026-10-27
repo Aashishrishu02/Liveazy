@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -12,26 +12,27 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import CategorySection from "./components/CategorySection";
 import TrendingRentals from "./components/TrendingRentals";
-import ProductDetails from "./components/ProductDetails";
 import PromoBanner from "./components/PromoBanner";
 import Footer from "./components/Footer";
 import CustomerReviews from "./components/CustomerReviews";
 
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import Categories from "./pages/Categories";
-import Products from "./pages/Products";
-import Banner from "./pages/Banner";
-import WhatsAppSettings from "./pages/WhatsAppSettings";
-import PromoBanners from "./pages/PromoBanners";
-import ContactUs from "./pages/ContactUs";
-import ContactManagement from "./pages/ContactManagement";
-import FeedbackMaster from "./pages/FeedbackMaster";
-import CategoryProducts from "./pages/CategoryProducts";
-import TrendingRentalsAdmin from "./pages/TrendingRentalsAdmin";
-import Blogs from "./pages/Blogs";
-import BlogListing from "./pages/BlogListing";
-import BlogDetails from "./pages/BlogDetails";
+const ProductDetails = lazy(() => import("./components/ProductDetails"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
+const CategoryProducts = lazy(() => import("./pages/CategoryProducts"));
+const BlogListing = lazy(() => import("./pages/BlogListing"));
+const BlogDetails = lazy(() => import("./pages/BlogDetails"));
+
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Categories = lazy(() => import("./pages/Categories"));
+const Products = lazy(() => import("./pages/Products"));
+const Banner = lazy(() => import("./pages/Banner"));
+const WhatsAppSettings = lazy(() => import("./pages/WhatsAppSettings"));
+const PromoBanners = lazy(() => import("./pages/PromoBanners"));
+const ContactManagement = lazy(() => import("./pages/ContactManagement"));
+const FeedbackMaster = lazy(() => import("./pages/FeedbackMaster"));
+const TrendingRentalsAdmin = lazy(() => import("./pages/TrendingRentalsAdmin"));
+const Blogs = lazy(() => import("./pages/Blogs"));
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -201,37 +202,37 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/product/:id" element={<ProductDetails />} />
+      <Suspense fallback={<div className="min-h-screen bg-[#faf9f7]" />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
-        {/* Category-specific product listing */}
-        <Route path="/category/:id" element={<CategoryProducts />} />
+          {/* Category-specific product listing */}
+          <Route path="/category/:id" element={<CategoryProducts />} />
 
-        {/* Existing admin routes */}
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/categories" element={<Categories />} />
-        <Route path="/admin/products" element={<Products />} />
-        <Route path="/admin/banner" element={<Banner />} />
-        <Route path="/admin/settings" element={<WhatsAppSettings />} />
-        <Route path="/admin/promo-banners" element={<PromoBanners />} />
+          {/* Existing admin routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/categories" element={<Categories />} />
+          <Route path="/admin/products" element={<Products />} />
+          <Route path="/admin/banner" element={<Banner />} />
+          <Route path="/admin/settings" element={<WhatsAppSettings />} />
+          <Route path="/admin/promo-banners" element={<PromoBanners />} />
 
+          <Route
+            path="/admin/contact-management"
+            element={<ContactManagement />}
+          />
 
-        <Route
-          path="/admin/contact-management"
-          element={<ContactManagement />}
-        />
-
-        <Route path="/admin/feedback" element={<FeedbackMaster />} />
-        <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
-        <Route path="/admin/blogs" element={<Blogs />} />
-        <Route path="/blogs" element={<BlogListing />} />
-<Route path="/blogs/:slug" element={<BlogDetails />} />
-      </Routes>
+          <Route path="/admin/feedback" element={<FeedbackMaster />} />
+          <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
+          <Route path="/admin/blogs" element={<Blogs />} />
+          <Route path="/blogs" element={<BlogListing />} />
+          <Route path="/blogs/:slug" element={<BlogDetails />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
-
   );
 }
 

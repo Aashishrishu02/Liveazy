@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Star, MessageSquare, RefreshCw } from "lucide-react";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,15 +22,10 @@ export default function CustomerReviews() {
 
     async function loadReviews() {
       try {
-        const response = await fetch(`${API_URL}/feedback/approved`, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Unable to load customer reviews");
-        }
-
-        const data: unknown = await response.json();
+        const data = await fetchJsonDeduplicated<unknown>(
+          `${API_URL}/feedback/approved`,
+          { signal: controller.signal }
+        );
 
         const reviews = Array.isArray(data)
           ? data

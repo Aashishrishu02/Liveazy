@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { Product } from "../types/rental";
 import { useNavigate } from "react-router-dom";
+import { fetchJsonDeduplicated } from "../utils/api";
 const API_URL = import.meta.env.VITE_API_URL;
 type RentalDuration = "12M" | "6M" | "3M";
 interface BackendProduct {
@@ -158,15 +159,20 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
     );
   }, [backendProducts]);
   useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/products`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data: BackendProduct[] = await response.json();
-        const activeProducts = data.filter((product) => product.isActive);
+        const data = await fetchJsonDeduplicated<BackendProduct[]>(
+          `${API_URL}/products`,
+          { signal: controller.signal }
+        );
+        if (cancelled) return;
+        const activeProducts = Array.isArray(data)
+          ? data.filter((product) => product.isActive)
+          : [];
         setBackendProducts(activeProducts);
         setSelectedPlans((previous) => {
           const updated = { ...previous };
@@ -178,40 +184,52 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
           return updated;
         });
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Error fetching products:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
     void fetchProducts();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
   useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
     const fetchWhatsAppSettings = async () => {
       try {
-        const response = await fetch(`${API_URL}/settings/whatsapp`, { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error("Failed to fetch WhatsApp settings");
-        }
-        const data: {
+        const data = await fetchJsonDeduplicated<{
           whatsappNumber?: string;
           whatsappMessage?: string;
-        } = await response.json();
-        if (data.whatsappNumber) {
+        }>(`${API_URL}/settings/whatsapp`, { signal: controller.signal });
+        if (cancelled) return;
+        if (data?.whatsappNumber) {
           setWhatsappNumber(
             String(data.whatsappNumber).replace(/\D/g, "")
           );
         }
         // No default message: use exactly what the admin saved.
         setWhatsappMessage(
-          typeof data.whatsappMessage === "string"
+          typeof data?.whatsappMessage === "string"
             ? data.whatsappMessage
             : ""
         );
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Error fetching WhatsApp settings:", error);
       }
     };
     void fetchWhatsAppSettings();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
   const filteredProducts = useMemo(() => {
     const isWithinBudget = (rent: number) => {

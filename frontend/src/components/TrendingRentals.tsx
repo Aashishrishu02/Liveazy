@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 interface TrendingProduct {
   id: string | number;
@@ -55,15 +56,10 @@ export default function TrendingRentals() {
 
     async function fetchTrendingRentals() {
       try {
-        const response = await fetch(`${API_URL}/trending-rentals`, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to load trending rentals");
-        }
-
-        const result: TrendingRentalsResponse = await response.json();
+        const result = await fetchJsonDeduplicated<TrendingRentalsResponse>(
+          `${API_URL}/trending-rentals`,
+          { signal: controller.signal }
+        );
         setData(result);
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {

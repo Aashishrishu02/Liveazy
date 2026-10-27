@@ -11,6 +11,7 @@ import heroBannerImg from "../assets/hero-banner.jpeg";
 import table2Img from "../assets/products/table2.jpeg";
 import sofaImg from "../assets/products/sofa.jpeg";
 import dinnerTableImg from "../assets/products/dinner-table.jpeg";
+import { fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -71,18 +72,16 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchPromoBanners = async () => {
       try {
         if (!API_URL) return;
 
-        const response = await fetch(`${API_URL}/promo-banners?placement=HOMEPAGE_PROMO`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to load promo banners: ${response.status}`);
-        }
-
-        const data: PromoBannerData[] = await response.json();
+        const data = await fetchJsonDeduplicated<PromoBannerData[]>(
+          `${API_URL}/promo-banners?placement=HOMEPAGE_PROMO`,
+          { signal: controller.signal }
+        );
 
         if (cancelled || !Array.isArray(data)) return;
 
@@ -94,6 +93,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
           activeBanners.length > 0 ? activeBanners : fallbackBanners
         );
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Error loading promo banners:", error);
 
         if (!cancelled) {
@@ -106,6 +106,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 
