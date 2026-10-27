@@ -204,6 +204,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
   function insertLink() {
     if (!editor) return;
 
+    const { from, to } = editor.state.selection;
     const previousUrl = editor.getAttributes("link").href as
       | string
       | undefined;
@@ -213,7 +214,13 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
     if (url === null) return;
 
     if (!url.trim()) {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .extendMarkRange("link")
+        .unsetLink()
+        .run();
       return;
     }
 
@@ -224,12 +231,10 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
         throw new Error("Invalid protocol");
       }
 
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: parsed.href })
-        .run();
+      const chain = editor.chain().focus().setTextSelection({ from, to });
+
+      chain.setLink({ href: parsed.href }).run();
+      setUploadError("");
     } catch {
       setUploadError("Please enter a valid HTTP or HTTPS URL.");
     }
@@ -368,9 +373,8 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Heading"
           aria-label="Heading"
           className={toolButton}
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
           <Heading2 size={17} />
         </button>
@@ -380,6 +384,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Bullet list"
           aria-label="Bullet list"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           <List size={17} />
@@ -390,6 +395,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Numbered list"
           aria-label="Numbered list"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered size={17} />
@@ -400,6 +406,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Blockquote"
           aria-label="Blockquote"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
           <Quote size={17} />
@@ -410,6 +417,7 @@ export default function BlogEditor({ value, onChange }: BlogEditorProps) {
           title="Insert link"
           aria-label="Insert link"
           className={toolButton}
+          onMouseDown={(event) => event.preventDefault()}
           onClick={insertLink}
         >
           <LinkIcon size={17} />
