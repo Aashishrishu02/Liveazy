@@ -26,6 +26,10 @@ export default function CategoryProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Sidebar category filter state
+  const [selectedProductCategory, setSelectedProductCategory] =
+    useState("All");
+
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(
     new Set(["p-sofa-01", "p-bed-01"])
   );
@@ -45,10 +49,14 @@ export default function CategoryProducts() {
         setError("");
 
         const result: unknown = await fetchCategoriesDeduplicated(API_URL);
+
         const data: Category[] = Array.isArray(result)
           ? (result as Category[])
-          : result && typeof result === "object" && "data" in result && Array.isArray((result as { data: unknown }).data)
-            ? ((result as { data: Category[] }).data)
+          : result &&
+              typeof result === "object" &&
+              "data" in result &&
+              Array.isArray((result as { data: unknown }).data)
+            ? (result as { data: Category[] }).data
             : [];
 
         const foundCategory = data.find(
@@ -61,6 +69,9 @@ export default function CategoryProducts() {
 
         if (!cancelled) {
           setCategory(foundCategory);
+
+          // Initially select the category opened from the homepage.
+          setSelectedProductCategory(foundCategory.name);
         }
       } catch (err) {
         if (!cancelled) {
@@ -106,9 +117,11 @@ export default function CategoryProducts() {
 
   return (
     <div className="min-h-screen bg-[#faf9f7] font-sans text-gray-900">
-      <Navbar onSearchSubmit={(query) => {
-        window.location.href = `/?search=${encodeURIComponent(query)}#products`;
-      }} />
+      <Navbar
+        onSearchSubmit={(query) => {
+          window.location.href = `/?search=${encodeURIComponent(query)}#products`;
+        }}
+      />
 
       <main className="min-h-[60vh]">
         <div className="mx-auto max-w-[1440px] px-5 pt-6 sm:px-8 lg:px-12">
@@ -135,7 +148,9 @@ export default function CategoryProducts() {
               <h1 className="text-xl font-bold text-[#0F2942]">
                 Category unavailable
               </h1>
+
               <p className="mt-2 text-sm text-slate-600">{error}</p>
+
               <Link
                 to="/#categories"
                 className="mt-5 inline-flex rounded-xl bg-[#008A90] px-5 py-3 text-sm font-bold text-white hover:bg-[#006f74]"
@@ -167,8 +182,8 @@ export default function CategoryProducts() {
 
             <PopularRentals
               products={[]}
-              selectedCategory={category.name}
-              onSelectCategory={() => {}}
+              selectedCategory={selectedProductCategory}
+              onSelectCategory={setSelectedProductCategory}
               searchFilter=""
               onClearSearch={() => {}}
               wishlistIds={wishlistIds}
