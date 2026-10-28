@@ -22,8 +22,9 @@ import { LayoutDashboard,
   Search, MessageSquareText, Star,
   FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = getApiBaseUrl();
 
 type Tab = "settings" | "faqs" | "enquiries";
 type EnquiryStatus = "PENDING" | "CONTACTED" | "RESOLVED";
@@ -136,9 +137,7 @@ export default function ContactManagement() {
   };
 
   const fetchSettings = useCallback(async () => {
-    const response = await fetch(`${API_URL}/contact-settings`, { cache: "no-store" });
-    if (!response.ok) throw new Error(await readError(response, "Unable to load contact settings."));
-    const data = await response.json();
+    const data = await fetchJsonDeduplicated<ContactSettings>(`${API_URL}/contact-settings`);
     setSettings({
       pageTitle: data.pageTitle ?? emptySettings.pageTitle,
       pageDescription: data.pageDescription ?? emptySettings.pageDescription,
@@ -150,21 +149,14 @@ export default function ContactManagement() {
   }, []);
 
   const fetchFaqs = useCallback(async () => {
-    const response = await fetch(`${API_URL}/faqs/admin`, {
+    const data = await fetchJsonDeduplicated<Faq[]>(`${API_URL}/faqs/admin`, {
       headers: requestHeaders(),
-      cache: "no-store",
     });
-    if (!response.ok) throw new Error(await readError(response, "Unable to load FAQs. Check your admin login and token."));
-    const data = await response.json();
     setFaqs(Array.isArray(data) ? data : []);
   }, []);
 
   const fetchProducts = useCallback(async () => {
-    const response = await fetch(`${API_URL}/products`, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(await readError(response, "Unable to load products for FAQ selection."));
-    }
-    const data = await response.json();
+    const data = await fetchJsonDeduplicated<unknown>(`${API_URL}/products`);
     setProducts(
       Array.isArray(data)
         ? data.filter(
@@ -179,12 +171,9 @@ export default function ContactManagement() {
     const endpoint = statusFilter === "ALL"
       ? `${API_URL}/contact-enquiries`
       : `${API_URL}/contact-enquiries?status=${statusFilter}`;
-    const response = await fetch(endpoint, {
+    const data = await fetchJsonDeduplicated<Enquiry[]>(endpoint, {
       headers: requestHeaders(),
-      cache: "no-store",
     });
-    if (!response.ok) throw new Error(await readError(response, "Unable to load enquiries. Check your admin login and token."));
-    const data = await response.json();
     setEnquiries(Array.isArray(data) ? data : []);
   }, [statusFilter]);
 

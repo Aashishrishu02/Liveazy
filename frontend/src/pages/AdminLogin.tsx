@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { getApiBaseUrl, fetchWithTimeout } from "../utils/api";
 import {
   Eye,
   EyeOff,
@@ -37,14 +37,9 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
+      const API_URL = getApiBaseUrl();
 
-      if (!API_URL) {
-        alert("VITE_API_URL is not configured.");
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/auth/admin-login`, {
+      const response = await fetchWithTimeout(`${API_URL}/auth/admin-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -23,7 +23,9 @@ import {
   MessageSquareText,
   FileText,
 } from "lucide-react";
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
+
+const API_URL = getApiBaseUrl();
 const MAX_PRODUCTS = 4;
 interface Product {
   id: string;
@@ -120,25 +122,16 @@ export default function TrendingRentalsAdmin() {
     setLoading(true);
     showNotice("");
     try {
-      const [settingsResponse, productsResponse] = await Promise.all([
-        fetch(`${API_URL}/trending-rentals/admin`, {
-          headers: authHeaders(),
-        }),
-        fetch(`${API_URL}/products`, {
-          headers: authHeaders(),
-        }),
+      const [adminData, productData] = await Promise.all([
+        fetchJsonDeduplicated<TrendingAdminResponse>(
+          `${API_URL}/trending-rentals/admin`,
+          { headers: authHeaders() },
+        ),
+        fetchJsonDeduplicated<Product[] | { data?: Product[] }>(
+          `${API_URL}/products`,
+          { headers: authHeaders() },
+        ),
       ]);
-      if (!settingsResponse.ok) {
-        throw new Error(
-          `Trending settings request failed (${settingsResponse.status})`,
-        );
-      }
-      if (!productsResponse.ok) {
-        throw new Error(`Products request failed (${productsResponse.status})`);
-      }
-      const adminData =
-        (await settingsResponse.json()) as TrendingAdminResponse;
-      const productData = await productsResponse.json();
       const savedSettings =
         adminData.setting || adminData.settings || adminData;
       setSettings({

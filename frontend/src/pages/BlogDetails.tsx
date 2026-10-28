@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays } from "lucide-react";
+import { getApiBaseUrl } from "../utils/api";
 
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_URL = getApiBaseUrl();
 
 interface Blog {
   id: string;

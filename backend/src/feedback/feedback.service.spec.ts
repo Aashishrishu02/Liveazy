@@ -1,12 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FeedbackService } from './feedback.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('FeedbackService', () => {
   let service: FeedbackService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FeedbackService],
+      providers: [
+        FeedbackService,
+        {
+          provide: PrismaService,
+          useValue: {
+            feedback: {
+              findMany: jest.fn(),
+              findUnique: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+              delete: jest.fn(),
+            },
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<FeedbackService>(FeedbackService);

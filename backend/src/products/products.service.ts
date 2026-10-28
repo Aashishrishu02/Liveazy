@@ -8,9 +8,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 @Injectable()
 export class ProductsService {
+  private productCache = new Map<string, { data: unknown; expiresAt: number }>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private singleProductCache = new Map<string, { data: any; expiresAt: number }>();
+
   constructor(private prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.productCache.clear();
+    this.singleProductCache.clear();
+    globalEtagCache.invalidate('products');
+  }
 
   async create(createProductDto: CreateProductDto) {
     const maxOrder = await this.prisma.product.aggregate({
@@ -21,17 +33,28 @@ export class ProductsService {
       createProductDto.displayOrder ??
       ((maxOrder._max.displayOrder ?? 0) + 1);
 
-    return this.prisma.product.create({
+    const created = await this.prisma.product.create({
       data: { ...createProductDto, displayOrder },
       include: {
         category: true,
         images: { orderBy: { sortOrder: 'asc' } },
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
-  async findAll() {
-    return this.prisma.product.findMany({
+  async findAll(categoryId?: string) {
+    const key = categoryId ? `cat:${categoryId}` : '__ALL__';
+    const now = Date.now();
+    const cached = this.productCache.get(key);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const products = await this.prisma.product.findMany({
+      where: categoryId ? { categoryId } : {},
       include: {
         category: true,
         images: { orderBy: { sortOrder: 'asc' } },
@@ -41,9 +64,18 @@ export class ProductsService {
         { createdAt: 'desc' },
       ],
     });
+
+    this.productCache.set(key, { data: products, expiresAt: now + 60000 }); // 60s cache
+    return products;
   }
 
   async findOne(id: string) {
+    const now = Date.now();
+    const cached = this.singleProductCache.get(id);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
@@ -56,13 +88,14 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
+    this.singleProductCache.set(id, { data: product, expiresAt: now + 60000 });
     return product;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     await this.findOne(id);
 
-    return this.prisma.product.update({
+    const updated = await this.prisma.product.update({
       where: { id },
       data: updateProductDto,
       include: {
@@ -70,13 +103,18 @@ export class ProductsService {
         images: { orderBy: { sortOrder: 'asc' } },
       },
     });
+
+    this.invalidateCache();
+    return updated;
   }
 
   async remove(id: string) {
     await this.findOne(id);
 
     // ProductImage records are removed automatically through onDelete: Cascade.
-    return this.prisma.product.delete({ where: { id } });
+    const deleted = await this.prisma.product.delete({ where: { id } });
+    this.invalidateCache();
+    return deleted;
   }
 
   async addImages(id: string, imageUrls: string[]) {
@@ -122,6 +160,7 @@ export class ProductsService {
       }
     });
 
+    this.invalidateCache();
     return this.findOne(id);
   }
 
@@ -169,6 +208,7 @@ export class ProductsService {
       });
     }
 
+    this.invalidateCache();
     return this.findOne(id);
   }
 
@@ -203,6 +243,7 @@ export class ProductsService {
       }),
     ]);
 
+    this.invalidateCache();
     return this.findOne(id);
   }
 

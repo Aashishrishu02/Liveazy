@@ -6,6 +6,8 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 const VALID_STATUSES = [
   'PENDING',
   'CONTACTED',
@@ -17,7 +19,14 @@ type EnquiryInput = Record<string, unknown>;
 
 @Injectable()
 export class ContactEnquiriesService {
+  private cache = new Map<string, { data: unknown; expiresAt: number }>();
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.cache.clear();
+    globalEtagCache.invalidate('contact-enquiries');
+  }
 
   private validateBody(input: unknown): EnquiryInput {
     if (
@@ -153,6 +162,8 @@ export class ContactEnquiriesService {
       },
     });
 
+    this.invalidateCache();
+
     return {
       message: 'Your enquiry has been submitted successfully.',
       enquiry,
@@ -177,7 +188,14 @@ export class ContactEnquiriesService {
       statusFilter = status as EnquiryStatus;
     }
 
-    return this.prisma.contactEnquiry.findMany({
+    const key = statusFilter || '__ALL__';
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const result = await this.prisma.contactEnquiry.findMany({
       where: statusFilter
         ? { status: statusFilter }
         : undefined,
@@ -186,6 +204,9 @@ export class ContactEnquiriesService {
       },
       take: 200,
     });
+
+    this.cache.set(key, { data: result, expiresAt: now + 60000 });
+    return result;
   }
 
   // ADMIN ONLY: Change status and/or add internal notes.
@@ -252,10 +273,12 @@ export class ContactEnquiriesService {
     }
 
     try {
-      return await this.prisma.contactEnquiry.update({
+      const updated = await this.prisma.contactEnquiry.update({
         where: { id },
         data: updateData,
       });
+      this.invalidateCache();
+      return updated;
     } catch (error) {
       if (
         typeof error === 'object' &&

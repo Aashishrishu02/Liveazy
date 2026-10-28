@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -14,6 +14,10 @@ import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.mo
 import { FeedbackModule } from './feedback/feedback.module';
 import { TrendingRentalsModule } from './trending-rentals/trending-rentals.module';
 import { BlogsModule } from './blogs/blogs.module';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConditionalRequestMiddleware } from './common/middleware/conditional-request.middleware';
 
 @Module({
   imports: [
@@ -35,5 +39,11 @@ import { BlogsModule } from './blogs/blogs.module';
     TrendingRentalsModule,
     BlogsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ConditionalRequestMiddleware).forRoutes('*');
+  }
+}

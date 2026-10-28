@@ -29,8 +29,9 @@ import {
   Save,
 } from "lucide-react";
 import BlogEditor from "../components/BlogEditor";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_URL = getApiBaseUrl();
 
 type BlogStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 type StatusFilter = "ALL" | BlogStatus;
@@ -160,30 +161,26 @@ export default function Blogs() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/blogs/admin`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const data = await fetchJsonDeduplicated<Blog[] | { blogs?: Blog[] }>(
+        `${API_URL}/blogs/admin`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("token");
-        navigate("/admin");
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          typeof data.message === "string"
-            ? data.message
-            : "Unable to load blogs.",
-        );
-      }
+      );
 
       setBlogs(Array.isArray(data) ? data : data.blogs || []);
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      if (error && typeof error === "object" && "status" in error) {
+        const status = (error as { status: number }).status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem("token");
+          navigate("/admin");
+          return;
+        }
+      }
       console.error("Blog loading error:", error);
       showNotice(
         error instanceof Error ? error.message : "Unable to load blogs.",

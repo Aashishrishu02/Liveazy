@@ -28,7 +28,9 @@ AlertCircle,
 SlidersHorizontal,
 Contact, MessageSquareText, Star,
   FileText } from "lucide-react";
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
+
+const API_URL = getApiBaseUrl();
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 type StatusFilter = "all" | "active" | "inactive";
 interface Category {
@@ -203,16 +205,9 @@ const fetchData = useCallback(async () => {
 try {
 setLoading(true);
 setLoadError("");
-const [productsResponse, categoriesResponse] = await Promise.all([
-fetch(`${API_URL}/products`),
-fetch(`${API_URL}/categories`),
-]);
-if (!productsResponse.ok || !categoriesResponse.ok) {
-throw new Error(`Unable to load catalogue (products: ${productsResponse.status}, categories: ${categoriesResponse.status}).`);
-}
 const [productsData, categoriesData] = await Promise.all([
-productsResponse.json(),
-categoriesResponse.json(),
+fetchJsonDeduplicated<unknown>(`${API_URL}/products`),
+fetchJsonDeduplicated<unknown>(`${API_URL}/categories`),
 ]);
 const productsList: Product[] = Array.isArray(productsData) ? productsData : [];
 setProducts(productsList);

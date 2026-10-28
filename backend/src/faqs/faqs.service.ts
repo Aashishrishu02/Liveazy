@@ -6,11 +6,24 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 type FaqInput = Record<string, unknown>;
 
 @Injectable()
 export class FaqsService {
+  private publicCache = new Map<string, { data: unknown; expiresAt: number }>();
+  private adminCache: unknown = null;
+  private adminCacheExpiresAt = 0;
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.publicCache.clear();
+    this.adminCache = null;
+    this.adminCacheExpiresAt = 0;
+    globalEtagCache.invalidate('faqs');
+  }
 
   private validateInput(input: unknown): FaqInput {
     if (
@@ -136,6 +149,12 @@ export class FaqsService {
    */
   async findPublic(productId?: string) {
     const normalizedProductId = productId?.trim() || null;
+    const cacheKey = normalizedProductId ? `prod:${normalizedProductId}` : '__GENERAL__';
+    const now = Date.now();
+    const cached = this.publicCache.get(cacheKey);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
 
     if (normalizedProductId) {
       const [product, faqs] = await Promise.all([
@@ -159,10 +178,11 @@ export class FaqsService {
         throw new NotFoundException('Product not found.');
       }
 
+      this.publicCache.set(cacheKey, { data: faqs, expiresAt: now + 60000 });
       return faqs;
     }
 
-    return this.prisma.faq.findMany({
+    const faqs = await this.prisma.faq.findMany({
       where: {
         isActive: true,
         productId: null,
@@ -172,18 +192,30 @@ export class FaqsService {
         { createdAt: 'asc' },
       ],
     });
+
+    this.publicCache.set(cacheKey, { data: faqs, expiresAt: now + 60000 });
+    return faqs;
   }
 
   /**
    * Admin: return all FAQs, including inactive FAQs.
    */
   async findAll() {
-    return this.prisma.faq.findMany({
+    const now = Date.now();
+    if (this.adminCache && now < this.adminCacheExpiresAt) {
+      return this.adminCache;
+    }
+
+    const faqs = await this.prisma.faq.findMany({
       orderBy: [
         { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
     });
+
+    this.adminCache = faqs;
+    this.adminCacheExpiresAt = now + 60000;
+    return faqs;
   }
 
   /**
@@ -248,7 +280,7 @@ export class FaqsService {
 
     productId = await this.validateProductId(productId);
 
-    return this.prisma.faq.create({
+    const created = await this.prisma.faq.create({
       data: {
         label,
         question,
@@ -260,6 +292,9 @@ export class FaqsService {
         ...(foot !== undefined ? { foot } : {}),
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
   /**
@@ -372,10 +407,12 @@ export class FaqsService {
     }
 
     try {
-      return await this.prisma.faq.update({
+      const updated = await this.prisma.faq.update({
         where: { id },
         data,
       });
+      this.invalidateCache();
+      return updated;
     } catch (error) {
       if (
         typeof error === 'object' &&
@@ -402,6 +439,7 @@ export class FaqsService {
       await this.prisma.faq.delete({
         where: { id },
       });
+      this.invalidateCache();
 
       return {
         message: 'FAQ deleted successfully.',

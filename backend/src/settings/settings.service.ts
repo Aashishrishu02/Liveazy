@@ -43,11 +43,27 @@ function isLegacyWhatsAppMessage(message: string): boolean {
   return hasOldMessagePrefix || hasProductDetailsBlock;
 }
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 @Injectable()
 export class SettingsService {
+  private cachedSettings: WhatsAppSettingsResponse | null = null;
+  private cacheExpiresAt = 0;
+
   constructor(private readonly prisma: PrismaService) {}
 
+  private invalidateCache() {
+    this.cachedSettings = null;
+    this.cacheExpiresAt = 0;
+    globalEtagCache.invalidate('settings');
+  }
+
   async getWhatsAppSettings(): Promise<WhatsAppSettingsResponse> {
+    const now = Date.now();
+    if (this.cachedSettings && now < this.cacheExpiresAt) {
+      return this.cachedSettings;
+    }
+
     let setting = await this.prisma.siteSetting.findUnique({
       where: { id: 1 },
     });
@@ -75,10 +91,14 @@ export class SettingsService {
       });
     }
 
-    return {
+    const response: WhatsAppSettingsResponse = {
       whatsappNumber: setting.whatsappNumber,
       whatsappMessage: isLegacyMessage ? '' : storedMessage,
     };
+
+    this.cachedSettings = response;
+    this.cacheExpiresAt = now + 60000;
+    return response;
   }
 
   async updateWhatsAppSettings(
@@ -154,6 +174,8 @@ export class SettingsService {
         whatsappMessage: updateData.whatsappMessage ?? '',
       },
     });
+
+    this.invalidateCache();
 
     return {
       whatsappNumber: setting.whatsappNumber,

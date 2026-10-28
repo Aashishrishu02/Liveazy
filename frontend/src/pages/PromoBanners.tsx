@@ -25,10 +25,9 @@ import { LayoutDashboard,
 
   Contact, MessageSquareText, Star,
   FileText } from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-
-
-const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
+const API_URL = getApiBaseUrl();
 
 
 
@@ -238,15 +237,9 @@ export default function PromoBanners() {
 
       setError("");
 
-      const response = await fetch(`${API_URL}/promo-banners/admin`, {
-
+      const data = await fetchJsonDeduplicated<PromoBannerData[]>(`${API_URL}/promo-banners/admin`, {
         headers: getHeaders(),
-
       });
-
-      const data = await response.json().catch(() => []);
-
-      if (!response.ok) throw new Error(getErrorMessage(data, "Failed to load promo banners."));
 
       setBanners(Array.isArray(data) ? data : []);
 

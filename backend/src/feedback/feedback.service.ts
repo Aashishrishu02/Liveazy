@@ -7,11 +7,26 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 @Injectable()
 export class FeedbackService {
+  private approvedCache: unknown = null;
+  private approvedExpiresAt = 0;
+  private adminCache: unknown = null;
+  private adminExpiresAt = 0;
+
   constructor(
     private readonly prisma: PrismaService,
   ) {}
+
+  private invalidateCache() {
+    this.approvedCache = null;
+    this.approvedExpiresAt = 0;
+    this.adminCache = null;
+    this.adminExpiresAt = 0;
+    globalEtagCache.invalidate('feedback');
+  }
 
   // Create feedback
   async create(data: {
@@ -35,18 +50,26 @@ export class FeedbackService {
       );
     }
 
-    return this.prisma.feedback.create({
+    const created = await this.prisma.feedback.create({
       data: {
         customerName,
         rating,
         message,
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
   // Get approved feedback for public website
   async findApproved() {
-    return this.prisma.feedback.findMany({
+    const now = Date.now();
+    if (this.approvedCache && now < this.approvedExpiresAt) {
+      return this.approvedCache;
+    }
+
+    const result = await this.prisma.feedback.findMany({
       where: {
         status: 'APPROVED',
       },
@@ -54,15 +77,28 @@ export class FeedbackService {
         createdAt: 'desc',
       },
     });
+
+    this.approvedCache = result;
+    this.approvedExpiresAt = now + 60000;
+    return result;
   }
 
   // Get all feedback for admin
   async findAll() {
-    return this.prisma.feedback.findMany({
+    const now = Date.now();
+    if (this.adminCache && now < this.adminExpiresAt) {
+      return this.adminCache;
+    }
+
+    const result = await this.prisma.feedback.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
+
+    this.adminCache = result;
+    this.adminExpiresAt = now + 60000;
+    return result;
   }
 
   // Approve or reject feedback
@@ -84,10 +120,12 @@ export class FeedbackService {
       throw new NotFoundException('Feedback not found');
     }
 
-    return this.prisma.feedback.update({
+    const updated = await this.prisma.feedback.update({
       where: { id },
       data: { status },
     });
+    this.invalidateCache();
+    return updated;
   }
 
   // Edit existing feedback
@@ -123,7 +161,7 @@ export class FeedbackService {
       throw new NotFoundException('Feedback not found');
     }
 
-    return this.prisma.feedback.update({
+    const updated = await this.prisma.feedback.update({
       where: { id },
       data: {
         customerName,
@@ -131,6 +169,8 @@ export class FeedbackService {
         message,
       },
     });
+    this.invalidateCache();
+    return updated;
   }
 
   // Delete existing feedback
@@ -143,8 +183,10 @@ export class FeedbackService {
       throw new NotFoundException('Feedback not found');
     }
 
-    return this.prisma.feedback.delete({
+    const deleted = await this.prisma.feedback.delete({
       where: { id },
     });
+    this.invalidateCache();
+    return deleted;
   }
 }

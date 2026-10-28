@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { globalEtagCache } from '../common/services/etag-cache.service';
 
 export interface PromoBannerInput {
   image?: string;
@@ -20,11 +21,30 @@ export interface PromoBannerInput {
 
 @Injectable()
 export class PromoBannersService {
+  private activeCache = new Map<string, { data: unknown; expiresAt: number }>();
+  private allCache: unknown = null;
+  private allCacheExpiresAt = 0;
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.activeCache.clear();
+    this.allCache = null;
+    this.allCacheExpiresAt = 0;
+    globalEtagCache.invalidate('promo-banners');
+  }
 
   // Public website: return active promo banners.
   async findActive(placement?: string) {
-    return this.prisma.promoBanner.findMany({
+    const key = placement || '__all__';
+    const now = Date.now();
+    const cached = this.activeCache.get(key);
+
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const banners = await this.prisma.promoBanner.findMany({
       where: {
         isActive: true,
         ...(placement ? { placement } : {}),
@@ -34,23 +54,35 @@ export class PromoBannersService {
         { createdAt: 'desc' },
       ],
     });
+
+    this.activeCache.set(key, { data: banners, expiresAt: now + 60000 });
+    return banners;
   }
 
   // Admin: return all banners, including inactive banners.
   async findAll() {
-    return this.prisma.promoBanner.findMany({
+    const now = Date.now();
+    if (this.allCache && now < this.allCacheExpiresAt) {
+      return this.allCache;
+    }
+
+    const banners = await this.prisma.promoBanner.findMany({
       orderBy: [
         { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
     });
+
+    this.allCache = banners;
+    this.allCacheExpiresAt = now + 60000;
+    return banners;
   }
 
   // Create a promo banner.
   async create(body: PromoBannerInput) {
     this.validate(body);
 
-    return this.prisma.promoBanner.create({
+    const created = await this.prisma.promoBanner.create({
       data: {
         image: body.image!.trim(),
         label: body.label!.trim(),
@@ -63,6 +95,9 @@ export class PromoBannersService {
         placement: body.placement?.trim() || 'HOMEPAGE_PROMO',
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
   // Update an existing promo banner.
@@ -77,7 +112,7 @@ export class PromoBannersService {
 
     this.validate(body, true);
 
-    return this.prisma.promoBanner.update({
+    const updated = await this.prisma.promoBanner.update({
       where: { id },
       data: {
         ...(body.image !== undefined && {
@@ -109,6 +144,9 @@ export class PromoBannersService {
         }),
       },
     });
+
+    this.invalidateCache();
+    return updated;
   }
 
   // Delete an existing promo banner.
@@ -121,9 +159,12 @@ export class PromoBannersService {
       throw new NotFoundException('Promo banner not found.');
     }
 
-    return this.prisma.promoBanner.delete({
+    const deleted = await this.prisma.promoBanner.delete({
       where: { id },
     });
+
+    this.invalidateCache();
+    return deleted;
   }
 
   // Public: record a banner impression.

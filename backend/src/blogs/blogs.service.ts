@@ -7,11 +7,22 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 type BlogStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
 @Injectable()
 export class BlogsService {
+  private publicCache = new Map<string, { data: unknown; expiresAt: number }>();
+  private adminCache = new Map<string, { data: unknown; expiresAt: number }>();
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.publicCache.clear();
+    this.adminCache.clear();
+    globalEtagCache.invalidate('blogs');
+  }
 
   private createSlug(value: string): string {
     return value
@@ -48,7 +59,15 @@ export class BlogsService {
   }
 
   async findPublic(query?: string, category?: string) {
-    return this.prisma.blog.findMany({
+    const cacheKey = `${query?.trim().toLowerCase() || ''}:${category || ''}`;
+    const cached = this.publicCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const blogs = await this.prisma.blog.findMany({
       where: {
         status: 'PUBLISHED',
         publishedAt: { lte: new Date() },
@@ -64,6 +83,9 @@ export class BlogsService {
       },
       orderBy: [{ featured: 'desc' }, { publishedAt: 'desc' }],
     });
+
+    this.publicCache.set(cacheKey, { data: blogs, expiresAt: now + 60000 });
+    return blogs;
   }
 
   async findPublicBySlug(slug: string) {
@@ -89,10 +111,20 @@ export class BlogsService {
       throw new BadRequestException('Invalid blog status');
     }
 
-    return this.prisma.blog.findMany({
+    const key = status || '__ALL__';
+    const now = Date.now();
+    const cached = this.adminCache.get(key);
+    if (cached && now < cached.expiresAt) {
+      return cached.data;
+    }
+
+    const blogs = await this.prisma.blog.findMany({
       where: status ? { status } : {},
       orderBy: { updatedAt: 'desc' },
     });
+
+    this.adminCache.set(key, { data: blogs, expiresAt: now + 60000 });
+    return blogs;
   }
 
   async create(input: unknown) {
@@ -103,7 +135,7 @@ export class BlogsService {
     const publishedAt =
       status === 'PUBLISHED' ? new Date() : null;
 
-    return this.prisma.blog.create({
+    const created = await this.prisma.blog.create({
       data: {
         ...data,
         slug,
@@ -111,6 +143,9 @@ export class BlogsService {
         publishedAt,
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
   async update(id: string, input: unknown) {
@@ -136,7 +171,7 @@ export class BlogsService {
       publishedAt = new Date();
     }
 
-    return this.prisma.blog.update({
+    const updated = await this.prisma.blog.update({
       where: { id },
       data: {
         ...data,
@@ -145,6 +180,9 @@ export class BlogsService {
         publishedAt,
       },
     });
+
+    this.invalidateCache();
+    return updated;
   }
 
   async remove(id: string) {
@@ -158,6 +196,7 @@ export class BlogsService {
     }
 
     await this.prisma.blog.delete({ where: { id } });
+    this.invalidateCache();
 
     return { message: 'Blog deleted successfully' };
   }

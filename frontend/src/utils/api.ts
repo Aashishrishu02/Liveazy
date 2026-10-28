@@ -74,12 +74,13 @@ function getDeduplicationKey(url: string, init?: RequestInit): string {
 export async function fetchJsonDeduplicated<T>(
   url: string,
   init?: RequestInit,
+  timeoutMs = 15000,
 ): Promise<T> {
   const method = (init?.method || 'GET').toUpperCase();
 
   // Non-GET requests should never be deduplicated
   if (method !== 'GET') {
-    const res = await fetch(url, init);
+    const res = await fetchWithTimeout(url, init, timeoutMs);
     if (!res.ok) {
       const err = new Error(`HTTP ${res.status}`);
       (err as unknown as { status: number }).status = res.status;
@@ -100,12 +101,18 @@ export async function fetchJsonDeduplicated<T>(
   let sharedPromise = inFlightRequests.get(deduplicationKey);
   if (!sharedPromise) {
     sharedPromise = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        // Shared fetch runs without a single caller's signal so one caller's abort
-        // does not tear down the connection for other listeners.
+        // Shared fetch runs with its own internal timeout signal, independent of individual
+        // caller signals, so that one caller's unmount/abort does not terminate the in-flight
+        // network fetch for other listeners or corrupt shared in-flight state.
         const restInit: RequestInit = { ...init };
         delete restInit.signal;
-        const res = await fetch(url, restInit);
+        const res = await fetch(url, {
+          ...restInit,
+          signal: controller.signal,
+        });
         if (!res.ok) {
           const err = new Error(`HTTP ${res.status}`);
           (err as unknown as { status: number }).status = res.status;
@@ -113,6 +120,7 @@ export async function fetchJsonDeduplicated<T>(
         }
         return (await res.json()) as T;
       } finally {
+        clearTimeout(timer);
         inFlightRequests.delete(deduplicationKey);
       }
     })();
@@ -145,6 +153,52 @@ export async function fetchJsonDeduplicated<T>(
       },
     );
   });
+}
+
+export function getApiBaseUrl(): string {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (typeof envUrl === 'string' && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+
+  // Fallback for Vercel production deployment if env var is missing or misconfigured
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://rentnest-syps.onrender.com';
+  }
+
+  return 'http://localhost:3000';
+}
+
+export async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = 15000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  const callerSignal = init?.signal;
+  if (callerSignal) {
+    if (callerSignal.aborted) {
+      clearTimeout(timer);
+      controller.abort();
+    } else {
+      callerSignal.addEventListener('abort', () => {
+        clearTimeout(timer);
+        controller.abort();
+      }, { once: true });
+    }
+  }
+
+  try {
+    const response = await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function fetchCategoriesDeduplicated(

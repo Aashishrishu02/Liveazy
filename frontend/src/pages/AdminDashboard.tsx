@@ -28,8 +28,7 @@ import {
   Star,
   FileText,
 } from "lucide-react";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface Category {
   id: string;
@@ -130,14 +129,10 @@ const navigation = [
 },
 ];
 
-async function fetchJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`);
-
-  if (!response.ok) {
-    throw new Error(`${path} request failed (${response.status})`);
-  }
-
-  return (await response.json()) as T;
+async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const base = getApiBaseUrl();
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return fetchJsonDeduplicated<T>(`${base}${cleanPath}`, { signal }, 15000);
 }
 
 function toArray<T>(value: unknown): T[] {
@@ -298,88 +293,82 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let cancelled = false;
+    const abortController = new AbortController();
 
     async function loadDashboard() {
       setLoading(true);
       setApiError(false);
 
-      const results = await Promise.allSettled([
-        fetchJson<unknown>("/categories"),
-        fetchJson<unknown>("/products"),
-        fetchJson<unknown>("/banners"),
-        fetchJson<unknown>("/promo-banners"),
-        fetchJson<unknown>("/settings/whatsapp"),
+      const fetchCategory = fetchJson<unknown>("/categories", abortController.signal)
+        .then((data) => {
+          if (!cancelled) setCategories(toArray<Category>(data));
+        })
+        .catch((err) => {
+          if (!cancelled && !(err instanceof Error && err.name === "AbortError")) {
+            console.error("Dashboard categories error:", err);
+            setApiError(true);
+          }
+        });
+
+      const fetchProduct = fetchJson<unknown>("/products", abortController.signal)
+        .then((data) => {
+          if (!cancelled) setProducts(toArray<Product>(data));
+        })
+        .catch((err) => {
+          if (!cancelled && !(err instanceof Error && err.name === "AbortError")) {
+            console.error("Dashboard products error:", err);
+            setApiError(true);
+          }
+        });
+
+      const fetchBanner = fetchJson<unknown>("/banners", abortController.signal)
+        .then((data) => {
+          if (!cancelled) setBanner(toBanner(data));
+        })
+        .catch((err) => {
+          if (!cancelled && !(err instanceof Error && err.name === "AbortError")) {
+            console.error("Dashboard banner error:", err);
+          }
+        });
+
+      const fetchPromo = fetchJson<unknown>("/promo-banners", abortController.signal)
+        .then((data) => {
+          if (!cancelled) setPromoBanners(toArray<PromoBanner>(data));
+        })
+        .catch((err) => {
+          if (!cancelled && !(err instanceof Error && err.name === "AbortError")) {
+            console.error("Dashboard promo banner error:", err);
+          }
+        });
+
+      const fetchWhatsapp = fetchJson<unknown>("/settings/whatsapp", abortController.signal)
+        .then((data) => {
+          if (!cancelled) setWhatsapp(toObject<WhatsAppSettings>(data));
+        })
+        .catch((err) => {
+          if (!cancelled && !(err instanceof Error && err.name === "AbortError")) {
+            console.error("Dashboard WhatsApp settings error:", err);
+          }
+        });
+
+      await Promise.allSettled([
+        fetchCategory,
+        fetchProduct,
+        fetchBanner,
+        fetchPromo,
+        fetchWhatsapp,
       ]);
 
-      if (cancelled) return;
-
-      const [
-        categoryResult,
-        productResult,
-        bannerResult,
-        promoResult,
-        whatsappResult,
-      ] = results;
-
-      if (categoryResult.status === "fulfilled") {
-        setCategories(toArray<Category>(categoryResult.value));
-      } else {
-        setCategories([]);
-        setApiError(true);
-        console.error(
-          "Dashboard categories error:",
-          categoryResult.reason,
-        );
+      if (!cancelled) {
+        setLoading(false);
       }
-
-      if (productResult.status === "fulfilled") {
-        setProducts(toArray<Product>(productResult.value));
-      } else {
-        setProducts([]);
-        setApiError(true);
-        console.error(
-          "Dashboard products error:",
-          productResult.reason,
-        );
-      }
-
-      if (bannerResult.status === "fulfilled") {
-        setBanner(toBanner(bannerResult.value));
-      } else {
-        setBanner(null);
-        console.error(
-          "Dashboard banner error:",
-          bannerResult.reason,
-        );
-      }
-
-      if (promoResult.status === "fulfilled") {
-        setPromoBanners(toArray<PromoBanner>(promoResult.value));
-      } else {
-        setPromoBanners([]);
-        console.error(
-          "Dashboard promo banner error:",
-          promoResult.reason,
-        );
-      }
-
-      if (whatsappResult.status === "fulfilled") {
-        setWhatsapp(toObject<WhatsAppSettings>(whatsappResult.value));
-      } else {
-        setWhatsapp(null);
-        console.error(
-          "Dashboard WhatsApp settings error:",
-          whatsappResult.reason,
-        );
-      }
-
-      setLoading(false);
     }
 
     void loadDashboard();
 
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [refreshKey]);
 

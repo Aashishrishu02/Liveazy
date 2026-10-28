@@ -5,9 +5,24 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 @Injectable()
 export class TrendingRentalsService {
+  private publicCache: unknown = null;
+  private publicCacheExpiresAt = 0;
+  private adminCache: unknown = null;
+  private adminCacheExpiresAt = 0;
+
   constructor(private readonly prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.publicCache = null;
+    this.publicCacheExpiresAt = 0;
+    this.adminCache = null;
+    this.adminCacheExpiresAt = 0;
+    globalEtagCache.invalidate('trending-rentals');
+  }
 
   private readonly productInclude = {
     category: true,
@@ -15,6 +30,11 @@ export class TrendingRentalsService {
   };
 
   async getPublicSection() {
+    const now = Date.now();
+    if (this.publicCache && now < this.publicCacheExpiresAt) {
+      return this.publicCache;
+    }
+
     const setting = await this.prisma.trendingRentalSetting.findUnique({
       where: { id: 1 },
       include: {
@@ -29,15 +49,18 @@ export class TrendingRentalsService {
     });
 
     if (!setting || !setting.isActive) {
-      return {
+      const emptyResult = {
         isActive: false,
         heading: setting?.heading ?? 'Trending Rentals in Your City',
         subtitle: setting?.subtitle ?? 'Handpicked rentals for your home.',
         products: [],
       };
+      this.publicCache = emptyResult;
+      this.publicCacheExpiresAt = now + 60000;
+      return emptyResult;
     }
 
-    return {
+    const result = {
       id: setting.id,
       heading: setting.heading,
       subtitle: setting.subtitle,
@@ -47,13 +70,20 @@ export class TrendingRentalsService {
         trendingSortOrder: item.sortOrder,
       })),
     };
+
+    this.publicCache = result;
+    this.publicCacheExpiresAt = now + 60000;
+    return result;
   }
 
   async getAdminSection() {
-    const setting = await this.ensureSetting();
+    const now = Date.now();
+    if (this.adminCache && now < this.adminCacheExpiresAt) {
+      return this.adminCache;
+    }
 
-    return this.prisma.trendingRentalSetting.findUnique({
-      where: { id: setting.id },
+    let result = await this.prisma.trendingRentalSetting.findUnique({
+      where: { id: 1 },
       include: {
         products: {
           orderBy: { sortOrder: 'asc' },
@@ -63,6 +93,25 @@ export class TrendingRentalsService {
         },
       },
     });
+
+    if (!result) {
+      const setting = await this.ensureSetting();
+      result = await this.prisma.trendingRentalSetting.findUnique({
+        where: { id: setting.id },
+        include: {
+          products: {
+            orderBy: { sortOrder: 'asc' },
+            include: {
+              product: { include: this.productInclude },
+            },
+          },
+        },
+      });
+    }
+
+    this.adminCache = result;
+    this.adminCacheExpiresAt = now + 60000;
+    return result;
   }
 
   private async ensureSetting() {
@@ -106,10 +155,13 @@ export class TrendingRentalsService {
 
     await this.ensureSetting();
 
-    return this.prisma.trendingRentalSetting.update({
+    const updated = await this.prisma.trendingRentalSetting.update({
       where: { id: 1 },
       data,
     });
+
+    this.invalidateCache();
+    return updated;
   }
 
   async updateProducts(input: { productIds: string[] }) {
@@ -156,6 +208,7 @@ export class TrendingRentalsService {
       }
     });
 
+    this.invalidateCache();
     return this.getAdminSection();
   }
 }

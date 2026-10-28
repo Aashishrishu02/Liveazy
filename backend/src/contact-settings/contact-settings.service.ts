@@ -13,26 +13,48 @@ const EDITABLE_FIELDS = [
   'supportHours',
 ] as const;
 
+import { globalEtagCache } from '../common/services/etag-cache.service';
+
 type EditableField = (typeof EDITABLE_FIELDS)[number];
 
 @Injectable()
 export class ContactSettingsService {
+  private cache: unknown = null;
+  private cacheExpiresAt = 0;
+
   constructor(private readonly prisma: PrismaService) {}
 
+  private invalidateCache() {
+    this.cache = null;
+    this.cacheExpiresAt = 0;
+    globalEtagCache.invalidate('contact-settings');
+  }
+
   async getSettings() {
+    const now = Date.now();
+    if (this.cache && now < this.cacheExpiresAt) {
+      return this.cache;
+    }
+
     const existing = await this.prisma.contactPageSetting.findUnique({
       where: { id: 1 },
     });
 
     if (existing) {
+      this.cache = existing;
+      this.cacheExpiresAt = now + 60000;
       return existing;
     }
 
-    return this.prisma.contactPageSetting.upsert({
+    const created = await this.prisma.contactPageSetting.upsert({
       where: { id: 1 },
       update: {},
       create: { id: 1 },
     });
+
+    this.cache = created;
+    this.cacheExpiresAt = now + 60000;
+    return created;
   }
 
   async updateSettings(input: Record<string, unknown>) {
@@ -68,7 +90,7 @@ export class ContactSettingsService {
       );
     }
 
-    return this.prisma.contactPageSetting.upsert({
+    const result = await this.prisma.contactPageSetting.upsert({
       where: { id: 1 },
       update: updateData,
       create: {
@@ -76,5 +98,8 @@ export class ContactSettingsService {
         ...updateData,
       },
     });
+
+    this.invalidateCache();
+    return result;
   }
 }

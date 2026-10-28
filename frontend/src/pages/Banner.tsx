@@ -65,8 +65,9 @@ import {
   Contact, MessageSquareText, Star,
   FileText,
  } from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API_URL = getApiBaseUrl();
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -421,9 +422,7 @@ export default function Banner() {
 
       setLoadError("");
 
-      const response = await fetch(`${API_URL}/banners/admin`, { headers: getHeaders() });
-
-      const data = await readResponse(response);
+      const data = await fetchJsonDeduplicated<unknown>(`${API_URL}/banners/admin`, { headers: getHeaders() });
 
       const list = (Array.isArray(data) ? data : []) as BannerRecord[];
 

@@ -31,8 +31,9 @@ import { LayoutDashboard,
   Check,
   Contact, MessageSquareText, Star,
   FileText } from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = getApiBaseUrl();
 const PAGE_SIZE = 10;
 
 interface Category {
@@ -152,13 +153,7 @@ export default function Categories() {
       setLoading(true);
       setLoadError("");
 
-      const response = await fetch(`${API_URL}/categories`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch categories (${response.status})`);
-      }
-
-      const data: unknown = await response.json();
+      const data = await fetchJsonDeduplicated<unknown>(`${API_URL}/categories`);
       const parsed = Array.isArray(data) ? (data as Category[]) : [];
 
       setCategories(parsed);

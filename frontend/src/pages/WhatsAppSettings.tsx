@@ -30,7 +30,9 @@ import {
   
   Contact, MessageSquareText, Star,
   FileText } from "lucide-react";
-const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
+
+const API_URL = getApiBaseUrl();
 const MAX_MESSAGE_LENGTH = 1024;
 const navigation = [
   { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
@@ -226,9 +228,10 @@ export default function WhatsAppSettings() {
     try {
       setLoading(true);
       setNotice(null);
-      const response = await fetch(`${API_URL}/settings/whatsapp`, { headers: getHeaders() });
-      const data = (await response.json().catch(() => ({}))) as WhatsAppSettingsData;
-      if (!response.ok) throw new Error(getErrorMessage(data, "Unable to load WhatsApp settings."));
+      const data = await fetchJsonDeduplicated<WhatsAppSettingsData>(
+        `${API_URL}/settings/whatsapp`,
+        { headers: getHeaders() },
+      );
       const numberParts = normalizeSavedNumber(data.whatsappNumber ?? "");
       setCountryCode(numberParts.countryCode);
       setLocalNumber(numberParts.localNumber);
@@ -246,11 +249,10 @@ export default function WhatsAppSettings() {
     void fetchSettings();
     if (!API_URL) return;
     const controller = new AbortController();
-    fetch(`${API_URL}/products`, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Products could not be loaded for preview.");
-        return (await response.json()) as ProductPreview[];
-      })
+    fetchJsonDeduplicated<ProductPreview[]>(
+      `${API_URL}/products`,
+      { signal: controller.signal },
+    )
       .then((data) => {
         const activeProducts = Array.isArray(data) ? data.filter((item) => item.isActive !== false) : [];
         setProducts(activeProducts);

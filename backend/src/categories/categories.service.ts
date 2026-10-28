@@ -1,14 +1,22 @@
-
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { globalEtagCache } from '../common/services/etag-cache.service';
 
 @Injectable()
 export class CategoriesService {
   private readonly logger = new Logger(CategoriesService.name);
+  private cachedCategories: unknown = null;
+  private cacheExpiresAt = 0;
 
   constructor(private prisma: PrismaService) {}
+
+  private invalidateCache() {
+    this.cachedCategories = null;
+    this.cacheExpiresAt = 0;
+    globalEtagCache.invalidate('categories');
+  }
 
   async create(createCategoryDto: CreateCategoryDto) {
     let displayOrder = createCategoryDto.displayOrder;
@@ -24,7 +32,7 @@ export class CategoriesService {
       displayOrder = (result._max.displayOrder ?? 0) + 1;
     }
 
-    return this.prisma.category.create({
+    const created = await this.prisma.category.create({
       data: {
         name: createCategoryDto.name,
         description: createCategoryDto.description,
@@ -32,13 +40,20 @@ export class CategoriesService {
         displayOrder,
       },
     });
+
+    this.invalidateCache();
+    return created;
   }
 
   async findAll() {
-    const startTime = performance.now();
+    const now = Date.now();
+    if (this.cachedCategories && now < this.cacheExpiresAt) {
+      return this.cachedCategories;
+    }
 
+    const startTime = performance.now();
     try {
-      return await this.prisma.category.findMany({
+      const categories = await this.prisma.category.findMany({
         orderBy: [
           { displayOrder: 'asc' },
           { createdAt: 'desc' },
@@ -51,12 +66,13 @@ export class CategoriesService {
           },
         },
       });
+
+      this.cachedCategories = categories;
+      this.cacheExpiresAt = now + 60000; // 60s cache
+      return categories;
     } finally {
       const duration = performance.now() - startTime;
-
-      this.logger.log(
-        `findAll completed in ${duration.toFixed(2)} ms`,
-      );
+      this.logger.log(`findAll completed in ${duration.toFixed(2)} ms`);
     }
   }
 
@@ -73,11 +89,8 @@ export class CategoriesService {
     });
   }
 
-  async update(
-    id: string,
-    updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.prisma.category.update({
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    const updated = await this.prisma.category.update({
       where: { id },
       data: {
         name: updateCategoryDto.name,
@@ -87,11 +100,17 @@ export class CategoriesService {
         displayOrder: updateCategoryDto.displayOrder,
       },
     });
+
+    this.invalidateCache();
+    return updated;
   }
 
   async remove(id: string) {
-    return this.prisma.category.delete({
+    const deleted = await this.prisma.category.delete({
       where: { id },
     });
+
+    this.invalidateCache();
+    return deleted;
   }
 }

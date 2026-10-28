@@ -10,7 +10,7 @@ import {
   Phone,
 } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface ContactSettings {
   supportEmail?: string;
@@ -37,20 +37,11 @@ export default function Footer() {
     let cancelled = false;
 
     const fetchContactSettings = async () => {
-      if (!API_URL) return;
-
       try {
-        const response = await fetch(`${API_URL}/contact-settings`, {
-          cache: "no-store",
-        });
+        const base = getApiBaseUrl();
+        const data = await fetchJsonDeduplicated<ContactSettings>(`${base}/contact-settings`);
 
-        if (!response.ok) {
-          throw new Error("Unable to load footer contact settings");
-        }
-
-        const data: ContactSettings = await response.json();
-
-        if (!cancelled) {
+        if (!cancelled && data) {
           setContact({
             supportEmail:
               data.supportEmail || DEFAULT_CONTACT.supportEmail,
@@ -63,7 +54,9 @@ export default function Footer() {
           });
         }
       } catch (error) {
-        console.error("Footer contact settings error:", error);
+        if (!cancelled && !(error instanceof Error && error.name === "AbortError")) {
+          // Fall back gracefully to default contact details
+        }
       }
     };
 

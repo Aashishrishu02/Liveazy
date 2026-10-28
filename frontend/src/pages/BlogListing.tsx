@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays, Search } from "lucide-react";
-
-const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface Blog {
   id: string;
@@ -43,25 +42,17 @@ export default function BlogListing() {
       setError("");
 
       try {
-        if (!API_URL) {
-          throw new Error("API URL configured nahi hai.");
-        }
-
+        const base = getApiBaseUrl();
         const params = new URLSearchParams();
         if (search.trim()) params.set("q", search.trim());
         if (category) params.set("category", category);
 
         const suffix = params.toString();
-        const response = await fetch(
-          `${API_URL}/blogs${suffix ? `?${suffix}` : ""}`,
+        const result = await fetchJsonDeduplicated<unknown>(
+          `${base}/blogs${suffix ? `?${suffix}` : ""}`,
           { signal: controller.signal },
+          15000,
         );
-
-        if (!response.ok) {
-          throw new Error("Blogs load nahi ho paaye.");
-        }
-
-        const result: unknown = await response.json();
 
         const list = Array.isArray(result)
           ? result

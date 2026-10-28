@@ -28,8 +28,9 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = getApiBaseUrl();
 
 type FeedbackStatus = "PENDING" | "APPROVED" | "REJECTED";
 type FilterStatus = "ALL" | FeedbackStatus;
@@ -109,22 +110,11 @@ export default function FeedbackMaster() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/feedback/admin`, {
+      const data = await fetchJsonDeduplicated<unknown>(`${API_URL}/feedback/admin`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.status === 401 || response.status === 403) {
-        setError("Access denied. Please log in again.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to load feedback (${response.status})`);
-      }
-
-      const data: unknown = await response.json();
 
       const list = Array.isArray(data)
         ? data
