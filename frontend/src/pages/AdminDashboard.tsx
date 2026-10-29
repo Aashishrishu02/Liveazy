@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Tags,
@@ -283,6 +283,20 @@ function formatDate(value?: string): string {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const sidebarNavRef = useRef<HTMLElement | null>(null);
+
+  // Keep the currently active sidebar item visible after route changes.
+  useEffect(() => {
+    const activeItem = sidebarNavRef.current?.querySelector<HTMLAnchorElement>(
+      'a[aria-current="page"]',
+    );
+
+    activeItem?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [location.pathname]);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -511,7 +525,7 @@ export default function AdminDashboard() {
             Operations &amp; Catalog
           </p>
 
-          <nav className="space-y-1.5">
+          <nav ref={sidebarNavRef} className="space-y-1.5">
             {navigation.map((item) => {
               const Icon = item.icon;
 

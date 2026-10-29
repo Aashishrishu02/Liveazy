@@ -61,6 +61,7 @@ const countryCodes = [
 interface SocialSettingsData {
   facebookUrl?: string;
   instagramUrl?: string;
+  youtubeUrl?: string;
   whatsappNumber?: string;
 }
 
@@ -150,6 +151,14 @@ function InstagramIconSvg({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function YouTubeIconSvg({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z" />
+    </svg>
+  );
+}
+
 function WhatsAppIconSvg({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -220,6 +229,7 @@ export default function SocialMediaSettings() {
 
   const [facebookUrl, setFacebookUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [localNumber, setLocalNumber] = useState("");
 
@@ -236,12 +246,14 @@ export default function SocialMediaSettings() {
     !savedNumberDigits || (savedNumberDigits.length >= 10 && savedNumberDigits.length <= 15);
   const facebookValid = isValidHttpUrl(facebookUrl);
   const instagramValid = isValidHttpUrl(instagramUrl);
+  const youtubeValid = isValidHttpUrl(youtubeUrl);
 
   const hasFacebook = Boolean(facebookUrl.trim() && facebookValid);
   const hasInstagram = Boolean(instagramUrl.trim() && instagramValid);
+  const hasYouTube = Boolean(youtubeUrl.trim() && youtubeValid);
   const hasWhatsApp = Boolean(savedNumberDigits && whatsappValid);
 
-  const activeIconsCount = [hasFacebook, hasInstagram, hasWhatsApp].filter(Boolean).length;
+  const activeIconsCount = [hasFacebook, hasInstagram, hasYouTube, hasWhatsApp].filter(Boolean).length;
 
   const whatsappLink = useMemo(() => {
     if (!savedNumberDigits || !whatsappValid) return "";
@@ -280,6 +292,7 @@ export default function SocialMediaSettings() {
         if (!cancelled) {
           setFacebookUrl(data.facebookUrl || "");
           setInstagramUrl(data.instagramUrl || "");
+          setYoutubeUrl(data.youtubeUrl || "");
 
           const parts = normalizeSavedNumber(data.whatsappNumber || "");
           setCountryCode(parts.countryCode);
@@ -325,6 +338,11 @@ export default function SocialMediaSettings() {
       return;
     }
 
+    if (!youtubeValid) {
+      showNotice("error", "Please enter a valid YouTube URL or leave it blank.");
+      return;
+    }
+
     if (savedNumberDigits && !whatsappValid) {
       showNotice("error", "Please enter a valid WhatsApp number with 10–15 digits including country code, or clear it.");
       return;
@@ -339,6 +357,7 @@ export default function SocialMediaSettings() {
         body: JSON.stringify({
           facebookUrl: facebookUrl.trim(),
           instagramUrl: instagramUrl.trim(),
+          youtubeUrl: youtubeUrl.trim(),
           whatsappNumber: savedNumberDigits,
         }),
       });
@@ -356,6 +375,7 @@ export default function SocialMediaSettings() {
 
       setFacebookUrl(data.facebookUrl ?? facebookUrl.trim());
       setInstagramUrl(data.instagramUrl ?? instagramUrl.trim());
+      setYoutubeUrl(data.youtubeUrl ?? youtubeUrl.trim());
 
       const parts = normalizeSavedNumber(data.whatsappNumber ?? savedNumberDigits);
       setCountryCode(parts.countryCode);
@@ -579,7 +599,7 @@ export default function SocialMediaSettings() {
             />
             <StatCard
               title="Footer Visibility"
-              value={`${activeIconsCount} of 3 active`}
+              value={`${activeIconsCount} of 4 active`}
               detail="Updated in real time across the website"
               icon={<Globe size={18} />}
               tone={activeIconsCount > 0 ? "bg-teal-50 text-[#008A90]" : "bg-slate-100 text-slate-600"}
@@ -593,7 +613,7 @@ export default function SocialMediaSettings() {
               <SectionTitle
                 icon={<Settings size={18} />}
                 title="Social Media & Contact Links"
-                subtitle="Specify URLs for Facebook and Instagram. Social icons automatically appear in the footer when configured, and remain hidden when left blank."
+                subtitle="Specify URLs for Facebook, Instagram, and YouTube. Social icons automatically appear in the footer when configured, and remain hidden when left blank."
               />
 
               {loading ? (
@@ -704,6 +724,46 @@ export default function SocialMediaSettings() {
                     )}
                   </div>
 
+                  {/* YouTube URL */}
+                  <div>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <label htmlFor="youtube-url" className="flex items-center gap-2 text-xs font-bold text-[#0F2942]">
+                        <YouTubeIconSvg className="h-3.5 w-3.5 text-red-600" /> YouTube Channel URL
+                      </label>
+                      <span className="text-[10px] font-semibold text-slate-400">Optional · Blank hides icon</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="youtube-url"
+                        type="url"
+                        value={youtubeUrl}
+                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                        placeholder="https://youtube.com/@liveazy"
+                        className={`w-full rounded-lg border px-3.5 py-2.5 text-xs outline-none transition focus:ring-2 focus:ring-[#008A90]/15 ${
+                          youtubeUrl && !youtubeValid
+                            ? "border-red-300 focus:border-red-500"
+                            : "border-slate-200 focus:border-[#008A90]"
+                        }`}
+                      />
+                      {youtubeUrl.trim() && (
+                        <button
+                          type="button"
+                          onClick={() => setYoutubeUrl("")}
+                          className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-2 text-xs text-slate-500 hover:bg-slate-100"
+                          title="Clear YouTube URL"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-[10px] leading-4 text-slate-400">
+                      Full URL to your official YouTube channel (e.g. <code>https://youtube.com/@liveazy</code>).
+                    </p>
+                    {youtubeUrl && !youtubeValid && (
+                      <p className="mt-1 text-[10px] text-red-600">Please enter a valid URL.</p>
+                    )}
+                  </div>
+
                   {/* WhatsApp Business Number */}
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
@@ -760,6 +820,7 @@ export default function SocialMediaSettings() {
                       onClick={() => {
                         setFacebookUrl("");
                         setInstagramUrl("");
+                        setYoutubeUrl("");
                         showNotice("success", "Cleared social links. Click Save Settings to persist.");
                       }}
                       disabled={saving}
@@ -822,7 +883,7 @@ export default function SocialMediaSettings() {
 
                       {activeIconsCount === 0 ? (
                         <div className="mt-3 rounded-lg border border-dashed border-white/20 p-3 text-center text-[11px] text-slate-400">
-                          No social icons configured yet. Add Facebook, Instagram, or WhatsApp above to display icons here.
+                          No social icons configured yet. Add Facebook, Instagram, YouTube, or WhatsApp above to display icons here.
                         </div>
                       ) : (
                         <div className="mt-3 flex items-center gap-2.5">
@@ -849,6 +910,19 @@ export default function SocialMediaSettings() {
                               title={`Instagram: ${instagramUrl}`}
                             >
                               <InstagramIconSvg className="h-4 w-4" />
+                            </a>
+                          )}
+
+                          {hasYouTube && (
+                            <a
+                              href={normalizeUrlForOpen(youtubeUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="YouTube"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-slate-300 transition duration-200 hover:bg-[#42DADA] hover:text-[#071D33]"
+                              title={`YouTube: ${youtubeUrl}`}
+                            >
+                              <YouTubeIconSvg className="h-4 w-4" />
                             </a>
                           )}
 
@@ -881,6 +955,12 @@ export default function SocialMediaSettings() {
                       <span className="font-semibold text-slate-500">Instagram:</span>
                       <span className="max-w-[200px] truncate font-mono text-[11px] text-slate-700">
                         {instagramUrl || "— (hidden)"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-500">YouTube:</span>
+                      <span className="max-w-[200px] truncate font-mono text-[11px] text-slate-700">
+                        {youtubeUrl || "— (hidden)"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">

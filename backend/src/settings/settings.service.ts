@@ -19,6 +19,7 @@ export interface WhatsAppSettingsResponse {
 export interface SocialSettingsResponse {
   facebookUrl: string;
   instagramUrl: string;
+  youtubeUrl: string;
   whatsappNumber: string;
 }
 
@@ -246,6 +247,7 @@ export class SettingsService {
     const response: SocialSettingsResponse = {
       facebookUrl: setting.facebookUrl ?? '',
       instagramUrl: setting.instagramUrl ?? '',
+      youtubeUrl: setting.youtubeUrl ?? '',
       whatsappNumber: setting.whatsappNumber ?? DEFAULT_WHATSAPP_NUMBER,
     };
 
@@ -257,17 +259,19 @@ export class SettingsService {
   async updateSocialSettings(dto: {
     facebookUrl?: unknown;
     instagramUrl?: unknown;
+    youtubeUrl?: unknown;
     whatsappNumber?: unknown;
   }): Promise<SocialSettingsResponse> {
     if (!dto || typeof dto !== 'object') {
       throw new BadRequestException('Request body is required.');
     }
 
-    const { facebookUrl, instagramUrl, whatsappNumber } = dto;
+    const { facebookUrl, instagramUrl, youtubeUrl, whatsappNumber } = dto;
 
     if (
       facebookUrl === undefined &&
       instagramUrl === undefined &&
+      youtubeUrl === undefined &&
       whatsappNumber === undefined
     ) {
       throw new BadRequestException(
@@ -278,6 +282,7 @@ export class SettingsService {
     const updateData: {
       facebookUrl?: string;
       instagramUrl?: string;
+      youtubeUrl?: string;
       whatsappNumber?: string;
     } = {};
 
@@ -315,6 +320,30 @@ export class SettingsService {
       }
     }
 
+    if (youtubeUrl !== undefined) {
+  if (typeof youtubeUrl !== 'string' && youtubeUrl !== null) {
+    throw new BadRequestException('YouTube URL must be a string.');
+  }
+
+  const trimmed =
+    typeof youtubeUrl === 'string' ? youtubeUrl.trim() : '';
+
+  if (!trimmed) {
+    updateData.youtubeUrl = '';
+  } else {
+    if (trimmed.length > 2048) {
+      throw new BadRequestException(
+        'YouTube URL must be 2048 characters or fewer.',
+      );
+    }
+
+    updateData.youtubeUrl = validateAndNormalizeUrl(
+      trimmed,
+      'YouTube URL',
+    );
+  }
+}
+
     if (whatsappNumber !== undefined) {
       if (typeof whatsappNumber !== 'string' && whatsappNumber !== null) {
         throw new BadRequestException('WhatsApp number must be a string.');
@@ -348,6 +377,7 @@ export class SettingsService {
         whatsappMessage: '',
         facebookUrl: updateData.facebookUrl ?? '',
         instagramUrl: updateData.instagramUrl ?? '',
+        youtubeUrl: updateData.youtubeUrl ?? '',
       },
     });
 
@@ -356,6 +386,7 @@ export class SettingsService {
     return {
       facebookUrl: setting.facebookUrl ?? '',
       instagramUrl: setting.instagramUrl ?? '',
+      youtubeUrl: setting.youtubeUrl ?? '',
       whatsappNumber: setting.whatsappNumber ?? '',
     };
   }

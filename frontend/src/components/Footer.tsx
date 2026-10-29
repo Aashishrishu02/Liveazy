@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -22,6 +23,7 @@ interface ContactSettings {
 interface SocialSettings {
   facebookUrl?: string;
   instagramUrl?: string;
+  youtubeUrl?: string;
   whatsappNumber?: string;
 }
 
@@ -34,23 +36,29 @@ const DEFAULT_CONTACT: Required<ContactSettings> = {
 
 function normalizeWhatsAppNumber(raw: string): string {
   const digits = raw.replace(/\D/g, "");
+
   if (!digits) return "";
-  // 10-digit Indian mobile number
+
   if (digits.length === 10) {
     return `91${digits}`;
   }
-  // 11-digit number with leading 0 (common in India, e.g. 09423838109)
+
   if (digits.length === 11 && digits.startsWith("0")) {
     return `91${digits.slice(1)}`;
   }
-  // Standard international number with country code (10-15 digits)
+
   if (digits.length >= 10 && digits.length <= 15) {
     return digits;
   }
+
   return "";
 }
 
-function FacebookIcon({ className = "h-4 w-4" }: { className?: string }) {
+function FacebookIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       className={className}
@@ -67,7 +75,11 @@ function FacebookIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function InstagramIcon({ className = "h-4 w-4" }: { className?: string }) {
+function InstagramIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       className={className}
@@ -84,7 +96,29 @@ function InstagramIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function WhatsAppIcon({ className = "h-4 w-4" }: { className?: string }) {
+function YouTubeIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon({
+  className = "h-4 w-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       className={className}
@@ -94,7 +128,7 @@ function WhatsAppIcon({ className = "h-4 w-4" }: { className?: string }) {
     >
       <path
         fillRule="evenodd"
-        d="M12 2C6.477 2 2 6.477 2 12c0 1.892.525 3.663 1.438 5.18L2 22l4.985-1.408A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm5.42 14.15c-.23.65-1.15 1.24-1.6 1.28-.42.04-.96.06-2.78-.69-2.33-.96-3.83-3.32-3.95-3.48-.12-.16-.95-1.26-.95-2.4 0-1.14.6-1.7.81-1.93.22-.23.48-.29.64-.29.16 0 .32 0 .46.01.15.01.35-.06.55.42.2.48.69 1.68.75 1.8.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.25.31-.36.42-.12.12-.24.25-.1.5.14.25.62 1.02 1.33 1.65.91.81 1.68 1.06 1.93 1.18.25.12.4.1.55-.07.15-.17.64-.75.81-1.01.17-.26.34-.22.57-.13.23.09 1.46.69 1.71.81.25.12.42.18.48.28.06.1.06.58-.17 1.23z"
+        d="M12 2C6.477 2 2 6.477 2 12c0 1.892.525 3.663 1.438 5.18L2 22l4.985-1.408A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm5.42 14.15c-.23.65-1.15 1.24-1.6 1.28-.42.04-.96.06-2.78-.69-2.33-.96-3.83-3.32-3.95-3.48-.12-.16-.95-1.26-.95-2.4 0-1.14.6-1.7.81-1.93.22-.23.48-.29.64-.29.16 0 .32 0 .46.01.15.01.35-.06.55.42.2.48.69 1.68.75 1.8.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.25.31-.36.42-.12.12-.25.31-.1.5.14.25.62 1.02 1.33 1.65.91.81 1.68 1.06 1.93 1.18.25.12.4.1.55-.07.15-.17.64-.75.81-1.01.17-.26.34-.22.57-.13.23.09 1.46.69 1.71.81.25.12.42.18.48.28.06.1-.17.58-.17 1.23z"
         clipRule="evenodd"
       />
     </svg>
@@ -104,7 +138,9 @@ function WhatsAppIcon({ className = "h-4 w-4" }: { className?: string }) {
 export default function Footer() {
   const [contact, setContact] =
     useState<Required<ContactSettings>>(DEFAULT_CONTACT);
-  const [socialSettings, setSocialSettings] = useState<SocialSettings>({});
+
+  const [socialSettings, setSocialSettings] =
+    useState<SocialSettings>({});
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -116,43 +152,62 @@ export default function Footer() {
       const base = getApiBaseUrl();
 
       try {
-        const contactData = await fetchJsonDeduplicated<ContactSettings>(
-          `${base}/contact-settings`,
-        );
+        const contactData =
+          await fetchJsonDeduplicated<ContactSettings>(
+            `${base}/contact-settings`,
+          );
 
         if (!cancelled && contactData) {
           setContact({
             supportEmail:
-              contactData.supportEmail || DEFAULT_CONTACT.supportEmail,
+              contactData.supportEmail ||
+              DEFAULT_CONTACT.supportEmail,
             supportPhone:
-              contactData.supportPhone || DEFAULT_CONTACT.supportPhone,
+              contactData.supportPhone ||
+              DEFAULT_CONTACT.supportPhone,
             serviceLocations:
-              contactData.serviceLocations || DEFAULT_CONTACT.serviceLocations,
+              contactData.serviceLocations ||
+              DEFAULT_CONTACT.serviceLocations,
             supportHours:
-              contactData.supportHours || DEFAULT_CONTACT.supportHours,
+              contactData.supportHours ||
+              DEFAULT_CONTACT.supportHours,
           });
         }
       } catch (error) {
-        if (!cancelled && !(error instanceof Error && error.name === "AbortError")) {
-          console.error("Failed to fetch contact settings in Footer:", error);
+        if (
+          !cancelled &&
+          !(error instanceof Error && error.name === "AbortError")
+        ) {
+          console.error(
+            "Failed to fetch contact settings in Footer:",
+            error,
+          );
         }
       }
 
       try {
-        const socialData = await fetchJsonDeduplicated<SocialSettings>(
-          `${base}/settings/social`,
-        );
+        const socialData =
+          await fetchJsonDeduplicated<SocialSettings>(
+            `${base}/settings/social`,
+          );
 
         if (!cancelled && socialData) {
           setSocialSettings({
             facebookUrl: socialData.facebookUrl || "",
             instagramUrl: socialData.instagramUrl || "",
+            youtubeUrl: socialData.youtubeUrl || "",
             whatsappNumber: socialData.whatsappNumber || "",
           });
         }
       } catch (error) {
-        if (!cancelled && !(error instanceof Error && error.name === "AbortError")) {
-          console.error("Failed to fetch social media settings in Footer:", error);
+        if (
+          !cancelled &&
+          !(error instanceof Error && error.name === "AbortError")
+        ) {
+          console.error(
+            "Failed to fetch social media settings in Footer:",
+            error,
+          );
         }
       }
     };
@@ -182,6 +237,7 @@ export default function Footer() {
       } else {
         navigate("/contact#faqs");
       }
+
       return;
     }
 
@@ -197,25 +253,42 @@ export default function Footer() {
     }
   };
 
-  // WhatsApp normalization:
-  // Social WhatsApp is only active if configured in social settings
-  const configuredWhatsapp = socialSettings.whatsappNumber?.trim() || "";
-  const normalizedSocialWhatsapp = normalizeWhatsAppNumber(configuredWhatsapp);
+  const configuredWhatsapp =
+    socialSettings.whatsappNumber?.trim() || "";
+
+  const normalizedSocialWhatsapp =
+    normalizeWhatsAppNumber(configuredWhatsapp);
+
   const socialWhatsappUrl = normalizedSocialWhatsapp
     ? `https://wa.me/${normalizedSocialWhatsapp}`
     : undefined;
 
-  // Fallback for "Chat on WhatsApp" button under Contact Us column
-  const fallbackWhatsapp = normalizeWhatsAppNumber(contact.supportPhone || "");
+  const fallbackWhatsapp =
+    normalizeWhatsAppNumber(contact.supportPhone || "");
+
   const chatWhatsappUrl =
-    socialWhatsappUrl || (fallbackWhatsapp ? `https://wa.me/${fallbackWhatsapp}` : undefined);
+    socialWhatsappUrl ||
+    (fallbackWhatsapp
+      ? `https://wa.me/${fallbackWhatsapp}`
+      : undefined);
 
-  const contactPhoneDigits = contact.supportPhone.replace(/\D/g, "");
+  const contactPhoneDigits =
+    contact.supportPhone.replace(/\D/g, "");
 
-  const hasFacebook = Boolean(socialSettings.facebookUrl?.trim());
-  const hasInstagram = Boolean(socialSettings.instagramUrl?.trim());
-  const hasWhatsApp = Boolean(configuredWhatsapp && socialWhatsappUrl);
-  const hasAnySocial = hasFacebook || hasInstagram || hasWhatsApp;
+  const hasFacebook =
+    Boolean(socialSettings.facebookUrl?.trim());
+
+  const hasInstagram =
+    Boolean(socialSettings.instagramUrl?.trim());
+
+  const hasYouTube =
+    Boolean(socialSettings.youtubeUrl?.trim());
+
+  const hasWhatsApp =
+    Boolean(configuredWhatsapp && socialWhatsappUrl);
+
+  const hasAnySocial =
+    hasFacebook || hasInstagram || hasYouTube || hasWhatsApp;
 
   return (
     <footer className="relative border-t border-slate-200 bg-[#071D33] text-white">
@@ -231,14 +304,15 @@ export default function Footer() {
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#42DADA] text-lg font-black text-[#071D33]">
                 L
               </span>
+
               <span className="text-2xl font-extrabold tracking-tight">
                 LIVE<span className="text-[#42DADA]">AZY</span>
               </span>
             </Link>
 
             <p className="mt-4 max-w-xs text-sm leading-6 text-slate-300">
-              Rent smarter, live better. Find the right products for your
-              space with flexible rental options from LIVEAZY.
+              Rent smarter, live better. Find the right products
+              for your space with flexible rental options from LIVEAZY.
             </p>
 
             <button
@@ -255,6 +329,7 @@ export default function Footer() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Follow Us
                 </p>
+
                 <div className="mt-3 flex items-center gap-2.5">
                   {hasFacebook && (
                     <a
@@ -280,6 +355,18 @@ export default function Footer() {
                     </a>
                   )}
 
+                  {hasYouTube && (
+                    <a
+                      href={socialSettings.youtubeUrl?.trim()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Subscribe to LIVEAZY on YouTube"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-slate-300 transition duration-200 hover:bg-[#42DADA] hover:text-[#071D33]"
+                    >
+                      <YouTubeIcon className="h-4 w-4" />
+                    </a>
+                  )}
+
                   {hasWhatsApp && socialWhatsappUrl && (
                     <a
                       href={socialWhatsappUrl}
@@ -301,12 +388,14 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Quick Links
             </h3>
+
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
               <li>
                 <Link to="/" className="transition hover:text-[#42DADA]">
                   Home
                 </Link>
               </li>
+
               <li>
                 <button
                   type="button"
@@ -316,6 +405,7 @@ export default function Footer() {
                   Browse Rentals
                 </button>
               </li>
+
               <li>
                 <button
                   type="button"
@@ -325,6 +415,7 @@ export default function Footer() {
                   About Us
                 </button>
               </li>
+
               <li>
                 <Link
                   to="/contact"
@@ -333,6 +424,7 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
+
               <li>
                 <button
                   type="button"
@@ -350,12 +442,14 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Contact Us
             </h3>
+
             <ul className="mt-5 space-y-4 text-sm text-slate-300">
               <li className="flex items-start gap-3">
                 <Mail
                   size={18}
                   className="mt-0.5 shrink-0 text-[#42DADA]"
                 />
+
                 <a
                   href={`mailto:${contact.supportEmail}`}
                   className="break-all transition hover:text-[#42DADA]"
@@ -363,18 +457,25 @@ export default function Footer() {
                   {contact.supportEmail}
                 </a>
               </li>
+
               <li className="flex items-start gap-3">
                 <Phone
                   size={18}
                   className="mt-0.5 shrink-0 text-[#42DADA]"
                 />
+
                 <a
-                  href={contactPhoneDigits ? `tel:+${contactPhoneDigits}` : undefined}
+                  href={
+                    contactPhoneDigits
+                      ? `tel:+${contactPhoneDigits}`
+                      : undefined
+                  }
                   className="transition hover:text-[#42DADA]"
                 >
                   {contact.supportPhone}
                 </a>
               </li>
+
               <li className="flex items-start gap-3">
                 <MapPin
                   size={18}
@@ -382,6 +483,7 @@ export default function Footer() {
                 />
                 <span>{contact.serviceLocations}</span>
               </li>
+
               <li className="flex items-start gap-3">
                 <Clock
                   size={18}
@@ -409,10 +511,12 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider">
               FAQs &amp; Support
             </h3>
+
             <p className="mt-5 text-sm leading-6 text-slate-300">
-              Have questions about products, rental plans, delivery, or
-              existing enquiries? Our support team is here to help.
+              Have questions about products, rental plans, delivery,
+              or existing enquiries? Our support team is here to help.
             </p>
+
             <button
               type="button"
               onClick={() => navigate("/contact")}
@@ -424,7 +528,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/15 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} LIVEAZY. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} LIVEAZY. All rights reserved.
+          </p>
+
           <Link
             to="/contact"
             className="w-fit transition hover:text-[#42DADA]"

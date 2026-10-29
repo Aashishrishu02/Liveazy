@@ -100,6 +100,7 @@ model SiteSetting {
   whatsappMessage String   @default("Hi LIVEAZY! ")
   facebookUrl     String?
   instagramUrl    String?
+  youtubeUrl      String?
   updatedAt       DateTime @updatedAt
 }
 

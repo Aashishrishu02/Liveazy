@@ -18,6 +18,14 @@ export class UpdateSocialSettingsDto {
   @IsString()
   instagramUrl?: string;
 
+    @ApiPropertyOptional({
+    example: 'https://youtube.com/@liveazy',
+    description: 'YouTube channel URL (empty string to hide)',
+  })
+  @IsOptional()
+  @IsString()
+  youtubeUrl?: string;
+
   @ApiPropertyOptional({
     example: '919423838109',
     description: 'WhatsApp number with country code',
