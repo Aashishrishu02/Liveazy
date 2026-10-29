@@ -28,6 +28,7 @@ const Categories = lazy(() => import("./pages/Categories"));
 const Products = lazy(() => import("./pages/Products"));
 const Banner = lazy(() => import("./pages/Banner"));
 const WhatsAppSettings = lazy(() => import("./pages/WhatsAppSettings"));
+const SocialMediaSettings = lazy(() => import("./pages/SocialMediaSettings"));
 const PromoBanners = lazy(() => import("./pages/PromoBanners"));
 const ContactManagement = lazy(() => import("./pages/ContactManagement"));
 const FeedbackMaster = lazy(() => import("./pages/FeedbackMaster"));
@@ -218,6 +219,8 @@ function App() {
           <Route path="/admin/products" element={<Products />} />
           <Route path="/admin/banner" element={<Banner />} />
           <Route path="/admin/settings" element={<WhatsAppSettings />} />
+          <Route path="/admin/social-media" element={<SocialMediaSettings />} />
+          <Route path="/admin/social-settings" element={<SocialMediaSettings />} />
           <Route path="/admin/promo-banners" element={<PromoBanners />} />
 
           <Route

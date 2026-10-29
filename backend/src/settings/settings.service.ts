@@ -16,6 +16,37 @@ export interface WhatsAppSettingsResponse {
   whatsappMessage: string;
 }
 
+export interface SocialSettingsResponse {
+  facebookUrl: string;
+  instagramUrl: string;
+  whatsappNumber: string;
+}
+
+function validateAndNormalizeUrl(urlStr: string, fieldName: string): string {
+  const trimmed = urlStr.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const candidate =
+    trimmed.startsWith('http://') || trimmed.startsWith('https://')
+      ? trimmed
+      : `https://${trimmed}`;
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error();
+    }
+    if (!parsed.hostname || !parsed.hostname.includes('.')) {
+      throw new Error();
+    }
+    return candidate;
+  } catch {
+    throw new BadRequestException(`Enter a valid URL for ${fieldName}.`);
+  }
+}
+
 
 function isLegacyWhatsAppMessage(message: string): boolean {
   const normalized = message.trim().toLowerCase();
@@ -48,12 +79,14 @@ import { globalEtagCache } from '../common/services/etag-cache.service';
 @Injectable()
 export class SettingsService {
   private cachedSettings: WhatsAppSettingsResponse | null = null;
+  private cachedSocialSettings: SocialSettingsResponse | null = null;
   private cacheExpiresAt = 0;
 
   constructor(private readonly prisma: PrismaService) {}
 
   private invalidateCache() {
     this.cachedSettings = null;
+    this.cachedSocialSettings = null;
     this.cacheExpiresAt = 0;
     globalEtagCache.invalidate('settings');
   }
@@ -64,18 +97,17 @@ export class SettingsService {
       return this.cachedSettings;
     }
 
-    let setting = await this.prisma.siteSetting.findUnique({
-      where: { id: 1 },
+    let setting = await this.prisma.siteSetting.findFirst({
+      orderBy: { id: 'asc' },
     });
 
     if (!setting) {
-      setting = await this.prisma.siteSetting.upsert({
-        where: { id: 1 },
-        update: {},
-        create: {
-          id: 1,
+      setting = await this.prisma.siteSetting.create({
+        data: {
           whatsappNumber: DEFAULT_WHATSAPP_NUMBER,
           whatsappMessage: '',
+          facebookUrl: '',
+          instagramUrl: '',
         },
       });
     }
@@ -164,14 +196,21 @@ export class SettingsService {
     // Clean any legacy template before applying the admin's new settings.
     await this.getWhatsAppSettings();
 
+    const existing = await this.prisma.siteSetting.findFirst({
+      orderBy: { id: 'asc' },
+    });
+    const targetId = existing?.id ?? 1;
+
     const setting = await this.prisma.siteSetting.upsert({
-      where: { id: 1 },
+      where: { id: targetId },
       update: updateData,
       create: {
-        id: 1,
+        id: targetId,
         whatsappNumber:
           updateData.whatsappNumber ?? DEFAULT_WHATSAPP_NUMBER,
         whatsappMessage: updateData.whatsappMessage ?? '',
+        facebookUrl: '',
+        instagramUrl: '',
       },
     });
 
@@ -180,6 +219,144 @@ export class SettingsService {
     return {
       whatsappNumber: setting.whatsappNumber,
       whatsappMessage: setting.whatsappMessage,
+    };
+  }
+
+  async getSocialSettings(): Promise<SocialSettingsResponse> {
+    const now = Date.now();
+    if (this.cachedSocialSettings && now < this.cacheExpiresAt) {
+      return this.cachedSocialSettings;
+    }
+
+    let setting = await this.prisma.siteSetting.findFirst({
+      orderBy: { id: 'asc' },
+    });
+
+    if (!setting) {
+      setting = await this.prisma.siteSetting.create({
+        data: {
+          whatsappNumber: DEFAULT_WHATSAPP_NUMBER,
+          whatsappMessage: '',
+          facebookUrl: '',
+          instagramUrl: '',
+        },
+      });
+    }
+
+    const response: SocialSettingsResponse = {
+      facebookUrl: setting.facebookUrl ?? '',
+      instagramUrl: setting.instagramUrl ?? '',
+      whatsappNumber: setting.whatsappNumber ?? DEFAULT_WHATSAPP_NUMBER,
+    };
+
+    this.cachedSocialSettings = response;
+    this.cacheExpiresAt = now + 60000;
+    return response;
+  }
+
+  async updateSocialSettings(dto: {
+    facebookUrl?: unknown;
+    instagramUrl?: unknown;
+    whatsappNumber?: unknown;
+  }): Promise<SocialSettingsResponse> {
+    if (!dto || typeof dto !== 'object') {
+      throw new BadRequestException('Request body is required.');
+    }
+
+    const { facebookUrl, instagramUrl, whatsappNumber } = dto;
+
+    if (
+      facebookUrl === undefined &&
+      instagramUrl === undefined &&
+      whatsappNumber === undefined
+    ) {
+      throw new BadRequestException(
+        'Provide at least one setting (facebookUrl, instagramUrl, or whatsappNumber) to update.',
+      );
+    }
+
+    const updateData: {
+      facebookUrl?: string;
+      instagramUrl?: string;
+      whatsappNumber?: string;
+    } = {};
+
+    if (facebookUrl !== undefined) {
+      if (typeof facebookUrl !== 'string' && facebookUrl !== null) {
+        throw new BadRequestException('Facebook URL must be a string.');
+      }
+      const trimmed = typeof facebookUrl === 'string' ? facebookUrl.trim() : '';
+      if (!trimmed) {
+        updateData.facebookUrl = '';
+      } else {
+        if (trimmed.length > 2048) {
+          throw new BadRequestException(
+            'Facebook URL must be 2048 characters or fewer.',
+          );
+        }
+        updateData.facebookUrl = validateAndNormalizeUrl(trimmed, 'Facebook URL');
+      }
+    }
+
+    if (instagramUrl !== undefined) {
+      if (typeof instagramUrl !== 'string' && instagramUrl !== null) {
+        throw new BadRequestException('Instagram URL must be a string.');
+      }
+      const trimmed = typeof instagramUrl === 'string' ? instagramUrl.trim() : '';
+      if (!trimmed) {
+        updateData.instagramUrl = '';
+      } else {
+        if (trimmed.length > 2048) {
+          throw new BadRequestException(
+            'Instagram URL must be 2048 characters or fewer.',
+          );
+        }
+        updateData.instagramUrl = validateAndNormalizeUrl(trimmed, 'Instagram URL');
+      }
+    }
+
+    if (whatsappNumber !== undefined) {
+      if (typeof whatsappNumber !== 'string' && whatsappNumber !== null) {
+        throw new BadRequestException('WhatsApp number must be a string.');
+      }
+      const trimmed = typeof whatsappNumber === 'string' ? whatsappNumber.trim() : '';
+      if (!trimmed) {
+        updateData.whatsappNumber = '';
+      } else {
+        const digits = trimmed.replace(/\D/g, '');
+        if (digits.length < 10 || digits.length > 15) {
+          throw new BadRequestException(
+            'Enter a valid WhatsApp number with 10–15 digits including the country code.',
+          );
+        }
+        updateData.whatsappNumber = digits;
+      }
+    }
+
+    const existing = await this.prisma.siteSetting.findFirst({
+      orderBy: { id: 'asc' },
+    });
+    const targetId = existing?.id ?? 1;
+
+    const setting = await this.prisma.siteSetting.upsert({
+      where: { id: targetId },
+      update: updateData,
+      create: {
+        id: targetId,
+        whatsappNumber:
+          updateData.whatsappNumber ?? DEFAULT_WHATSAPP_NUMBER,
+        whatsappMessage: '',
+        facebookUrl: updateData.facebookUrl ?? '',
+        instagramUrl: updateData.instagramUrl ?? '',
+      },
+    });
+
+    this.invalidateCache();
+
+    return {
+      facebookUrl: setting.facebookUrl ?? '',
+      instagramUrl: setting.instagramUrl ?? '',
+      whatsappNumber: setting.whatsappNumber ?? '',
     };
   }
 }

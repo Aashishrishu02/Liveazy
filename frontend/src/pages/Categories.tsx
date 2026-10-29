@@ -30,7 +30,7 @@ import { LayoutDashboard,
   Layers3,
   Check,
   Contact, MessageSquareText, Star,
-  FileText } from "lucide-react";
+  FileText, Share2 } from "lucide-react";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -60,6 +60,7 @@ const navigation = [
   { label: "Banners", path: "/admin/banner", icon: Images },
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
+  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
   { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
   { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },

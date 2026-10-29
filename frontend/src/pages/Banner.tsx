@@ -64,6 +64,7 @@ import {
 
   Contact, MessageSquareText, Star,
   FileText,
+  Share2,
  } from "lucide-react";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
@@ -216,6 +217,8 @@ const navigation = [
   { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
 
   { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
+
+  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
 
   { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
 

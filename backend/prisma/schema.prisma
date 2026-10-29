@@ -98,6 +98,8 @@ model SiteSetting {
   id              Int      @id @default(autoincrement())
   whatsappNumber  String   @default("919423838109")
   whatsappMessage String   @default("Hi LIVEAZY! ")
+  facebookUrl     String?
+  instagramUrl    String?
   updatedAt       DateTime @updatedAt
 }
 

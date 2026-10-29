@@ -27,6 +27,7 @@ import {
   Contact,
   Star,
   FileText,
+  Share2,
 } from "lucide-react";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
@@ -109,6 +110,11 @@ const navigation = [
     label: "WhatsApp Settings",
     path: "/admin/settings",
     icon: MessageCircle,
+  },
+  {
+    label: "Social Media Settings",
+    path: "/admin/social-media",
+    icon: Share2,
   },
   {
     label: "Contact Management",
@@ -1248,6 +1254,30 @@ export default function AdminDashboard() {
 
                         <span className="mt-1 block text-[10px] text-slate-500">
                           Update contact number and message
+                        </span>
+                      </span>
+                    </span>
+
+                    <ChevronRight size={16} className="text-slate-400" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/admin/social-media")}
+                    className="flex w-full items-center justify-between gap-3 rounded-lg border border-slate-100 p-3 text-left transition hover:border-[#B6E4E2] hover:bg-[#F4FBFA]"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="rounded-lg bg-cyan-50 p-2 text-[#008A90]">
+                        <Share2 size={17} />
+                      </span>
+
+                      <span>
+                        <span className="block text-xs font-bold text-[#0F2942]">
+                          Social Media Settings
+                        </span>
+
+                        <span className="mt-1 block text-[10px] text-slate-500">
+                          Configure Facebook, Instagram and WhatsApp links
                         </span>
                       </span>
                     </span>
