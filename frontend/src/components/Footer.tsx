@@ -390,12 +390,22 @@ export default function Footer() {
             </h3>
 
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
-              <li>
-                <Link to="/" className="transition hover:text-[#42DADA]">
-                  Home
-                </Link>
-              </li>
-
+             <li>
+  <button
+    type="button"
+    onClick={() => {
+      if (location.pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }}
+    className="transition hover:text-[#42DADA]"
+  >
+    Home
+  </button>
+</li>
               <li>
                 <button
                   type="button"
