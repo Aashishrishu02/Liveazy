@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,36 @@ interface AdminLoginResponse {
   };
 }
 
+// Retry login only for network errors and timeout errors.
+// Maximum 2 attempts.
+async function loginWithRetry(
+  url: string,
+  options: RequestInit,
+): Promise<Response> {
+  try {
+    return await fetchWithTimeout(url, options, 60000);
+  } catch (error) {
+    const isTimeout =
+      error instanceof DOMException && error.name === "AbortError";
+
+    const isNetworkError = error instanceof TypeError;
+
+    if (!isTimeout && !isNetworkError) {
+      throw error;
+    }
+
+    console.warn(
+      isTimeout
+        ? "Login request timed out. Retrying once..."
+        : "Network error. Retrying once...",
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    return fetchWithTimeout(url, options, 60000);
+  }
+}
+
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,16 +70,19 @@ export default function AdminLogin() {
     try {
       const API_URL = getApiBaseUrl();
 
-      const response = await fetchWithTimeout(`${API_URL}/auth/admin-login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await loginWithRetry(
+        `${API_URL}/auth/admin-login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
         },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
+      );
 
       const data = (await response.json()) as AdminLoginResponse;
 
@@ -79,7 +113,15 @@ export default function AdminLogin() {
       navigate("/admin/dashboard", { replace: true });
     } catch (error) {
       console.error("Admin login error:", error);
-      alert("Unable to connect to the server. Check your backend.");
+
+      const isTimeout =
+        error instanceof DOMException && error.name === "AbortError";
+
+      alert(
+        isTimeout
+          ? "Server is taking too long to respond. Please try again."
+          : "Unable to connect to the server. Please check your internet connection and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -215,7 +257,7 @@ export default function AdminLogin() {
                 disabled={loading}
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F2942] px-4 text-sm font-semibold text-white shadow-lg shadow-[#0F2942]/15 transition hover:bg-[#008A90] focus:outline-none focus:ring-4 focus:ring-[#008A90]/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Signing in..." : "Sign in to dashboard"}
+                {loading ? "Connecting to server..." : "Sign in to dashboard"}
                 {!loading && <span aria-hidden="true">→</span>}
               </button>
             </form>
