@@ -139,11 +139,13 @@ export default function AdminLogin() {
           <div className="absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-[#008A90]/20 blur-2xl" />
 
           <div className="relative z-10">
-            <img
-              src="/liveazy-logo.png"
-              alt="LIVEAZY"
-              className="mb-10 h-16 w-auto max-w-[220px] rounded-lg bg-white p-2 object-contain"
-            />
+            <div className="mb-8 inline-block rounded-2xl bg-white p-3 shadow-md shadow-black/15">
+              <img
+                src="/liveazy-logo-cropped.png"
+                alt="LIVEAZY Furniture Rental"
+                className="h-11 sm:h-13 w-auto max-w-[230px] object-contain"
+              />
+            </div>
 
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-teal-100">
               <ShieldCheck size={15} />
@@ -173,8 +175,15 @@ export default function AdminLogin() {
         <section className="flex items-center justify-center p-7 sm:p-12 lg:p-14">
           <div className="w-full max-w-sm">
             <div className="mb-8">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#008A90]/10 text-[#008A90]">
-                <LockKeyhole size={24} />
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#008A90]/10 text-[#008A90]">
+                  <LockKeyhole size={24} />
+                </div>
+                <img
+                  src="/liveazy-logo-cropped.png"
+                  alt="LIVEAZY"
+                  className="h-8 w-auto max-w-[160px] object-contain lg:hidden"
+                />
               </div>
 
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#008A90]">

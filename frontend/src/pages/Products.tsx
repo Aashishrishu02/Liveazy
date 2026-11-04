@@ -1,14 +1,6 @@
 import {
 useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard,
-Tags,
-Armchair,
-Images,
-Megaphone,
-MessageCircle,
-Store,
-LogOut,
+import {
 Search,
 Plus,
 Pencil,
@@ -26,8 +18,9 @@ CircleSlash,
 Check,
 AlertCircle,
 SlidersHorizontal,
-Contact, MessageSquareText, Star,
-  FileText, Share2 } from "lucide-react";
+} from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
+import ImageUpload from "../components/ImageUpload";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -56,19 +49,6 @@ deposit6M?: number | string | null;
 rent3M?: number | string | null;
 deposit3M?: number | string | null;
 }
-const navigation = [
-{ label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-{ label: "Categories", path: "/admin/categories", icon: Tags },
-{ label: "Products", path: "/admin/products", icon: Armchair },
-{ label: "Banners", path: "/admin/banner", icon: Images },
-{ label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
-{ label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
-{ label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
-{ label: "Contact Management", path: "/admin/contact-management", icon: Contact },
-{ label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
-];
 function getErrorMessage(error: unknown, fallback: string) {
 return error instanceof Error ? error.message : fallback;
 }
@@ -163,8 +143,6 @@ className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 tex
 );
 }
 export default function Products() {
-const navigate = useNavigate();
-const fileInputRef = useRef<HTMLInputElement>(null);
 const galleryInputRef = useRef<HTMLInputElement>(null);
 const [products, setProducts] = useState<Product[]>([]);
 const [categories, setCategories] = useState<Category[]>([]);
@@ -190,7 +168,7 @@ const [search, setSearch] = useState("");
 const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 const [categoryFilter, setCategoryFilter] = useState("all");
 const [sortBy, setSortBy] = useState<"newest" | "name" | "price-low" | "price-high">("newest");
-const [uploading, setUploading] = useState(false);
+const uploading = false;
 const [saving, setSaving] = useState(false);
 const [deletingId, setDeletingId] = useState<string | null>(null);
 const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -249,7 +227,6 @@ setDeposit6M("");
 setRent3M("");
 setDeposit3M("");
 setEditingProduct(null);
-if (fileInputRef.current) fileInputRef.current.value = "";
 };
 const openAddModal = () => {
 resetForm();
@@ -282,40 +259,6 @@ setRent3M(readRentalValue(product.rent3M));
 setDeposit3M(readRentalValue(product.deposit3M));
 showNotice("");
 setShowModal(true);
-};
-const handleImageUpload = async (file: File) => {
-if (!file.type.startsWith("image/")) {
-showNotice("Please select a valid image file.", true);
-if (fileInputRef.current) fileInputRef.current.value = "";
-return;
-}
-if (file.size > MAX_IMAGE_SIZE) {
-showNotice("Image size must be less than 5 MB.", true);
-if (fileInputRef.current) fileInputRef.current.value = "";
-return;
-}
-try {
-setUploading(true);
-showNotice("");
-const formData = new FormData();
-formData.append("file", file);
-const response = await fetch(`${API_URL}/upload/image`, {
-method: "POST",
-body: formData,
-});
-const data = await response.json().catch(() => ({}));
-if (!response.ok || !data.url) {
-throw new Error(data.message || "Image upload failed.");
-}
-setImage(data.url);
-showNotice("Product image uploaded. Save the product to keep this change.");
-} catch (error) {
-console.error("Image upload error:", error);
-showNotice(getErrorMessage(error, "Failed to upload image."), true);
-} finally {
-setUploading(false);
-if (fileInputRef.current) fileInputRef.current.value = "";
-}
 };
 const handleGalleryUpload = async (files: FileList | null) => {
 if (!files?.length) return;
@@ -540,42 +483,9 @@ return 0;
 const activeCount = products.filter((product) => product.isActive).length;
 const inactiveCount = products.length - activeCount;
 const productsWithImage = products.filter((product) => Boolean(product.image)).length;
-const logout = () => {
-localStorage.removeItem("token");
-navigate("/admin");
-};
 return (
 <div className="min-h-screen bg-[#F6F8FD] text-[#142B43]">
-{sidebarOpen && (
-<button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden" />
-)}
-{/* Shared admin sidebar — consistent across LIVEAZY admin pages */}
-<aside className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
-<div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-<div className="flex items-center gap-3">
-<img src="/liveazy-logo.png" alt="LIVEAZY" className="h-11 w-11 rounded-xl bg-white object-contain p-1" onError={(event) => { event.currentTarget.style.display = "none"; }} />
-<div><h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">LIVEAZY</h1><p className="mt-0.5 text-xs text-slate-500">Rental Commerce Hub</p></div>
-<button type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} className="ml-auto rounded-lg p-2 hover:bg-slate-200 lg:hidden"><X size={18} /></button>
-</div>
-<span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">ADMIN CONSOLE</span>
-</div>
-<div className="flex-1 overflow-y-auto px-4 py-6">
-<p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Operations &amp; Catalog</p>
-<nav className="space-y-1.5">
-{navigation.map((item) => {
-const Icon = item.icon;
-return (
-<NavLink key={item.path} to={item.path} onClick={() => setSidebarOpen(false)} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${isActive ? "bg-[#0F2942] text-white shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"}`}>
-<Icon size={19} strokeWidth={1.8} />{item.label}
-</NavLink>
-);
-})}
-</nav>
-<div className="my-6 border-t border-slate-100" />
-<NavLink to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-[#0F2942]"><Store size={19} />View Website</NavLink>
-</div>
-<div className="border-t border-slate-100 p-4"><button type="button" onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"><LogOut size={18} />Log Out</button></div>
-</aside>
+<AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 <div className="min-h-screen lg:pl-[260px]">
 <header className="sticky top-0 z-30 flex min-h-[72px] items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8">
 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -747,12 +657,14 @@ Save
 </div>
 </section>
 <section className="space-y-4">
-<div><h3 className="text-sm font-extrabold text-[#0F2942]">Product image</h3><p className="mt-1 text-xs text-slate-500">Upload a clear product image (maximum 5 MB).</p></div>
-<input ref={fileInputRef} id="product-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handleImageUpload(file); }} className="hidden" />
-<div className="rounded-xl border-2 border-dashed border-slate-200 bg-[#F8FAFC] p-4">
-{image ? <div className="mb-4 flex items-center gap-4"><img src={image} alt="Product preview" className="h-24 w-24 rounded-lg border border-slate-200 bg-white object-cover" onError={(event) => { event.currentTarget.style.display = "none"; }} /><div className="min-w-0 flex-1"><p className="text-sm font-semibold text-[#0F2942]">Image preview</p><p className="mt-1 break-all text-xs text-slate-500">Image URL ready to save</p><button type="button" onClick={() => { setImage(""); if (fileInputRef.current) fileInputRef.current.value = ""; }} className="mt-2 text-xs font-semibold text-red-600 hover:underline">Remove image</button></div></div> : <div className="mb-3 flex h-20 items-center justify-center rounded-lg bg-white text-slate-300"><ImageIcon size={30} /></div>}
-<label htmlFor="product-image" className="flex cursor-pointer flex-col items-center justify-center rounded-lg px-4 py-4 text-center transition hover:bg-white hover:text-teal-700"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-teal-700 shadow-sm">{uploading ? <RefreshCw size={20} className="animate-spin" /> : <Upload size={20} />}</span><span className="mt-3 text-sm font-semibold text-[#0F2942]">{uploading ? "Uploading image…" : image ? "Change product image" : "Click to upload product image"}</span><span className="mt-1 text-xs text-slate-400">JPG, PNG, GIF or WebP · Maximum 5 MB</span></label>
-</div>
+<ImageUpload
+  label="Primary Product Image"
+  value={image}
+  onChange={setImage}
+  folder="products"
+  aspectRatio="video"
+  helperText="Upload the main product photo from device (JPG, PNG, WEBP, max 5 MB)"
+/>
 </section>
 <section className="space-y-4">
 <div>

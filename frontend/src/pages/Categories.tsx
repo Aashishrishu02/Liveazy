@@ -1,19 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard,
-  Tags,
-  Armchair,
-  Images,
-  Megaphone,
-  MessageCircle,
-  Store,
-  LogOut,
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
   Search,
   Plus,
   Pencil,
   Trash2,
   X,
-  Upload,
   Image as ImageIcon,
   CheckCircle2,
   FolderOpen,
@@ -29,8 +20,9 @@ import { LayoutDashboard,
   CircleSlash,
   Layers3,
   Check,
-  Contact, MessageSquareText, Star,
-  FileText, Share2 } from "lucide-react";
+} from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
+import ImageUpload from "../components/ImageUpload";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -52,20 +44,6 @@ interface Category {
 
 type StatusFilter = "all" | "active" | "inactive";
 type BulkAction = "" | "activate" | "deactivate" | "delete";
-
-const navigation = [
-  { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Categories", path: "/admin/categories", icon: Tags },
-  { label: "Products", path: "/admin/products", icon: Armchair },
-  { label: "Banners", path: "/admin/banner", icon: Images },
-  { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
-  { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
-  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
-  { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
-  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
-];
 
 const slugify = (value: string) =>
   value
@@ -105,9 +83,6 @@ function AdminAvatar() {
 }
 
 export default function Categories() {
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -133,7 +108,7 @@ export default function Categories() {
   const [image, setImage] = useState("");
   const [isActive, setIsActive] = useState(true);
 
-  const [uploading, setUploading] = useState(false);
+  const uploading = false;
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(
@@ -191,10 +166,6 @@ export default function Categories() {
     setImage("");
     setIsActive(true);
     setEditingCategory(null);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const openAddModal = () => {
@@ -221,57 +192,6 @@ export default function Categories() {
     setShowModal(false);
     resetForm();
     showNotice("");
-  };
-
-  // Upload category image
-  const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      showNotice("Please select a valid image file.", true);
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showNotice("Image size must be less than 5 MB.", true);
-      return;
-    }
-
-    try {
-      setUploading(true);
-      showNotice("");
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(`${API_URL}/upload/image`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      const data = await response.json();
-
-      if (!data.url) {
-        throw new Error("Image URL was not returned.");
-      }
-
-      setImage(data.url);
-      showNotice("Image uploaded successfully.");
-    } catch (error) {
-      console.error("Image upload error:", error);
-      showNotice(
-        getErrorMessage(error, "Failed to upload image. Please try again."),
-        true
-      );
-    } finally {
-      setUploading(false);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
   };
 
   // Create or update category
@@ -680,116 +600,9 @@ export default function Categories() {
     );
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/admin");
-  };
-
   return (
     <div className="min-h-screen bg-[#F6F8FD] text-[#142B43]">
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden"
-        />
-      )}
-
-      {/* Admin sidebar - same as other pages */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
-      >
-        <div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-          <div className="flex items-center gap-3">
-            <img
-              src="/liveazy-logo.png"
-              alt="LIVEAZY"
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-            />
-
-            <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">
-                LIVEAZY
-              </h1>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Rental Commerce Hub
-              </p>
-            </div>
-
-            <button
-              type="button"
-              aria-label="Close sidebar"
-              onClick={() => setSidebarOpen(false)}
-              className="ml-auto rounded-lg p-2 hover:bg-slate-200 lg:hidden"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          <span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">
-            ADMIN CONSOLE
-          </span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-            Operations &amp; Catalog
-          </p>
-
-          <nav className="space-y-1.5">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-[#0F2942] text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"
-                    }`
-                  }
-                >
-                  <Icon size={19} strokeWidth={1.8} />
-                  {item.label}
-                </NavLink>
-              );
-            })}
-          </nav>
-
-          <div className="my-6 border-t border-slate-100" />
-
-          <NavLink
-            to="/"
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
-          >
-            <Store size={19} />
-            View Website
-          </NavLink>
-        </div>
-
-        <div className="border-t border-slate-100 p-4">
-          <button
-            type="button"
-            onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Log Out
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main page */}
       <div className="min-h-screen lg:pl-[260px]">
@@ -1562,80 +1375,14 @@ export default function Categories() {
               </div>
 
               <div>
-                <label
-                  htmlFor="category-image"
-                  className="mb-2 block text-sm font-semibold text-[#0F2942]"
-                >
-                  Category Image
-                </label>
-
-                <input
-                  ref={fileInputRef}
-                  id="category-image"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) void handleImageUpload(file);
-                  }}
-                  className="hidden"
+                <ImageUpload
+                  label="Category Thumbnail Image"
+                  value={image}
+                  onChange={setImage}
+                  folder="categories"
+                  aspectRatio="square"
+                  helperText="Upload circular thumbnail image from device (JPG, PNG, WEBP, max 5 MB)"
                 />
-
-                <label
-                  htmlFor="category-image"
-                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-[#F8FAFC] px-5 py-6 text-center transition hover:border-teal-600 hover:bg-teal-50/30"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-teal-700 shadow-sm">
-                    {uploading ? (
-                      <RefreshCw size={20} className="animate-spin" />
-                    ) : (
-                      <Upload size={21} />
-                    )}
-                  </div>
-
-                  <span className="mt-3 text-sm font-semibold text-[#0F2942]">
-                    {uploading
-                      ? "Uploading image..."
-                      : "Click to upload image"}
-                  </span>
-
-                  <span className="mt-1 text-xs text-slate-400">
-                    JPG, PNG, GIF or WebP · Maximum 5 MB
-                  </span>
-                </label>
-
-                {image && (
-                  <div className="mt-4 flex items-center gap-4 rounded-xl border border-slate-200 p-3">
-                    <img
-                      src={image}
-                      alt="Category preview"
-                      className="h-20 w-20 rounded-lg border border-slate-100 object-cover"
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#0F2942]">
-                        Image preview
-                      </p>
-
-                      <p className="mt-1 text-xs text-emerald-700">
-                        Image URL ready to save
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setImage("");
-                          if (fileInputRef.current) {
-                            fileInputRef.current.value = "";
-                          }
-                        }}
-                        className="mt-2 text-xs font-semibold text-red-600 hover:underline"
-                      >
-                        Remove image
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <label className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-[#F8FAFC] p-4">

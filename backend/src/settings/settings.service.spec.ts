@@ -58,6 +58,7 @@ describe('SettingsService', () => {
         whatsappNumber: '919876543210',
         facebookUrl: 'https://facebook.com/liveazy',
         instagramUrl: 'https://instagram.com/liveazy',
+        youtubeUrl: '',
       });
     });
 
@@ -68,6 +69,7 @@ describe('SettingsService', () => {
         whatsappNumber: '919423838109',
         facebookUrl: '',
         instagramUrl: '',
+        youtubeUrl: '',
         updatedAt: new Date(),
       });
 
@@ -76,6 +78,7 @@ describe('SettingsService', () => {
         whatsappNumber: '919423838109',
         facebookUrl: '',
         instagramUrl: '',
+        youtubeUrl: '',
       });
     });
   });
@@ -88,6 +91,7 @@ describe('SettingsService', () => {
         whatsappNumber: '919876543210',
         facebookUrl: 'https://facebook.com/liveazy',
         instagramUrl: 'https://instagram.com/liveazy',
+        youtubeUrl: '',
       });
 
       const result = await service.updateSocialSettings({
@@ -110,6 +114,7 @@ describe('SettingsService', () => {
         facebookUrl: 'https://facebook.com/liveazy',
         instagramUrl: 'https://instagram.com/liveazy',
         whatsappNumber: '919876543210',
+        youtubeUrl: '',
       });
     });
 

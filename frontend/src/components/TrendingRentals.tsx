@@ -1,7 +1,8 @@
-
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { fetchJsonDeduplicated } from "../utils/api";
+import React, { useEffect, useState } from "react";
+import { Sparkles, ArrowRight } from "lucide-react";
+import ProductCard from "./ProductCard";
+import type { Product } from "../types/rental";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface TrendingProduct {
   id: string | number;
@@ -11,7 +12,9 @@ interface TrendingProduct {
   rent3M?: number | string | null;
   rent6M?: number | string | null;
   rent12M?: number | string | null;
-  [key: string]: unknown;
+  deposit12M?: number | string | null;
+  price?: number | null;
+  description?: string | null;
 }
 
 interface TrendingRentalsResponse {
@@ -21,191 +24,131 @@ interface TrendingRentalsResponse {
   products?: TrendingProduct[];
 }
 
-const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
-).replace(/\/$/, "");
-
-function getMonthlyRent(product: TrendingProduct): number | null {
-  const possibleRents = [
-    product.rent3M,
-    product.rent6M,
-    product.rent12M,
-  ]
-    .map(Number)
-    .filter((rent) => Number.isFinite(rent) && rent > 0);
-
-  return possibleRents.length ? Math.min(...possibleRents) : null;
+interface TrendingRentalsProps {
+  onQuickView?: (product: Product, defaultTenure?: number) => void;
+  onAddToCart?: (product: Product, tenure: number) => void;
 }
 
-function getCategoryName(product: TrendingProduct): string {
-  if (typeof product.category === "string") {
-    return product.category;
-  }
-
-  return product.category?.name || "Furniture Rental";
-}
-
-export default function TrendingRentals() {
-  const navigate = useNavigate();
-
+export const TrendingRentals: React.FC<TrendingRentalsProps> = ({
+  onQuickView,
+  onAddToCart,
+}) => {
   const [data, setData] = useState<TrendingRentalsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
+    const apiBase = getApiBaseUrl();
 
     async function fetchTrendingRentals() {
       try {
+        setLoading(true);
         const result = await fetchJsonDeduplicated<TrendingRentalsResponse>(
-          `${API_URL}/trending-rentals`,
-          { signal: controller.signal }
+          `${apiBase}/trending-rentals`
         );
-        setData(result);
+        if (!cancelled) {
+          setData(result);
+        }
       } catch (error) {
-        if (error instanceof Error && error.name !== "AbortError") {
-          console.error("Trending rentals error:", error.message);
+        if (!cancelled) {
+          console.warn("Trending rentals error:", error);
         }
       } finally {
-        if (!controller.signal.aborted) {
+        if (!cancelled) {
           setLoading(false);
         }
       }
     }
 
-    fetchTrendingRentals();
-
-    return () => controller.abort();
+    void fetchTrendingRentals();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading || !data?.isActive || !data.products?.length) {
     return null;
   }
 
-  const products = data.products.slice(0, 4);
+  const mappedProducts: Product[] = data.products.map((p) => {
+    const baseMonthly = Number(p.rent12M || p.price || 499);
+    const catName =
+      typeof p.category === "object" && p.category
+        ? p.category.name
+        : typeof p.category === "string"
+        ? p.category
+        : "Furniture";
+
+    return {
+      id: String(p.id),
+      name: p.name,
+      category: (catName as Product["category"]) || "Furniture",
+      monthlyPrice: baseMonthly,
+      originalPrice: p.price && p.price > baseMonthly ? Math.round(p.price) : Math.round(baseMonthly * 1.5),
+      rating: 4.8,
+      reviewsCount: 68,
+      image: p.image || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80",
+      tag: "Trending",
+      deposit: Number(p.deposit12M || 0),
+      availableTenures: [3, 6, 12],
+      specs: p.description ? [p.description] : [],
+      rent12M: p.rent12M ? Number(p.rent12M) : null,
+      rent6M: p.rent6M ? Number(p.rent6M) : null,
+      rent3M: p.rent3M ? Number(p.rent3M) : null,
+      deposit12M: p.deposit12M ? Number(p.deposit12M) : null,
+    } as Product & Record<string, unknown>;
+  });
 
   return (
     <section
       aria-labelledby="trending-rentals-heading"
-      className="border-t border-slate-200/70 bg-[#F6F7FD] px-5 py-14 sm:px-8 sm:py-16 lg:px-12 lg:py-20"
+      className="border-t border-gray-100 bg-[#f8f7fc] py-10 sm:py-14"
     >
-      <div className="mx-auto max-w-7xl">
-        {/* Section heading */}
-        <div className="mb-9 flex flex-col gap-5 md:mb-10 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#087F8C] ring-1 ring-slate-200">
-              <span className="h-2 w-2 rounded-full bg-[#087F8C]" />
-              Trending Collections
+      <div className="ref-container">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+              <Sparkles size={13} className="text-[#4a36b3]" />
+              Curated Picks
             </span>
 
             <h2
               id="trending-rentals-heading"
-              className="mt-5 text-3xl font-bold tracking-tight text-[#14243B] sm:text-4xl lg:text-[42px]"
+              className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight"
             >
               {data.heading || "Trending Rentals in Your City"}
             </h2>
 
-            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 max-w-xl">
               {data.subtitle ||
-                "Discover furniture and appliances for comfortable living, without the heavy investment."}
+                "Handpicked furniture and appliances rented across your city."}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/#categories")}
-            className="inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-xl border border-[#087F8C]/25 bg-white px-5 py-3 text-sm font-semibold text-[#087F8C] transition hover:border-[#087F8C] hover:bg-[#087F8C] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#087F8C]/30"
+          <a
+            href="#trending"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#4a36b3] hover:underline shrink-0"
           >
-            Explore rentals
-            <span aria-hidden="true">→</span>
-          </button>
+            <span>View all products</span>
+            <ArrowRight size={16} />
+          </a>
         </div>
 
-        {/* Product cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-          {products.map((product) => {
-            const monthlyRent = getMonthlyRent(product);
-            const categoryName = getCategoryName(product);
-
-            return (
-              <article
-                key={product.id}
-                className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#087F8C]/30 hover:shadow-lg hover:shadow-slate-900/5"
-              >
-                {/* Product image */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `/product/${encodeURIComponent(String(product.id))}`
-                    )
-                  }
-                  aria-label={`View ${product.name}`}
-                  className="relative block aspect-[4/3] w-full overflow-hidden bg-white p-4 text-left"
-                >
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      loading="lazy"
-                      className="h-full w-full rounded-xl object-contain transition duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center rounded-xl bg-[#F6F7FD] text-sm text-slate-400">
-                      Image unavailable
-                    </div>
-                  )}
-
-                  <span className="absolute left-6 top-6 rounded-full bg-[#E5F5F5] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#087F8C]">
-                    Trending
-                  </span>
-                </button>
-
-                {/* Product information */}
-                <div className="flex flex-1 flex-col px-5 pb-5 pt-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#087F8C]">
-                    {categoryName}
-                  </p>
-
-                  <h3 className="mt-2 line-clamp-2 min-h-12 text-base font-bold leading-6 text-[#14243B]">
-                    {product.name}
-                  </h3>
-
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <p className="text-xs text-slate-500">
-                        Monthly rent
-                      </p>
-                      <p className="mt-1 text-xl font-bold text-[#14243B]">
-                        {monthlyRent !== null
-                          ? `₹${monthlyRent.toLocaleString("en-IN")}`
-                          : "View details"}
-                        {monthlyRent !== null && (
-                          <span className="text-sm font-medium text-slate-500">
-                            /mo
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(
-                        `/product/${encodeURIComponent(String(product.id))}`
-                      )
-                    }
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#087F8C] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#066873] focus:outline-none focus:ring-2 focus:ring-[#087F8C]/40 focus:ring-offset-2"
-                  >
-                    View details
-                    <span aria-hidden="true">→</span>
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          {mappedProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onQuickView={onQuickView}
+              onAddToCart={onAddToCart}
+            />
+          ))}
         </div>
       </div>
     </section>
   );
-}
+};
+
+export default TrendingRentals;

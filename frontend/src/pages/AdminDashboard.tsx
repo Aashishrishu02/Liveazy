@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
   Tags,
-  Armchair,
   Images,
   Megaphone,
   MessageCircle,
-  MessageSquareText,
   Store,
-  LogOut,
   Search,
   Bell,
   Plus,
@@ -25,10 +21,12 @@ import {
   ShieldCheck,
   AlertCircle,
   Contact,
-  Star,
-  FileText,
   Share2,
+  SlidersHorizontal,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface Category {
@@ -79,61 +77,6 @@ interface WhatsAppSettings {
   whatsappNumber?: string;
   whatsappMessage?: string;
 }
-
-const navigation = [
-  {
-    label: "Dashboard",
-    path: "/admin/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Categories",
-    path: "/admin/categories",
-    icon: Tags,
-  },
-  {
-    label: "Products",
-    path: "/admin/products",
-    icon: Armchair,
-  },
-  {
-    label: "Banners",
-    path: "/admin/banner",
-    icon: Images,
-  },
-  {
-    label: "Promo Banners",
-    path: "/admin/promo-banners",
-    icon: Megaphone,
-  },
-  {
-    label: "WhatsApp Settings",
-    path: "/admin/settings",
-    icon: MessageCircle,
-  },
-  {
-    label: "Social Media Settings",
-    path: "/admin/social-media",
-    icon: Share2,
-  },
-  {
-    label: "Contact Management",
-    path: "/admin/contact-management",
-    icon: Contact,
-  },
-    
-  {
-    label: "Feedback Master",
-    path: "/admin/feedback",
-    icon: MessageSquareText,
-  },
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  {
-  label: "Blog Management",
-  path: "/admin/blogs",
-  icon: FileText,
-},
-];
 
 async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const base = getApiBaseUrl();
@@ -281,22 +224,24 @@ function formatDate(value?: string): string {
   });
 }
 
+interface DashboardWidgetConfig {
+  id: "stats" | "recentProducts" | "bannerPreview" | "whatsappGateway" | "quickActions";
+  label: string;
+  description: string;
+  visible: boolean;
+  order: number;
+}
+
+const DEFAULT_DASHBOARD_LAYOUT: DashboardWidgetConfig[] = [
+  { id: "stats", label: "Store Statistics Cards", description: "Product counts, categories, and promo numbers", visible: true, order: 0 },
+  { id: "recentProducts", label: "Recent Products Table", description: "Latest catalog products and status", visible: true, order: 1 },
+  { id: "bannerPreview", label: "Homepage Banner Preview", description: "Hero banner preview and status", visible: true, order: 2 },
+  { id: "whatsappGateway", label: "WhatsApp Gateway Settings", description: "Configured number and enquiry message", visible: true, order: 3 },
+  { id: "quickActions", label: "Quick Actions Shortcuts", description: "Direct navigation to management pages", visible: true, order: 4 },
+];
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const sidebarNavRef = useRef<HTMLElement | null>(null);
-
-  // Keep the currently active sidebar item visible after route changes.
-  useEffect(() => {
-    const activeItem = sidebarNavRef.current?.querySelector<HTMLAnchorElement>(
-      'a[aria-current="page"]',
-    );
-
-    activeItem?.scrollIntoView({
-      block: "nearest",
-      behavior: "smooth",
-    });
-  }, [location.pathname]);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -310,6 +255,70 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Persistent Dashboard Layout State
+  const [layoutSettings, setLayoutSettings] = useState<DashboardWidgetConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem("admin_dashboard_layout");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_DASHBOARD_LAYOUT;
+  });
+
+  const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
+  const [draftLayout, setDraftLayout] = useState<DashboardWidgetConfig[]>(DEFAULT_DASHBOARD_LAYOUT);
+
+  const openLayoutEditor = () => {
+    setDraftLayout(layoutSettings.map((item) => ({ ...item })));
+    setLayoutEditorOpen(true);
+  };
+
+  const saveLayoutEditor = () => {
+    setLayoutSettings(draftLayout);
+    try {
+      localStorage.setItem("admin_dashboard_layout", JSON.stringify(draftLayout));
+    } catch (e) {
+      console.warn("Could not save layout:", e);
+    }
+    setLayoutEditorOpen(false);
+  };
+
+  const cancelLayoutEditor = () => {
+    setDraftLayout(layoutSettings.map((item) => ({ ...item })));
+    setLayoutEditorOpen(false);
+  };
+
+  const resetLayoutToDefault = () => {
+    setDraftLayout(DEFAULT_DASHBOARD_LAYOUT.map((item) => ({ ...item })));
+  };
+
+  const toggleDraftVisibility = (id: string) => {
+    setDraftLayout((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, visible: !item.visible } : item))
+    );
+  };
+
+  const moveDraftItem = (index: number, direction: "up" | "down") => {
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === draftLayout.length - 1)
+    ) {
+      return;
+    }
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    const next = [...draftLayout];
+    const [moved] = next.splice(index, 1);
+    next.splice(targetIdx, 0, moved);
+    setDraftLayout(next.map((item, idx) => ({ ...item, order: idx })));
+  };
+
+  const isWidgetVisible = (id: string) => {
+    const found = layoutSettings.find((w) => w.id === id);
+    return found ? found.visible : true;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -474,104 +483,10 @@ export default function AdminDashboard() {
     banner?.description ||
     "Manage the message shown on your homepage.";
 
-  function logout() {
-    localStorage.removeItem("token");
-    navigate("/admin");
-  }
-
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#142B43]">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden"
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
-      >
-        <div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-          <div className="flex items-center gap-3">
-            <img
-              src="/liveazy-logo.png"
-              alt="LIVEAZY"
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1"
-            />
-
-            <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">
-                LIVEAZY
-              </h1>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Rental Commerce Hub
-              </p>
-            </div>
-          </div>
-
-          <span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">
-            ADMIN CONSOLE
-          </span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-            Operations &amp; Catalog
-          </p>
-
-          <nav ref={sidebarNavRef} className="space-y-1.5">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-[#0F2942] text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"
-                    }`
-                  }
-                >
-                  <Icon size={19} strokeWidth={1.8} />
-                  {item.label}
-                </NavLink>
-              );
-            })}
-          </nav>
-
-          <div className="my-6 border-t border-slate-100" />
-
-          <NavLink
-            to="/"
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
-          >
-            <Store size={19} />
-            View Website
-          </NavLink>
-        </div>
-
-        <div className="border-t border-slate-100 p-4">
-          <button
-            type="button"
-            onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Log Out
-          </button>
-        </div>
-      </aside>
+      {/* Admin Sidebar */}
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main area */}
       <div className="min-h-screen lg:pl-[260px]">
@@ -697,6 +612,15 @@ export default function AdminDashboard() {
                 <Plus size={16} />
                 Add Category
               </button>
+
+              <button
+                type="button"
+                onClick={openLayoutEditor}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-[#0F2942] transition hover:bg-slate-50"
+              >
+                <SlidersHorizontal size={16} />
+                Dashboard Layout
+              </button>
             </div>
           </section>
 
@@ -732,78 +656,94 @@ export default function AdminDashboard() {
           )}
 
           {/* Statistics */}
-          <section>
-            <div className="mb-4 flex items-end justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-bold text-[#0F2942]">
-                  Store Statistics
-                </h3>
+          {isWidgetVisible("stats") && (
+            <section>
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F2942]">
+                    Store Statistics
+                  </h3>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Current store data from your backend.
-                </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Current store data from your backend.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setRefreshKey((previous) => previous + 1)}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <RefreshCw
+                    size={14}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Refresh
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setRefreshKey((previous) => previous + 1)}
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                <RefreshCw
-                  size={14}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Refresh
-              </button>
-            </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {stats.map((stat) => {
+                  const Icon = stat.icon;
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {stats.map((stat) => {
-                const Icon = stat.icon;
+                  return (
+                    <button
+                      type="button"
+                      key={stat.title}
+                      onClick={() => navigate(stat.path)}
+                      className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-slate-500">
+                            {stat.title}
+                          </p>
 
-                return (
-                  <button
-                    type="button"
-                    key={stat.title}
-                    onClick={() => navigate(stat.path)}
-                    className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium text-slate-500">
-                          {stat.title}
-                        </p>
+                          <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#0F2942]">
+                            {loading ? "—" : stat.value}
+                          </p>
+                        </div>
 
-                        <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#0F2942]">
-                          {loading ? "—" : stat.value}
-                        </p>
+                        <div
+                          className={`flex h-11 w-11 items-center justify-center rounded-xl ${stat.iconClass}`}
+                        >
+                          <Icon size={21} strokeWidth={1.8} />
+                        </div>
                       </div>
 
-                      <div
-                        className={`flex h-11 w-11 items-center justify-center rounded-xl ${stat.iconClass}`}
-                      >
-                        <Icon size={21} strokeWidth={1.8} />
+                      <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                        <span className="text-xs text-slate-500">
+                          {stat.detail}
+                        </span>
+
+                        <ArrowUpRight size={15} className="text-slate-400" />
                       </div>
-                    </div>
-
-                    <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                      <span className="text-xs text-slate-500">
-                        {stat.detail}
-                      </span>
-
-                      <ArrowUpRight size={15} className="text-slate-400" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Recent products and management panels */}
-          <section className="grid grid-cols-1 items-start gap-5 2xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
-            {/* Recent products table */}
-            <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          {(isWidgetVisible("recentProducts") ||
+            isWidgetVisible("bannerPreview") ||
+            isWidgetVisible("whatsappGateway") ||
+            isWidgetVisible("quickActions")) && (
+            <section
+              className={`grid grid-cols-1 items-start gap-5 ${
+                isWidgetVisible("recentProducts") &&
+                (isWidgetVisible("bannerPreview") ||
+                  isWidgetVisible("whatsappGateway") ||
+                  isWidgetVisible("quickActions"))
+                  ? "2xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]"
+                  : "2xl:grid-cols-1"
+              }`}
+            >
+              {/* Recent products table */}
+              {isWidgetVisible("recentProducts") && (
+                <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
                 <div>
                   <h3 className="text-lg font-bold text-[#0F2942]">
@@ -1007,11 +947,16 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
+            )}
 
             {/* Right-side panels */}
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-1">
-              {/* Homepage banner */}
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            {(isWidgetVisible("bannerPreview") ||
+              isWidgetVisible("whatsappGateway") ||
+              isWidgetVisible("quickActions")) && (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-1">
+                {/* Homepage banner */}
+                {isWidgetVisible("bannerPreview") && (
+                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                   <div>
                     <h3 className="text-base font-bold text-[#0F2942]">
@@ -1107,8 +1052,10 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* WhatsApp gateway */}
+            {/* WhatsApp gateway */}
+            {isWidgetVisible("whatsappGateway") && (
               <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                   <div>
@@ -1191,8 +1138,10 @@ export default function AdminDashboard() {
                   </p>
                 </div>
               </div>
+            )}
 
-              {/* Quick actions */}
+            {/* Quick actions */}
+            {isWidgetVisible("quickActions") && (
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:col-span-2 2xl:col-span-1">
                 <h3 className="text-base font-bold text-[#0F2942]">
                   Quick Actions
@@ -1350,8 +1299,134 @@ export default function AdminDashboard() {
                   </a>
                 </div>
               </div>
+            )}
             </div>
-          </section>
+          )}
+        </section>
+      )}
+
+      {/* Dashboard Layout Customizer Modal */}
+      {layoutEditorOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2942]/50 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={cancelLayoutEditor}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 bg-[#F8FAFC] px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D9F4F2] text-[#00696E]">
+                  <SlidersHorizontal size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#0F2942]">
+                    Customize Dashboard
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Toggle widgets and adjust their order
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={cancelLayoutEditor}
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-600 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-3">
+              {draftLayout.map((widget, index) => (
+                <div
+                  key={widget.id}
+                  className={`flex items-center justify-between gap-3 p-3.5 rounded-xl border transition ${
+                    widget.visible
+                      ? "border-slate-200 bg-white hover:border-[#008A90]/40"
+                      : "border-slate-100 bg-slate-50/60 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => toggleDraftVisibility(widget.id)}
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition ${
+                        widget.visible
+                          ? "bg-[#0F2942] border-[#0F2942] text-white"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {widget.visible && (
+                        <span className="text-xs font-bold leading-none">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-[#0F2942] truncate">
+                        {widget.label}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {widget.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => moveDraftItem(index, "up")}
+                      className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
+                      title="Move up"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === draftLayout.length - 1}
+                      onClick={() => moveDraftItem(index, "down")}
+                      className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
+                      title="Move down"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-100 bg-[#F8FAFC] px-6 py-4">
+              <button
+                type="button"
+                onClick={resetLayoutToDefault}
+                className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+              >
+                Reset to default
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={cancelLayoutEditor}
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={saveLayoutEditor}
+                  className="rounded-lg bg-[#0F2942] px-4 py-2 text-xs font-semibold text-white hover:bg-[#193D5C] transition shadow-sm"
+                >
+                  Save Layout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
           {/* Footer */}
           <footer className="flex flex-col justify-between gap-2 border-t border-slate-200 py-5 text-xs text-slate-400 sm:flex-row sm:items-center">

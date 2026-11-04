@@ -1,18 +1,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  LayoutDashboard,
-  Tags,
-  Armchair,
-  Images,
-  Megaphone,
-  Contact,
-  MessageCircle,
-  MessageSquareText,
-  Store,
-  LogOut,
   Menu,
   CheckCircle2,
   RefreshCw,
@@ -26,9 +16,8 @@ import {
   Pencil,
   Trash2,
   X,
-  FileText,
-  Share2,
 } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -64,20 +53,6 @@ const emptyForm: FeedbackForm = {
   rating: 5,
   message: "",
 };
-
-const FEEDBACK_ADMIN_SIDEBAR = [
-  { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Categories", path: "/admin/categories", icon: Tags },
-  { label: "Products", path: "/admin/products", icon: Armchair },
-  { label: "Banners", path: "/admin/banner", icon: Images },
-  { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
-  { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
-  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
-  { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
-  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
-];
 
 export default function FeedbackMaster() {
   const navigate = useNavigate();
@@ -442,95 +417,7 @@ export default function FeedbackMaster() {
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#142B43]">
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden"
-        />
-      )}
-
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0`}>
-        <div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-          <div className="flex items-center gap-3">
-            <img
-              src="/liveazy-logo.png"
-              alt="LIVEAZY"
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1"
-              onError={(event) => { event.currentTarget.style.display = "none"; }}
-            />
-            <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">LIVEAZY</h1>
-              <p className="mt-0.5 text-xs text-slate-500">Rental Commerce Hub</p>
-            </div>
-            <button
-              type="button"
-              aria-label="Close sidebar"
-              onClick={() => setSidebarOpen(false)}
-              className="ml-auto rounded-lg p-2 hover:bg-slate-200 lg:hidden"
-            >
-              <X size={18} />
-            </button>
-          </div>
-          <span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">
-            ADMIN CONSOLE
-          </span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-            Operations &amp; Catalog
-          </p>
-          <nav className="space-y-1.5">
-            {FEEDBACK_ADMIN_SIDEBAR.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-[#0F2942] text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"
-                    }`
-                  }
-                >
-                  <Icon size={19} strokeWidth={1.8} />
-                  {item.label}
-                </NavLink>
-              );
-            })}
-          </nav>
-          <div className="my-6 border-t border-slate-100" />
-          <NavLink
-            to="/"
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-          >
-            <Store size={19} />
-            View Website
-          </NavLink>
-        </div>
-
-        <div className="border-t border-slate-100 p-4">
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.removeItem("token");
-              navigate("/admin");
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Log Out
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen lg:pl-[260px]">
         <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8">

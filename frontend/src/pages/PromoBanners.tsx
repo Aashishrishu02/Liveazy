@@ -1,30 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-
-import {
-  NavLink, useNavigate } from "react-router-dom";
-
-import { LayoutDashboard,
-
-  Tags,
-
-  Armchair,
-
-  Images,
-
-  Megaphone,
-
-  MessageCircle,
-
-  Store,
-
-  LogOut,
-
-  Menu,
-
-  X,
-
-  Contact, MessageSquareText, Star,
-  FileText, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Menu } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
+import ImageUpload from "../components/ImageUpload";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -108,33 +85,6 @@ const placements = [
 
 ];
 
-
-
-const navigation = [
-
-  { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-
-  { label: "Categories", path: "/admin/categories", icon: Tags },
-
-  { label: "Products", path: "/admin/products", icon: Armchair },
-
-  { label: "Banners", path: "/admin/banner", icon: Images },
-
-  { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
-
-  { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
-
-  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
-
-  { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
-  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
-
-];
-
-
-
 function AdminAvatar() {
 
   return (
@@ -181,8 +131,6 @@ function getErrorMessage(data: any, fallback: string) {
 
 export default function PromoBanners() {
 
-  const navigate = useNavigate();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [banners, setBanners] = useState<PromoBannerData[]>([]);
@@ -203,17 +151,13 @@ export default function PromoBanners() {
 
   const [busy, setBusy] = useState(false);
 
-  const [uploading, setUploading] = useState(false);
+  const uploading = false;
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [error, setError] = useState("");
 
   const [success, setSuccess] = useState("");
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-
 
   const getHeaders = (): HeadersInit => {
 
@@ -328,82 +272,6 @@ export default function PromoBanners() {
     setForm((current) => ({ ...current, [field]: value }));
 
   };
-
-
-
-  const uploadImage = async (file: File) => {
-
-    if (!file.type.startsWith("image/")) throw new Error("Please select a valid image file.");
-
-    if (file.size > 5 * 1024 * 1024) throw new Error("Image size must be 5 MB or less.");
-
-
-
-    const body = new FormData();
-
-    body.append("file", file);
-
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(`${API_URL}/upload/promo-banner`, {
-
-      method: "POST",
-
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-
-      body,
-
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok || !data.url) {
-
-      throw new Error(getErrorMessage(data, "Image upload failed."));
-
-    }
-
-    return String(data.url);
-
-  };
-
-
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-
-    const file = event.target.files?.[0];
-
-    event.target.value = "";
-
-    if (!file) return;
-
-    try {
-
-      setUploading(true);
-
-      setError("");
-
-      setSuccess("");
-
-      const url = await uploadImage(file);
-
-      updateField("image", url);
-
-      setSuccess("Image uploaded. Save the banner to apply the change.");
-
-    } catch (err) {
-
-      setError(err instanceof Error ? err.message : "Image upload failed.");
-
-    } finally {
-
-      setUploading(false);
-
-    }
-
-  };
-
-
 
   const saveBanner = async (mode: SaveMode) => {
 
@@ -575,18 +443,6 @@ export default function PromoBanners() {
 
   };
 
-
-
-  const logout = () => {
-
-    localStorage.removeItem("token");
-
-    navigate("/admin");
-
-  };
-
-
-
   const activeCount = banners.filter((banner) => banner.isActive).length;
   const totalImpressions = banners.reduce(
     (total, banner) => total + (Number(banner.impressions) || 0),
@@ -631,187 +487,7 @@ export default function PromoBanners() {
 
     <div className="min-h-screen bg-[#F6F8FD] text-[#142B43]">
 
-      {sidebarOpen && (
-
-        <button
-
-          type="button"
-
-          aria-label="Close navigation"
-
-          onClick={() => setSidebarOpen(false)}
-
-          className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden"
-
-        />
-
-      )}
-
-
-
-      <aside
-
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${
-
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-
-        } lg:translate-x-0`}
-
-      >
-
-        <div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-
-          <div className="flex items-center gap-3">
-
-            <img
-
-              src="/liveazy-logo.png"
-
-              alt="LIVEAZY"
-
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1"
-
-              onError={(event) => {
-
-                event.currentTarget.style.display = "none";
-
-              }}
-
-            />
-
-            <div>
-
-              <h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">LIVEAZY</h1>
-
-              <p className="mt-0.5 text-xs text-slate-500">Rental Commerce Hub</p>
-
-            </div>
-
-            <button
-
-              type="button"
-
-              aria-label="Close sidebar"
-
-              onClick={() => setSidebarOpen(false)}
-
-              className="ml-auto rounded-lg p-2 hover:bg-slate-200 lg:hidden"
-
-            >
-
-              <X size={18} />
-
-            </button>
-
-          </div>
-
-          <span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">
-
-            ADMIN CONSOLE
-
-          </span>
-
-        </div>
-
-
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
-
-            Operations & Catalog
-
-          </p>
-
-          <nav className="space-y-1.5">
-
-            {navigation.map((item) => {
-
-              const Icon = item.icon;
-
-              return (
-
-                <NavLink
-
-                  key={item.path}
-
-                  to={item.path}
-
-                  onClick={() => setSidebarOpen(false)}
-
-                  className={({ isActive }) =>
-
-                    `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-
-                      isActive
-
-                        ? "bg-[#0F2942] text-white shadow-sm"
-
-                        : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"
-
-                    }`
-
-                  }
-
-                >
-
-                  <Icon size={19} strokeWidth={1.8} />
-
-                  {item.label}
-
-                </NavLink>
-
-              );
-
-            })}
-
-          </nav>
-
-          <div className="my-6 border-t border-slate-100" />
-
-          <NavLink
-
-            to="/"
-
-            onClick={() => setSidebarOpen(false)}
-
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
-
-          >
-
-            <Store size={19} />
-
-            View Website
-
-          </NavLink>
-
-        </div>
-
-
-
-        <div className="border-t border-slate-100 p-4">
-
-          <button
-
-            type="button"
-
-            onClick={logout}
-
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-
-          >
-
-            <LogOut size={18} />
-
-            Log Out
-
-          </button>
-
-        </div>
-
-      </aside>
-
-
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen lg:pl-[260px]">
 
@@ -1176,33 +852,14 @@ export default function PromoBanners() {
 
                 <div className="border-b border-slate-200 bg-[#F7F9FB] p-5 sm:p-7 lg:border-b-0 lg:border-r">
 
-                  <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-[#0F2942]">Banner creative</h3><p className="mt-1 text-xs leading-5 text-slate-500">Upload a wide image for the best result.</p></div><span className="rounded-lg bg-white px-2 py-1 text-[10px] font-semibold text-slate-500 ring-1 ring-slate-200">5 MB max</span></div>
-
-                  <div className="mt-5 overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-white p-2">
-
-                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-slate-100">
-
-                      {form.image ? <img src={form.image} alt="Promo banner preview" className="absolute inset-0 h-full w-full object-cover" /> : <div className="px-5 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl text-slate-400 shadow-sm">＋</div><p className="mt-3 text-sm font-semibold text-slate-600">Your image preview</p><p className="mt-1 text-xs text-slate-400">JPG, PNG or WebP</p></div>}
-
-                      {uploading && <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F2942]/65 text-white"><span className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white"/><span className="mt-3 text-sm font-semibold">Uploading image…</span></div>}
-
-                    </div>
-
-                  </div>
-
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-
-                    <button type="button" disabled={uploading} onClick={() => fileInputRef.current?.click()} className="rounded-xl bg-[#0F2942] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#173a5b] disabled:opacity-50">{uploading ? "Uploading…" : form.image ? "Change image" : "Upload image"}</button>
-
-                    {form.image && <button type="button" disabled={uploading} onClick={() => updateField("image", "")} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:text-red-600 disabled:opacity-50">Remove image</button>}
-
-                  </div>
-
-                  <div className="mt-6 rounded-xl border border-[#D5EAEA] bg-[#ECF7F7] p-4"><p className="text-xs font-bold uppercase tracking-wide text-[#087C82]">Design tip</p><p className="mt-1.5 text-xs leading-5 text-slate-600">Use clear product photography with enough space for text. Keep important details away from the edges so the image crops well on mobile.</p></div>
-
-                  {form.image && <div className="mt-5"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Image URL</p><p className="mt-1 break-all text-xs leading-5 text-slate-500">{form.image}</p></div>}
+                  <ImageUpload
+                    label="Promo Banner Creative"
+                    value={form.image}
+                    onChange={(url) => updateField("image", url)}
+                    folder="promo-banners"
+                    aspectRatio="video"
+                    helperText="Upload wide promotional banner artwork (JPG, PNG, WEBP, max 5 MB)"
+                  />
 
                 </div>
 

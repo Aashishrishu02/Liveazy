@@ -14,6 +14,10 @@ import { ContactEnquiriesModule } from './contact-enquiries/contact-enquiries.mo
 import { FeedbackModule } from './feedback/feedback.module';
 import { TrendingRentalsModule } from './trending-rentals/trending-rentals.module';
 import { BlogsModule } from './blogs/blogs.module';
+import { CombosModule } from './combos/combos.module';
+import { DealsModule } from './deals/deals.module';
+import { CustomerStoriesModule } from './customer-stories/customer-stories.module';
+import { HomepageSectionsModule } from './homepage-sections/homepage-sections.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -38,6 +42,10 @@ import { ConditionalRequestMiddleware } from './common/middleware/conditional-re
     FeedbackModule,
     TrendingRentalsModule,
     BlogsModule,
+    CombosModule,
+    DealsModule,
+    CustomerStoriesModule,
+    HomepageSectionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

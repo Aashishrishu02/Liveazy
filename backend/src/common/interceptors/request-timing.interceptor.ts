@@ -54,6 +54,15 @@ export class RequestTimingInterceptor implements NestInterceptor {
               const etag = globalEtagCache.setPayload(routeKey, data);
               if (!res.headersSent) {
                 res.setHeader('ETag', etag);
+                res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+              }
+            }
+
+            // Automatically invalidate ETag cache on any mutation
+            if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && statusCode >= 200 && statusCode < 300) {
+              const resource = url.replace(/^\//, '').split('/')[0]?.split('?')[0];
+              if (resource) {
+                globalEtagCache.invalidate(resource);
               }
             }
 

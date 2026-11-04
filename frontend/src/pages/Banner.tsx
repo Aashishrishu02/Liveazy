@@ -1,71 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
-
-import { NavLink, useNavigate } from "react-router-dom";
-
 import {
-
-  LayoutDashboard,
-
-  Tags,
-
-  Armchair,
-
   Images,
-
-  Megaphone,
-
-  MessageCircle,
-
-  Store,
-
-  LogOut,
-
   Menu,
-
   Search,
-
   Plus,
-
   Pencil,
-
   Trash2,
-
   X,
-
   Upload,
-
   Save,
-
   Image as ImageIcon,
-
   CheckCircle2,
-
   AlertCircle,
-
   RefreshCw,
-
   Eye,
-
   MousePointerClick,
-
   CalendarClock,
-
   ArrowUpDown,
-
   ExternalLink,
-
   ToggleLeft,
-
   ToggleRight,
-
   Clock3,
-
-  Contact, MessageSquareText, Star,
-  FileText,
-  Share2,
- } from "lucide-react";
+} from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 const API_URL = getApiBaseUrl();
@@ -204,31 +162,6 @@ const defaultForm: BannerForm = {
 
 };
 
-const navigation = [
-
-  { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-
-  { label: "Categories", path: "/admin/categories", icon: Tags },
-
-  { label: "Products", path: "/admin/products", icon: Armchair },
-
-  { label: "Banners", path: "/admin/banner", icon: Images },
-
-  { label: "Promo Banners", path: "/admin/promo-banners", icon: Megaphone },
-
-  { label: "WhatsApp Settings", path: "/admin/settings", icon: MessageCircle },
-
-  { label: "Social Media Settings", path: "/admin/social-media", icon: Share2 },
-
-  { label: "Contact Management", path: "/admin/contact-management", icon: Contact },
-
-  { label: "Feedback Master", path: "/admin/feedback", icon: MessageSquareText },
-
-  { label: "Trending Rentals", path: "/admin/trending-rentals", icon: Star },
-  { label: "Blog Management", path: "/admin/blogs", icon: FileText }
-
-];
-
 function getErrorMessage(error: unknown, fallback: string) {
 
   return error instanceof Error ? error.message : fallback;
@@ -362,8 +295,6 @@ async function readResponse(response: Response) {
 }
 
 export default function Banner() {
-
-  const navigate = useNavigate();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -669,24 +600,6 @@ export default function Banner() {
 
   };
 
-  const moveDraftImage = (index: number, direction: -1 | 1) => {
-
-    setImageDrafts((current) => {
-
-      const targetIndex = index + direction;
-
-      if (targetIndex < 0 || targetIndex >= current.length) return current;
-
-      const next = [...current];
-
-      [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
-
-      return next;
-
-    });
-
-  };
-
   const uploadBannerImage = async (file: File): Promise<string> => {
 
     const body = new FormData();
@@ -712,79 +625,46 @@ export default function Banner() {
   };
 
   const handleSaveBanner = async (event: FormEvent<HTMLFormElement>) => {
-
     event.preventDefault();
 
-    if (!form.heading.trim()) {
-
-      showNotice("error", "Please enter a banner heading.");
-
-      return;
-
-    }
-
     if (imageDrafts.length === 0) {
-
       showNotice("error", "Please add at least one banner image before saving.");
-
       return;
-
     }
 
     const sortOrder = Number(form.sortOrder);
-
     if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-
       showNotice("error", "Display order must be a whole number greater than or equal to 0.");
-
       return;
-
     }
 
     const startsAt = form.startsAt ? new Date(form.startsAt) : null;
-
     const endsAt = form.endsAt ? new Date(form.endsAt) : null;
 
     if (startsAt && Number.isNaN(startsAt.getTime())) {
-
       showNotice("error", "Please enter a valid start date.");
-
       return;
-
     }
 
     if (endsAt && Number.isNaN(endsAt.getTime())) {
-
       showNotice("error", "Please enter a valid end date.");
-
       return;
-
     }
 
     if (startsAt && endsAt && endsAt <= startsAt) {
-
       showNotice("error", "End date must be later than start date.");
-
       return;
-
     }
 
     try {
-
       setSaving(true);
-
       setNotice(null);
-
       setUploading(true);
 
       const images: string[] = [];
-
       for (const item of imageDrafts) {
-
         const url = item.file ? await uploadBannerImage(item.file) : item.imageUrl.trim();
-
         if (url) images.push(url);
-
       }
 
       setUploading(false);
@@ -794,35 +674,20 @@ export default function Banner() {
       const image = images[0];
 
       const payload = {
-
         image,
-
         images,
-
-        topLabel: form.topLabel.trim(),
-
-        heading: form.heading.trim(),
-
-        subtitle: form.subtitle.trim(),
-
-        button1Text: form.button1Text.trim(),
-
-        button1Link: form.button1Link.trim(),
-
-        button2Text: form.button2Text.trim(),
-
-        button2Link: form.button2Link.trim(),
-
+        topLabel: form.topLabel?.trim() || "LIVEAZY RENTALS",
+        heading: form.heading?.trim() || "Promotional Banner",
+        subtitle: form.subtitle?.trim() || "",
+        button1Text: form.button1Text?.trim() || "Explore Now",
+        button1Link: form.button1Link?.trim() || "#trending",
+        button2Text: form.button2Text?.trim() || "",
+        button2Link: form.button2Link?.trim() || "",
         isActive: form.isActive,
-
-        placement: form.placement,
-
+        placement: form.placement || "HOMEPAGE_HERO",
         sortOrder,
-
         startsAt: startsAt ? startsAt.toISOString() : null,
-
         endsAt: endsAt ? endsAt.toISOString() : null,
-
       };
 
       const isEditing = Boolean(editingBanner);
@@ -985,14 +850,6 @@ export default function Banner() {
 
   };
 
-  const logout = () => {
-
-    localStorage.removeItem("token");
-
-    navigate("/admin");
-
-  };
-
   const inputClass = "h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-[#0F2942] outline-none transition placeholder:text-slate-400 focus:border-[#008A90] focus:ring-2 focus:ring-[#008A90]/10";
 
   const labelClass = "mb-2 block text-xs font-bold uppercase tracking-wide text-slate-600";
@@ -1001,41 +858,7 @@ export default function Banner() {
 
     <div className="min-h-screen bg-[#F6F8FD] text-[#142B43]">
 
-      {sidebarOpen && <button type="button" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-[#0F2942]/40 lg:hidden" />}
-
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
-
-        <div className="border-b border-slate-100 bg-[#F8FAFC] px-6 py-6">
-
-          <div className="flex items-center gap-3">
-
-            <img src="/liveazy-logo.png" alt="LIVEAZY" className="h-11 w-11 rounded-xl bg-white object-contain p-1" onError={(event) => { event.currentTarget.style.display = "none"; }} />
-
-            <div><h1 className="text-xl font-extrabold tracking-tight text-[#0F2942]">LIVEAZY</h1><p className="mt-0.5 text-xs text-slate-500">Rental Commerce Hub</p></div>
-
-            <button type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} className="ml-auto rounded-lg p-2 hover:bg-slate-200 lg:hidden"><X size={18} /></button>
-
-          </div>
-
-          <span className="mt-5 inline-flex rounded-md bg-[#D9F4F2] px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#00696E]">ADMIN CONSOLE</span>
-
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Operations & Catalog</p>
-
-          <nav className="space-y-1.5">{navigation.map(({ label, path, icon: Icon }) => <NavLink key={path} to={path} onClick={() => setSidebarOpen(false)} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${isActive ? "bg-[#0F2942] text-white shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-[#0F2942]"}`}><Icon size={19} strokeWidth={1.8} />{label}</NavLink>)}</nav>
-
-          <div className="my-6 border-t border-slate-100" />
-
-          <NavLink to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-[#0F2942]"><Store size={19} />View Website</NavLink>
-
-        </div>
-
-        <div className="border-t border-slate-100 p-4"><button type="button" onClick={logout} className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"><LogOut size={18} />Log Out</button></div>
-
-      </aside>
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen lg:pl-[260px]">
 
@@ -1145,107 +968,199 @@ export default function Banner() {
 
             {notice && <div role="status" className={`rounded-lg p-3 text-sm ${notice.type === "error" ? "bg-red-50 text-red-700" : "bg-teal-50 text-teal-800"}`}>{notice.message}</div>}
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_0.9fr]">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
 
               <div className="space-y-5">
 
-                <section className="space-y-4"><div><h3 className="text-sm font-extrabold text-[#0F2942]">Banner content</h3><p className="mt-1 text-xs text-slate-500">These fields appear over the hero banner on the website.</p></div>
+                {/* Direct Banner Configuration */}
+                <section className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-[#0F2942]">Banner Navigation &amp; Target</h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Promotional text is already designed inside the uploaded banner artwork. Set where customers are redirected when clicking the banner.
+                    </p>
+                  </div>
 
-                  <div><label className={labelClass} htmlFor="banner-top-label">Top label</label><input id="banner-top-label" value={form.topLabel} onChange={(event) => setForm((current) => ({ ...current, topLabel: event.target.value }))} className={inputClass} placeholder="NO INVESTMENT, JUST COMFORT" /></div>
-
-                  <div><label className={labelClass} htmlFor="banner-heading">Main heading *</label><input id="banner-heading" required maxLength={180} value={form.heading} onChange={(event) => setForm((current) => ({ ...current, heading: event.target.value }))} className={inputClass} placeholder="Furnish your home..." /></div>
-
-                  <div><label className={labelClass} htmlFor="banner-subtitle">Subtitle</label><textarea id="banner-subtitle" rows={3} maxLength={1200} value={form.subtitle} onChange={(event) => setForm((current) => ({ ...current, subtitle: event.target.value }))} className={`${inputClass} h-auto py-3`} placeholder="Short supporting description..." /></div>
-
+                  <div>
+                    <label className={labelClass} htmlFor="banner-button1-link">
+                      Target Link / Click Action
+                    </label>
+                    <input
+                      id="banner-button1-link"
+                      value={form.button1Link}
+                      onChange={(event) => setForm((current) => ({ ...current, button1Link: event.target.value }))}
+                      className={inputClass}
+                      placeholder="#trending, /category/bedroom, or custom URL"
+                    />
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      When a customer clicks the banner, they will navigate to this link. Defaults to #trending.
+                    </p>
+                  </div>
                 </section>
 
-                <section className="space-y-4 rounded-xl border border-slate-200 bg-[#F8FAFC] p-4"><div><h3 className="text-sm font-extrabold text-[#0F2942]">Call-to-action buttons</h3><p className="mt-1 text-xs text-slate-500">Set the label and destination for each button.</p></div>
+                <section className="space-y-4 rounded-xl border border-slate-200 bg-[#F8FAFC] p-4">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-[#0F2942]">Publishing and ordering</h3>
+                    <p className="mt-1 text-xs text-slate-500">Control placement and sequential order on the homepage.</p>
+                  </div>
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div><label className={labelClass} htmlFor="banner-button1-text">First button text</label><input id="banner-button1-text" value={form.button1Text} onChange={(event) => setForm((current) => ({ ...current, button1Text: event.target.value }))} className={inputClass} /></div><div><label className={labelClass} htmlFor="banner-button1-link">First button link</label><input id="banner-button1-link" value={form.button1Link} onChange={(event) => setForm((current) => ({ ...current, button1Link: event.target.value }))} className={inputClass} placeholder="#categories or /contact" /></div><div><label className={labelClass} htmlFor="banner-button2-text">Second button text</label><input id="banner-button2-text" value={form.button2Text} onChange={(event) => setForm((current) => ({ ...current, button2Text: event.target.value }))} className={inputClass} /></div><div><label className={labelClass} htmlFor="banner-button2-link">Second button link</label><input id="banner-button2-link" value={form.button2Link} onChange={(event) => setForm((current) => ({ ...current, button2Link: event.target.value }))} className={inputClass} placeholder="tel:+91... or /products" /></div></div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass} htmlFor="banner-placement">Placement</label>
+                      <select
+                        id="banner-placement"
+                        value={form.placement}
+                        onChange={(event) => setForm((current) => ({ ...current, placement: event.target.value }))}
+                        className={inputClass}
+                      >
+                        <option value="HOMEPAGE_HERO">Homepage hero (2-sec carousel)</option>
+                        <option value="HOMEPAGE_SECONDARY">Homepage secondary</option>
+                        <option value="CATEGORY_FEATURED">Category feature</option>
+                      </select>
+                    </div>
 
-                </section>
+                    <div>
+                      <label className={labelClass} htmlFor="banner-sort-order">Display order</label>
+                      <input
+                        id="banner-sort-order"
+                        type="number"
+                        min="0"
+                        step="1"
+                        required
+                        value={form.sortOrder}
+                        onChange={(event) => setForm((current) => ({ ...current, sortOrder: event.target.value }))}
+                        className={inputClass}
+                      />
+                      <p className="mt-1 text-[11px] text-slate-400">A lower number appears first (e.g. 0, 1, 2).</p>
+                    </div>
+                  </div>
 
-                <section className="space-y-4"><div><h3 className="text-sm font-extrabold text-[#0F2942]">Publishing and ordering</h3><p className="mt-1 text-xs text-slate-500">Inactive banners stay saved but will not appear publicly.</p></div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass} htmlFor="banner-starts-at">Start date (optional)</label>
+                      <input
+                        id="banner-starts-at"
+                        type="datetime-local"
+                        value={form.startsAt}
+                        onChange={(event) => setForm((current) => ({ ...current, startsAt: event.target.value }))}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="banner-ends-at">End date (optional)</label>
+                      <input
+                        id="banner-ends-at"
+                        type="datetime-local"
+                        value={form.endsAt}
+                        onChange={(event) => setForm((current) => ({ ...current, endsAt: event.target.value }))}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div><label className={labelClass} htmlFor="banner-placement">Placement</label><select id="banner-placement" value={form.placement} onChange={(event) => setForm((current) => ({ ...current, placement: event.target.value }))} className={inputClass}><option value="HOMEPAGE_HERO">Homepage hero</option><option value="HOMEPAGE_SECONDARY">Homepage secondary</option><option value="CATEGORY_FEATURED">Category feature</option></select><p className="mt-1 text-[11px] text-slate-400">Homepage hero will be connected to the customer carousel.</p></div><div><label className={labelClass} htmlFor="banner-sort-order">Display order</label><input id="banner-sort-order" type="number" min="0" step="1" required value={form.sortOrder} onChange={(event) => setForm((current) => ({ ...current, sortOrder: event.target.value }))} className={inputClass} /><p className="mt-1 text-[11px] text-slate-400">A lower number appears first.</p></div></div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div><label className={labelClass} htmlFor="banner-starts-at">Start date (optional)</label><input id="banner-starts-at" type="datetime-local" value={form.startsAt} onChange={(event) => setForm((current) => ({ ...current, startsAt: event.target.value }))} className={inputClass} /></div><div><label className={labelClass} htmlFor="banner-ends-at">End date (optional)</label><input id="banner-ends-at" type="datetime-local" value={form.endsAt} onChange={(event) => setForm((current) => ({ ...current, endsAt: event.target.value }))} className={inputClass} /></div></div>
-
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white p-3"><input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} className="h-4 w-4 accent-[#008A90]" /><span><span className="block text-sm font-semibold text-[#0F2942]">Publish banner</span><span className="mt-0.5 block text-xs text-slate-500">The banner must also be inside its scheduled dates to appear publicly.</span></span></label>
-
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
+                    <input
+                      type="checkbox"
+                      checked={form.isActive}
+                      onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))}
+                      className="h-4 w-4 accent-[#008A90]"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-[#0F2942]">Active / Published</span>
+                      <span className="mt-0.5 block text-xs text-slate-500">Uncheck to temporarily hide from customer slideshow.</span>
+                    </span>
+                  </label>
                 </section>
 
               </div>
 
+              {/* Right Column: Image Upload & Real Preview */}
               <div className="space-y-4">
 
                 <section className="space-y-3">
-
-                <div>
-
-                  <h3 className="text-sm font-extrabold text-[#0F2942]">Banner images</h3>
-
-                  <p className="mt-1 text-xs text-slate-500">Add multiple JPG, PNG or WebP images. Each image must be 5 MB or less. The first image is the primary banner image.</p>
-
-                </div>
-
-                <input ref={fileInputRef} id="banner-file" type="file" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
-
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-4 py-4 text-sm font-semibold text-teal-800 transition hover:bg-teal-100">
-
-                  <Upload size={17} /> Add images
-
-                </button>
-
-                {imageDrafts.length === 0 ? (
-
-                  <div className="flex h-40 flex-col items-center justify-center rounded-xl border border-slate-200 bg-[#F8FAFC] text-slate-400">
-
-                    <ImageIcon size={30} /><p className="mt-2 text-sm font-semibold">No images selected</p>
-
+                  <div>
+                    <h3 className="text-sm font-extrabold text-[#0F2942]">Banner artwork image</h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Upload the complete banner graphic (PNG, JPG, WebP up to 5MB).
+                    </p>
                   </div>
 
-                ) : (
+                  <input ref={fileInputRef} id="banner-file" type="file" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-teal-300 bg-teal-50 px-4 py-3.5 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
+                  >
+                    <Upload size={17} /> Select banner image file
+                  </button>
 
-                    {imageDrafts.map((item, index) => (
-
-                      <div key={item.key} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-
-                        <div className="relative aspect-[4/3] bg-slate-100">
-
-                          <img src={item.previewUrl || item.imageUrl} alt={`Banner image ${index + 1}`} className="h-full w-full object-cover" />
-
-                          <span className="absolute left-2 top-2 rounded-md bg-[#0F2942]/90 px-2 py-1 text-[10px] font-bold text-white">{index === 0 ? "Primary" : `Image ${index + 1}`}</span>
-
-                          <button type="button" onClick={() => removeDraftImage(item.key)} aria-label={`Remove image ${index + 1}`} className="absolute right-2 top-2 rounded-full bg-white p-1.5 text-red-600 shadow hover:bg-red-50"><X size={14} /></button>
-
+                  {imageDrafts.length === 0 ? (
+                    <div className="flex h-36 flex-col items-center justify-center rounded-xl border border-slate-200 bg-[#F8FAFC] text-slate-400">
+                      <ImageIcon size={30} />
+                      <p className="mt-2 text-xs font-semibold">No banner artwork selected yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {imageDrafts.map((item, index) => (
+                        <div key={item.key} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-2">
+                          <img
+                            src={item.previewUrl || item.imageUrl}
+                            alt={`Banner image ${index + 1}`}
+                            className="h-12 w-20 rounded-md object-cover border border-slate-100"
+                          />
+                          <div className="min-w-0 flex-1 text-xs text-slate-600 truncate">
+                            {item.file ? item.file.name : "Saved banner image"}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeDraftImage(item.key)}
+                            aria-label={`Remove image ${index + 1}`}
+                            className="rounded-lg p-1.5 text-red-600 hover:bg-red-50"
+                          >
+                            <X size={15} />
+                          </button>
                         </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
 
-                        <div className="flex items-center justify-between gap-2 p-2">
-
-                          <button type="button" disabled={index === 0} onClick={() => moveDraftImage(index, -1)} className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold disabled:opacity-30">← Move left</button>
-
-                          <button type="button" disabled={index === imageDrafts.length - 1} onClick={() => moveDraftImage(index, 1)} className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold disabled:opacity-30">Move right →</button>
-
-                        </div>
-
-                        {item.file && <p className="truncate px-2 pb-2 text-[10px] text-slate-500" title={item.file.name}>{item.file.name} · {(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>}
-
+                {/* Direct Banner Image Preview */}
+                <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <div className="border-b border-slate-100 px-4 py-2.5">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#0F2942]">Live Image Preview</h3>
+                  </div>
+                  <div className="relative aspect-[16/7] w-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                    {(imageDrafts[0]?.previewUrl || imageDrafts[0]?.imageUrl || form.image) ? (
+                      <img
+                        src={imageDrafts[0]?.previewUrl || imageDrafts[0]?.imageUrl || form.image}
+                        alt="Banner Preview"
+                        className="h-full w-full object-cover"
+                        onError={(event) => { event.currentTarget.style.display = "none"; }}
+                      />
+                    ) : (
+                      <div className="text-center p-6 text-slate-400 text-xs">
+                        <ImageIcon size={24} className="mx-auto mb-1 opacity-50" />
+                        Preview will appear once an image is chosen.
                       </div>
-
-                    ))}
-
+                    )}
                   </div>
+                </section>
 
+                {editingBanner && (
+                  <div className="rounded-xl bg-slate-50 p-4 text-xs text-slate-500">
+                    <p className="font-semibold text-[#0F2942]">Banner engagement analytics</p>
+                    <div className="mt-2 flex justify-between">
+                      <span>Impressions</span>
+                      <strong className="text-[#0F2942]">{(editingBanner.impressions || 0).toLocaleString("en-IN")}</strong>
+                    </div>
+                    <div className="mt-1 flex justify-between">
+                      <span>Clicks</span>
+                      <strong className="text-[#0F2942]">{(editingBanner.clicks || 0).toLocaleString("en-IN")}</strong>
+                    </div>
+                  </div>
                 )}
-
-              </section>
-
-              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white"><div className="border-b border-slate-100 px-4 py-3"><h3 className="text-sm font-extrabold text-[#0F2942]">Content preview</h3><p className="mt-1 text-xs text-slate-500">Approximate display based on the content fields.</p></div><div className="relative min-h-[220px] overflow-hidden bg-[#0F2942] p-5 text-white"><div className="absolute inset-0 bg-gradient-to-r from-[#0F2942]/95 via-[#0F2942]/75 to-transparent" />{(imageDrafts[0]?.previewUrl || imageDrafts[0]?.imageUrl || form.image) && <img src={imageDrafts[0]?.previewUrl || imageDrafts[0]?.imageUrl || form.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" onError={(event) => { event.currentTarget.style.display = "none"; }} />}<div className="relative"><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-cyan-300">{form.topLabel || "YOUR TOP LABEL"}</p><h4 className="mt-3 line-clamp-3 text-xl font-extrabold leading-tight">{form.heading || "Your banner heading"}</h4><p className="mt-3 line-clamp-3 text-xs leading-5 text-slate-200">{form.subtitle || "Your supporting subtitle will appear here."}</p><div className="mt-4 flex flex-wrap gap-2">{form.button1Text && <span className="rounded-md bg-[#008A90] px-3 py-2 text-[9px] font-bold uppercase tracking-wide">{form.button1Text}</span>}{form.button2Text && <span className="rounded-md border border-white/60 px-3 py-2 text-[9px] font-bold uppercase tracking-wide">{form.button2Text}</span>}</div></div></div></section>
-
-                {editingBanner && <div className="rounded-xl bg-slate-50 p-4 text-xs text-slate-500"><p className="font-semibold text-[#0F2942]">Banner engagement</p><div className="mt-2 flex justify-between"><span>Impressions</span><strong className="text-[#0F2942]">{(editingBanner.impressions || 0).toLocaleString("en-IN")}</strong></div><div className="mt-1 flex justify-between"><span>Clicks</span><strong className="text-[#0F2942]">{(editingBanner.clicks || 0).toLocaleString("en-IN")}</strong></div></div>}
 
               </div>
 
@@ -1253,7 +1168,27 @@ export default function Banner() {
 
           </div>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-[#F8FAFC] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"><p className="self-center text-xs text-slate-400">Changes are saved to the Banner database record.</p><div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button type="button" onClick={closeModal} disabled={saving || uploading} className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50">Cancel</button><button type="submit" disabled={saving || uploading || !form.heading.trim()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F2942] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#193D5C] disabled:cursor-not-allowed disabled:opacity-50">{saving || uploading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}{uploading ? "Uploading image…" : saving ? "Saving…" : editingBanner ? "Save Changes" : "Create Banner"}</button></div></div>
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-[#F8FAFC] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p className="self-center text-xs text-slate-400">Changes are saved directly to the database.</p>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={closeModal}
+                disabled={saving || uploading}
+                className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving || uploading || imageDrafts.length === 0}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F2942] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#193D5C] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving || uploading ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+                {uploading ? "Uploading image…" : saving ? "Saving…" : editingBanner ? "Save Changes" : "Create Banner"}
+              </button>
+            </div>
+          </div>
 
         </form>
 

@@ -15,10 +15,18 @@ export interface Product {
   rating: number;
   reviewsCount: number;
   image: string;
+  images?: Array<{ id?: string; imageUrl?: string; url?: string; sortOrder?: number } | string>;
   tag?: string;
   deposit: number;
   availableTenures: number[];
   specs: string[];
+  description?: string | null;
+  rent3M?: number | null;
+  rent6M?: number | null;
+  rent12M?: number | null;
+  deposit3M?: number | null;
+  deposit6M?: number | null;
+  deposit12M?: number | null;
 }
 
 export interface CategoryItem {

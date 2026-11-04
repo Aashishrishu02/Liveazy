@@ -48,6 +48,8 @@ model Product {
   images       ProductImage[]
   trendingIn   TrendingRentalProduct[]
   faqs         Faq[]
+  comboOffers  ComboOfferProduct[]
+  deals        DealProduct[]
 }
 
 model ProductImage {
@@ -246,4 +248,118 @@ model Blog {
   @@index([status, publishedAt])
   @@index([category, status])
   @@index([featured, status])
+}
+
+model ComboOffer {
+  id              String              @id @default(cuid())
+  title           String
+  description     String?             @db.Text
+  image           String?
+  originalPrice   Float
+  specialPrice    Float
+  discountPercent Float?
+  isActive        Boolean             @default(true)
+  sortOrder       Int                 @default(0)
+  validUntil      DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  products        ComboOfferProduct[]
+
+  @@index([isActive, sortOrder])
+}
+
+model ComboOfferProduct {
+  id           String      @id @default(cuid())
+  comboOfferId String
+  productId    String
+  sortOrder    Int         @default(0)
+  comboOffer   ComboOffer  @relation(fields: [comboOfferId], references: [id], onDelete: Cascade)
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([comboOfferId, productId])
+  @@index([comboOfferId, sortOrder])
+}
+
+model Deal {
+  id              String        @id @default(cuid())
+  title           String
+  subtitle        String?
+  description     String?       @db.Text
+  image           String?
+  originalPrice   Float
+  offerPrice      Float
+  discountPercent Float?
+  startsAt        DateTime
+  endsAt          DateTime
+  isActive        Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  products        DealProduct[]
+
+  @@index([isActive, startsAt, endsAt])
+  @@index([sortOrder])
+}
+
+model DealProduct {
+  id        String   @id @default(cuid())
+  dealId    String
+  productId String
+  sortOrder Int      @default(0)
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([dealId, productId])
+  @@index([dealId, sortOrder])
+}
+
+model CustomerStory {
+  id           String   @id @default(cuid())
+  customerName String
+  photo        String?
+  story        String   @db.Text
+  location     String?  @default("Pune")
+  videoUrl     String?
+  rating       Int      @default(5)
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model HomepageSection {
+  id          String                @id @default(cuid())
+  sectionKey  String                @unique
+  title       String
+  subtitle    String?
+  badge       String?
+  description String?               @db.Text
+  sortOrder   Int                   @default(0)
+  isVisible   Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  items       HomepageSectionItem[]
+
+  @@index([isVisible, sortOrder])
+}
+
+model HomepageSectionItem {
+  id          String          @id @default(cuid())
+  sectionId   String
+  title       String
+  subtitle    String?
+  description String?         @db.Text
+  icon        String?
+  image       String?
+  badge       String?
+  linkUrl     String?
+  sortOrder   Int             @default(0)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  section     HomepageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, isActive, sortOrder])
 }

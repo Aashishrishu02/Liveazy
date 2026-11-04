@@ -1,756 +1,259 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-
-import {
-
-  ArrowLeft,
-
-  ArrowRight,
-
-  PhoneCall,
-
-  Sparkles,
-
-  Pause,
-
-  Play,
-
-} from "lucide-react";
-
-import heroImg from "../assets/hero-banner.jpeg";
-import { fetchJsonDeduplicated } from "../utils/api";
-
-
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
 interface HeroSectionProps {
-
-  onSearchSubmit?: (
-
-    query: string,
-
-    category?: string,
-
-    city?: string
-
-  ) => void;
-
+  onSearchSubmit?: (query: string, category?: string, city?: string) => void;
   selectedCity?: string;
-
   onExploreClick?: () => void;
-
 }
 
-
-
-interface BannerData {
-
-  id?: string;
-
-  image?: string;
-
-  images?: Array<{ id?: string; imageUrl?: string; sortOrder?: number } | string>;
-
-  topLabel?: string;
-
+interface BannerItem {
+  id: string;
+  image: string;
   heading?: string;
-
   subtitle?: string;
-
+  topLabel?: string;
   button1Text?: string;
-
   button1Link?: string;
-
   button2Text?: string;
-
   button2Link?: string;
-
   isActive?: boolean;
-
-  placement?: string;
-
   sortOrder?: number;
-
-  startsAt?: string | null;
-
-  endsAt?: string | null;
-
 }
-
-
-
-const defaultBanner: BannerData = {
-
-  topLabel: "NO INVESTMENT, JUST COMFORT",
-
-  heading: "Furnish Your Home in Just 2 Days.",
-
-  subtitle:
-
-    "Delivery, Setup & Support — All Included. Enjoy comfortable living with affordable furniture rentals across Pune & PCMC.",
-
-  button1Text: "VIEW CATEGORIES",
-
-  button1Link: "#categories",
-
-  button2Text: "CALL HOTLINE",
-
-  button2Link: "tel:+919423838109",
-
-  image: "",
-
-  isActive: true,
-
-};
-
-
-
-const SLIDE_INTERVAL = 4000;
-
-
-
-function isWithinSchedule(banner: BannerData, now = Date.now()) {
-
-  if (banner.isActive === false) return false;
-
-
-
-  const start = banner.startsAt ? new Date(banner.startsAt).getTime() : null;
-
-  const end = banner.endsAt ? new Date(banner.endsAt).getTime() : null;
-
-
-
-  if (start !== null && Number.isFinite(start) && start > now) return false;
-
-  if (end !== null && Number.isFinite(end) && end <= now) return false;
-
-
-
-  return true;
-
-}
-
-
-
-function normalizeBanners(payload: unknown): BannerData[] {
-
-  const records = Array.isArray(payload)
-
-    ? payload
-
-    : payload && typeof payload === "object"
-
-      ? [payload as BannerData]
-
-      : [];
-
-
-
-  return records
-
-    .filter(
-
-      (item): item is BannerData =>
-
-        Boolean(item) && typeof item === "object"
-
-    )
-
-    .filter(
-
-      (item) =>
-
-        !item.placement || item.placement === "HOMEPAGE_HERO"
-
-    )
-
-    .filter((item) => isWithinSchedule(item))
-
-    .filter((item) => Boolean(item.image || (Array.isArray(item.images) && item.images.length)))
-
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-
-}
-
-
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
-
   onExploreClick,
-
 }) => {
-
-  const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-
-
-
-  const [banners, setBanners] = useState<BannerData[]>([]);
-
+  const [banners, setBanners] = useState<BannerItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-
-  const [isBannerLoading, setIsBannerLoading] = useState(true);
-
   const [isPaused, setIsPaused] = useState(false);
-
-  const [imageFailed, setImageFailed] = useState(false);
-
-
-
-  // Avoid duplicate impression requests for the same banner during this mount.
-
-  const trackedImpressions = useRef<Set<string>>(new Set());
-
-
-
-  const currentBanner = banners[activeIndex] ?? defaultBanner;
-
-  const currentImages = (Array.isArray(currentBanner.images) ? currentBanner.images : [])
-    .map((item) => typeof item === "string" ? item : item?.imageUrl || "")
-    .filter(Boolean);
-  const slideImages = currentImages.length ? currentImages : (currentBanner.image ? [currentBanner.image] : []);
-  const bannerImage = slideImages[activeImageIndex % Math.max(slideImages.length, 1)] || heroImg;
-
-  const currentBannerId = currentBanner.id;
-
-
-
-  const goToSlide = useCallback(
-
-  (index: number) => {
-
-    const count = banners.length;
-
-
-
-    if (count <= 1) {
-
-      setActiveIndex(0);
-
-      return;
-
-    }
-
-
-
-    setActiveIndex((index + count) % count);
-
-    setImageFailed(false);
-
-  },
-
-  [banners.length]
-
-);
-
-
-
-  const nextSlide = useCallback(() => {
-
-    setActiveIndex((current) =>
-
-      banners.length > 1 ? (current + 1) % banners.length : 0
-
-    );
-
-    setImageFailed(false);
-
-  }, [banners.length]);
-
-
-
-  const previousSlide = useCallback(() => {
-
-    setActiveIndex((current) =>
-
-      banners.length > 1
-
-        ? (current - 1 + banners.length) % banners.length
-
-        : 0
-
-    );
-
-    setImageFailed(false);
-
-  }, [banners.length]);
-
-
+  const [loading, setLoading] = useState(true);
+  const impressionTracked = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-
     let cancelled = false;
-    const controller = new AbortController();
+    const apiBase = getApiBaseUrl();
 
-    async function fetchBanners() {
+    async function loadBanners() {
       try {
-        const payload = await fetchJsonDeduplicated<unknown>(
-          `${API_URL}/banners`,
-          { signal: controller.signal }
-        );
+        setLoading(true);
+        // Try public active banners endpoint first
+        let result: unknown;
+        try {
+          result = await fetchJsonDeduplicated<unknown>(`${apiBase}/banners/public`);
+        } catch {
+          result = await fetchJsonDeduplicated<unknown>(`${apiBase}/banners`);
+        }
 
-        if (cancelled) return;
+        let list: unknown[] = [];
+        if (Array.isArray(result)) {
+          list = result;
+        } else if (result && typeof result === "object" && "data" in result && Array.isArray((result as { data: unknown }).data)) {
+          list = (result as { data: unknown[] }).data;
+        }
 
-        const publicBanners = normalizeBanners(payload);
-        setBanners(publicBanners);
-        setActiveIndex(0);
-      } catch (error) {
-        if (controller.signal.aborted) return;
+        const validBanners: BannerItem[] = list
+          .filter((b): b is Record<string, unknown> => typeof b === "object" && b !== null)
+          .filter((b) => b.isActive !== false)
+          .map((b) => {
+            const image = String(
+              b.image ||
+              (Array.isArray(b.images) && b.images[0]
+                ? typeof b.images[0] === "string"
+                  ? b.images[0]
+                  : (b.images[0] as { imageUrl?: string }).imageUrl
+                : "") ||
+              ""
+            );
+            return {
+              id: String(b.id || ""),
+              image,
+              heading: typeof b.heading === "string" ? b.heading : undefined,
+              subtitle: typeof b.subtitle === "string" ? b.subtitle : undefined,
+              topLabel: typeof b.topLabel === "string" ? b.topLabel : undefined,
+              button1Text: typeof b.button1Text === "string" ? b.button1Text : undefined,
+              button1Link: typeof b.button1Link === "string" ? b.button1Link : "#trending",
+              button2Text: typeof b.button2Text === "string" ? b.button2Text : undefined,
+              button2Link: typeof b.button2Link === "string" ? b.button2Link : undefined,
+              sortOrder: typeof b.sortOrder === "number" ? b.sortOrder : 0,
+            };
+          })
+          .filter((b) => b.image.length > 0)
+          .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
         if (!cancelled) {
-          console.error("Failed to fetch banners:", error);
-          setBanners([]);
+          setBanners(validBanners);
           setActiveIndex(0);
         }
+      } catch (e) {
+        console.warn("Failed to load backend banners:", e);
+        if (!cancelled) {
+          setBanners([]);
+        }
       } finally {
-        if (!cancelled) setIsBannerLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
-    void fetchBanners();
-
+    void loadBanners();
     return () => {
       cancelled = true;
-      controller.abort();
     };
-  }, [API_URL]);
+  }, []);
 
-
-
-  // Cycle through images within the current banner first; otherwise cycle banners.
+  // Impression tracking
+  const currentBanner = banners[activeIndex];
   useEffect(() => {
-    if (isPaused || banners.length === 0) return;
-    const timer = window.setInterval(() => {
-      const banner = banners[activeIndex];
-      const images = (Array.isArray(banner?.images) ? banner.images : [])
-        .map((item) => typeof item === "string" ? item : item?.imageUrl || "")
-        .filter(Boolean);
-      const count = images.length || (banner?.image ? 1 : 0);
-      if (count > 1) {
-        setActiveImageIndex((current) => (current + 1) % count);
-      } else if (banners.length > 1) {
-        setActiveIndex((current) => (current + 1) % banners.length);
-        setActiveImageIndex(0);
-      }
-      setImageFailed(false);
-    }, SLIDE_INTERVAL);
-    return () => window.clearInterval(timer);
-  }, [banners, activeIndex, isPaused]);
+    if (!currentBanner || !currentBanner.id || impressionTracked.current.has(currentBanner.id)) return;
+    impressionTracked.current.add(currentBanner.id);
 
-
-
-  useEffect(() => {
-    setActiveImageIndex(0);
-    setImageFailed(false);
-  }, [activeIndex]);
-
-
-  // Record one impression for each saved banner shown in this session.
-
-  useEffect(() => {
-
-    if (!currentBannerId || !API_URL) return;
-
-    if (trackedImpressions.current.has(currentBannerId)) return;
-
-
-
-    trackedImpressions.current.add(currentBannerId);
-
-
-
-    void fetch(`${API_URL}/banners/${currentBannerId}/impression`, {
-
+    const apiBase = getApiBaseUrl();
+    void fetch(`${apiBase}/banners/${currentBanner.id}/impression`, {
       method: "POST",
+    }).catch(() => {});
+  }, [currentBanner]);
 
-    }).catch((error) => {
+  const handleNext = useCallback(() => {
+    setActiveIndex((prev) => (banners.length > 0 ? (prev + 1) % banners.length : 0));
+  }, [banners.length]);
 
-      trackedImpressions.current.delete(currentBannerId);
+  const handlePrev = useCallback(() => {
+    setActiveIndex((prev) => (banners.length > 0 ? (prev - 1 + banners.length) % banners.length : 0));
+  }, [banners.length]);
 
-      console.error("Failed to record banner impression:", error);
+  // Autoplay - exactly 2000ms (2 seconds), resets cleanly when slide changes
+  useEffect(() => {
+    if (isPaused || banners.length <= 1) return;
+    const interval = setInterval(handleNext, 2000);
+    return () => clearInterval(interval);
+  }, [isPaused, banners.length, handleNext, activeIndex]);
 
-    });
-
-  }, [currentBannerId, API_URL]);
-
-
-
-  const trackBannerClick = () => {
-
-    if (!currentBannerId || !API_URL) return;
-
-
-
-    void fetch(`${API_URL}/banners/${currentBannerId}/click`, {
-
-      method: "POST",
-
-    }).catch((error) => {
-
-      console.error("Failed to record banner click:", error);
-
-    });
-
-  };
-
-
-
-  const handlePrimaryClick = (
-
-    event: React.MouseEvent<HTMLAnchorElement>
-
-  ) => {
-
-    trackBannerClick();
-
-
-
-    if (currentBanner.button1Link === "#categories") {
-
-      event.preventDefault();
-
-      onExploreClick?.();
-
+  const handleBannerClick = (banner: BannerItem) => {
+    const apiBase = getApiBaseUrl();
+    if (banner.id) {
+      void fetch(`${apiBase}/banners/${banner.id}/click`, {
+        method: "POST",
+      }).catch(() => {});
     }
 
+    if (banner.button1Link?.startsWith("#")) {
+      const target = document.querySelector(banner.button1Link);
+      target?.scrollIntoView({ behavior: "smooth" });
+    } else if (banner.button1Link) {
+      window.location.href = banner.button1Link;
+    } else if (onExploreClick) {
+      onExploreClick();
+    }
   };
 
-
-
-  if (isBannerLoading) {
-
+  // Never render demo banners when database has no active banners!
+  if (!loading && banners.length === 0) {
     return (
-
-      <section
-
-        id="hero"
-
-        aria-label="Loading banners"
-
-        className="min-h-[500px] animate-pulse bg-[#0F2942] sm:min-h-[540px] lg:min-h-[590px]"
-
-      />
-
+      <section aria-label="Welcome" className="py-3 sm:py-5">
+        <div className="ref-container">
+          <div className="rounded-2xl bg-gradient-to-r from-[#1c1836] to-[#2d2358] p-8 sm:p-12 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="max-w-xl">
+              <span className="rounded-full bg-[#fb923c]/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#fb923c]">
+                NO INVESTMENT, JUST COMFORT
+              </span>
+              <h2 className="mt-3 text-2xl sm:text-4xl font-extrabold leading-tight">
+                Furnish Your Home in Just 2 Days.
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-[#c4bcdc] leading-relaxed">
+                Delivery, Setup &amp; Support — All Included. Enjoy comfortable living with affordable furniture rentals.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onExploreClick}
+              className="rounded-xl bg-[#4a36b3] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#3a27a0] shadow-md flex items-center gap-2"
+            >
+              <span>Explore Collection</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
     );
-
   }
 
-
-
-  const displayBanner = banners.length > 0 ? currentBanner : defaultBanner;
-
-
-
   return (
-
     <section
-
-      id="hero"
-
-      aria-label="Featured rental banners"
-
-      className="relative isolate overflow-hidden bg-[#0F2942]"
-
+      aria-label="Featured Offers"
+      className="py-3 sm:py-5"
       onMouseEnter={() => setIsPaused(true)}
-
       onMouseLeave={() => setIsPaused(false)}
-
-      onFocusCapture={() => setIsPaused(true)}
-
-      onBlurCapture={(event) => {
-
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-
-          setIsPaused(false);
-
-        }
-
-      }}
-
     >
-      
-
-      {/* Background image and overlays */}
-
-      <div className="absolute inset-0">
-
-        <img
-
-          key={bannerImage}
-
-          src={imageFailed ? heroImg : bannerImage}
-
-          alt={displayBanner.heading || "Furniture rental for comfortable living"}
-
-          className="h-full w-full object-cover object-center transition-opacity duration-500"
-
-          fetchPriority="high"
-
-          onError={() => setImageFailed(true)}
-
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-[#071827]/95 via-[#0F2942]/80 to-[#0F2942]/25" />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-[#071827]/45 via-transparent to-transparent" />
-
-      </div>
-
-
-
-      {/* Decorative accent */}
-
-      <div className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full border border-white/10 sm:h-96 sm:w-96" />
-
-      <div className="pointer-events-none absolute -right-12 top-24 h-56 w-56 rounded-full border border-white/10 sm:h-72 sm:w-72" />
-
-
-
-      <div className="relative mx-auto flex min-h-[500px] max-w-[1440px] items-center px-5 py-16 sm:min-h-[540px] sm:px-8 sm:py-20 lg:min-h-[590px] lg:px-12">
-
-        <div className="max-w-3xl" key={currentBannerId ?? `default-${activeIndex}`}>
-
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold tracking-[0.14em] text-white backdrop-blur-md sm:text-sm">
-
-            <Sparkles size={15} className="text-[#FF6A3D]" />
-
-            <span>{displayBanner.topLabel || defaultBanner.topLabel}</span>
-
-          </div>
-
-
-
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-
-            {displayBanner.heading || defaultBanner.heading}
-
-          </h1>
-
-
-
-          <p className="mt-6 max-w-2xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
-
-            {displayBanner.subtitle || defaultBanner.subtitle}
-
-          </p>
-
-
-
-          <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
-
-            <a
-
-              href={displayBanner.button1Link || defaultBanner.button1Link}
-
-              onClick={handlePrimaryClick}
-
-              className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#008A90] px-7 py-4 text-sm font-bold text-white shadow-lg shadow-black/15 transition duration-300 hover:-translate-y-0.5 hover:bg-[#00767B] sm:text-base"
-
-            >
-
-              {displayBanner.button1Text || defaultBanner.button1Text}
-
-              <ArrowRight
-
-                size={19}
-
-                className="transition-transform duration-300 group-hover:translate-x-1"
-
-              />
-
-            </a>
-
-
-
-            <a
-
-              href={displayBanner.button2Link || defaultBanner.button2Link}
-
-              onClick={trackBannerClick}
-
-              className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-white/35 bg-white/10 px-7 py-4 text-sm font-bold text-white backdrop-blur-sm transition duration-300 hover:border-white hover:bg-white/20 sm:text-base"
-
-            >
-
-              <PhoneCall size={18} />
-
-              {displayBanner.button2Text || defaultBanner.button2Text}
-
-            </a>
-
-          </div>
-
-
-
-          <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-white/80">
-
-            <span className="flex items-center gap-2">
-
-              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
-
-              Affordable rentals
-
-            </span>
-
-            <span className="flex items-center gap-2">
-
-              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
-
-              Convenient delivery
-
-            </span>
-
-            <span className="flex items-center gap-2">
-
-              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
-
-              Hassle-free setup
-
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      {/* Carousel controls appear only when multiple active hero banners exist. */}
-
-      {/* Dots indicate images within the current banner. */}
-      {slideImages.length > 1 && (
-        <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/20 bg-[#071827]/40 px-3 py-2 backdrop-blur sm:bottom-7">
-          {slideImages.map((image, index) => (
-            <button
-              key={`${image}-${index}`}
-              type="button"
-              aria-label={`Show image ${index + 1} of ${slideImages.length}`}
-              aria-current={index === activeImageIndex ? "true" : undefined}
-              onClick={() => {
-                setActiveImageIndex(index);
-                setImageFailed(false);
-              }}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
-                index === activeImageIndex
-                  ? "w-7 bg-white"
-                  : "w-2.5 bg-white/50 hover:bg-white/90"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
-      {banners.length > 1 && (
-
-        <>
-
-          <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2 sm:bottom-7 sm:right-8 lg:right-12">
-
-            <button
-
-              type="button"
-
-              aria-label="Previous banner"
-
-              onClick={previousSlide}
-
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-[#071827]/40 text-white backdrop-blur transition hover:bg-white/20"
-
-            >
-
-              <ArrowLeft size={18} />
-
-            </button>
-
-
-
-            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-[#071827]/40 px-3 py-2 backdrop-blur">
-
-              {banners.map((banner, index) => (
-
-                <button
-
-                  key={banner.id || `${banner.image}-${index}`}
-
-                  type="button"
-
-                  aria-label={`Show banner ${index + 1}`}
-
-                  aria-current={index === activeIndex ? "true" : undefined}
-
-                  onClick={() => { goToSlide(index); setActiveImageIndex(0); setImageFailed(false); }}
-
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-
-                    index === activeIndex
-
-                      ? "w-7 bg-white"
-
-                      : "w-2.5 bg-white/50 hover:bg-white/80"
-
-                  }`}
-
+      <div className="ref-container">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-md bg-[#ede9fe] aspect-[16/8] sm:aspect-[1920/600]">
+          {/* Banner Slides */}
+          <div
+            className="flex h-full w-full transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+            {banners.map((b, i) => (
+              <div
+                key={b.id || i}
+                onClick={() => handleBannerClick(b)}
+                className="relative h-full w-full shrink-0 cursor-pointer"
+              >
+                <img
+                  src={b.image}
+                  alt={b.heading || "LIVEAZY furniture rental banner"}
+                  className="h-full w-full object-cover"
+                  loading={i === 0 ? "eager" : "lazy"}
                 />
-
-              ))}
-
-            </div>
-
-
-
-            <button
-
-              type="button"
-
-              aria-label="Next banner"
-
-              onClick={nextSlide}
-
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-[#071827]/40 text-white backdrop-blur transition hover:bg-white/20"
-
-            >
-
-              <ArrowRight size={18} />
-
-            </button>
-
-
-
-            <button
-
-              type="button"
-
-              aria-label={isPaused ? "Resume automatic slideshow" : "Pause automatic slideshow"}
-
-              onClick={() => setIsPaused((paused) => !paused)}
-
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-[#071827]/40 text-white backdrop-blur transition hover:bg-white/20 sm:flex"
-
-            >
-
-              {isPaused ? <Play size={16} /> : <Pause size={16} />}
-
-            </button>
-
+              </div>
+            ))}
           </div>
 
+          {/* Navigation Arrows */}
+          {banners.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrev}
+                aria-label="Previous Slide"
+                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#4a36b3] hover:scale-110"
+              >
+                <ChevronLeft size={22} className="stroke-[2.5]" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                aria-label="Next Slide"
+                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#4a36b3] hover:scale-110"
+              >
+                <ChevronRight size={22} className="stroke-[2.5]" />
+              </button>
+            </>
+          )}
 
-
-          <span className="absolute bottom-8 left-5 z-10 text-xs font-semibold tracking-wider text-white/75 sm:left-8 lg:left-12">
-
-            {String(activeIndex + 1).padStart(2, "0")} / {String(banners.length).padStart(2, "0")}
-
-          </span>
-
-        </>
-
-      )}
-
+          {/* Indicator Dots */}
+          {banners.length > 1 && (
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+              {banners.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveIndex(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    i === activeIndex
+                      ? "w-7 bg-[#4a36b3]"
+                      : "w-2.5 bg-white/70 hover:bg-white"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </section>
-
   );
-
 };
-
-
 
 export default HeroSection;

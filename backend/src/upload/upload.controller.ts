@@ -1,6 +1,7 @@
 
 import {
   BadRequestException,
+  Body,
   Controller,
   Post,
   UploadedFile,
@@ -16,13 +17,17 @@ import { BannersService } from '../banners/banners.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminEmailGuard } from '../auth/guards/admin-email.guard';
 
-const imageUploadInterceptor = () =>
+const imageUploadInterceptor = (maxSize = 5 * 1024 * 1024) =>
   FileInterceptor('file', {
     storage: memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: maxSize },
     fileFilter: (_req, file, callback) => {
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) {
-        return callback(new BadRequestException('Only JPG, PNG, WEBP and GIF images are allowed'), false);
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowed.includes(file.mimetype.toLowerCase())) {
+        return callback(
+          new BadRequestException('Only JPG, JPEG, PNG, and WEBP images are allowed'),
+          false,
+        );
       }
       callback(null, true);
     },
@@ -49,12 +54,32 @@ export class UploadController {
 
   @Post('image')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } }, required: ['file'] } })
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: any) {
-    if (!file) throw new BadRequestException('Please select an image');
-    const result = await this.uploadService.uploadImage(file);
-    return { message: 'Image uploaded successfully', url: result.secure_url };
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        folder: { type: 'string', description: 'Target subfolder under liveazy/' },
+      },
+      required: ['file'],
+    },
+  })
+  @UseInterceptors(imageUploadInterceptor(5 * 1024 * 1024))
+  async uploadImage(
+    @UploadedFile() file: any,
+    @Body('folder') folder?: string,
+  ) {
+    if (!file) throw new BadRequestException('Please select an image (JPG, PNG, or WEBP, max 5 MB)');
+    const safeFolder = folder && typeof folder === 'string' && folder.trim()
+      ? `liveazy/${folder.trim().replace(/[^a-zA-Z0-9_-]/g, '')}`
+      : 'liveazy/uploads';
+    const result = await this.uploadService.uploadImage(file, safeFolder);
+    return {
+      success: true,
+      message: 'Image uploaded successfully',
+      url: result.secure_url,
+      secure_url: result.secure_url,
+    };
   }
 
   @Post('banner-image')

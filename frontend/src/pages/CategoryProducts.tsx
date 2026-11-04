@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import Navbar from "../components/Navbar";
 import PopularRentals from "../components/PopularRentals";
@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 
 import type { Product } from "../types/rental";
 import { fetchCategoriesDeduplicated } from "../utils/api";
+import { getWishlist, subscribeWishlist, toggleWishlist } from "../utils/wishlist";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,13 +27,14 @@ export default function CategoryProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Sidebar category filter state
-  const [selectedProductCategory, setSelectedProductCategory] =
-    useState("All");
+  const [selectedProductCategory, setSelectedProductCategory] = useState("All");
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => new Set(getWishlist()));
 
-  const [wishlistIds, setWishlistIds] = useState<Set<string>>(
-    new Set(["p-sofa-01", "p-bed-01"])
-  );
+  useEffect(() => {
+    return subscribeWishlist((ids) => {
+      setWishlistIds(new Set(ids));
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +62,7 @@ export default function CategoryProducts() {
             : [];
 
         const foundCategory = data.find(
-          (item) => item.id === id && item.isActive
+          (item) => (item.id === id || item.name.toLowerCase() === id.toLowerCase()) && item.isActive
         );
 
         if (!foundCategory) {
@@ -69,8 +71,6 @@ export default function CategoryProducts() {
 
         if (!cancelled) {
           setCategory(foundCategory);
-
-          // Initially select the category opened from the homepage.
           setSelectedProductCategory(foundCategory.name);
         }
       } catch (err) {
@@ -96,45 +96,32 @@ export default function CategoryProducts() {
   }, [id]);
 
   const handleToggleWishlist = (product: Product) => {
-    setWishlistIds((previous) => {
-      const updated = new Set(previous);
-
-      if (updated.has(product.id)) {
-        updated.delete(product.id);
-      } else {
-        updated.add(product.id);
-      }
-
-      return updated;
-    });
+    toggleWishlist(product.id);
   };
 
   const handleRentNow = (product: Product) => {
-    window.alert(
-      `Booking initiated for ${product.name}. Please continue through the product's WhatsApp rental option.`
-    );
+    const waUrl = `https://wa.me/919423838109?text=${encodeURIComponent(
+      `Hello LIVEAZY! I would like to rent "${product.name}". Please share booking details.`
+    )}`;
+    window.open(waUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] font-sans text-gray-900">
-      <Navbar
-        onSearchSubmit={(query) => {
-          window.location.href = `/?search=${encodeURIComponent(query)}#products`;
-        }}
-      />
+    <div className="min-h-screen bg-[#fafbfc] font-['Poppins',sans-serif] text-gray-900">
+      <Navbar />
 
       <main className="min-h-[60vh]">
-        <div className="mx-auto max-w-[1440px] px-5 pt-6 sm:px-8 lg:px-12">
+        <div className="ref-container pt-6">
           <Link
-            to="/#categories"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[#008A90] hover:underline"
+            to="/#trending"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#4a36b3] hover:underline"
           >
-            ← Back to categories
+            <ArrowLeft size={16} /> Back to all products
           </Link>
         </div>
 
         {loading && (
-          <div className="mx-auto max-w-[1440px] px-5 py-16 sm:px-8 lg:px-12">
+          <div className="ref-container py-16">
             <div className="animate-pulse">
               <div className="h-8 w-64 rounded bg-slate-200" />
               <div className="mt-4 h-4 w-96 max-w-full rounded bg-slate-200" />
@@ -143,19 +130,17 @@ export default function CategoryProducts() {
         )}
 
         {!loading && error && (
-          <div className="mx-auto max-w-[1440px] px-5 py-16 sm:px-8 lg:px-12">
-            <div className="rounded-2xl border border-red-100 bg-white p-8 text-center">
-              <h1 className="text-xl font-bold text-[#0F2942]">
+          <div className="ref-container py-16">
+            <div className="rounded-2xl border border-red-100 bg-white p-8 text-center max-w-lg mx-auto shadow-sm">
+              <h1 className="text-xl font-bold text-gray-900">
                 Category unavailable
               </h1>
-
-              <p className="mt-2 text-sm text-slate-600">{error}</p>
-
+              <p className="mt-2 text-sm text-gray-500">{error}</p>
               <Link
-                to="/#categories"
-                className="mt-5 inline-flex rounded-xl bg-[#008A90] px-5 py-3 text-sm font-bold text-white hover:bg-[#006f74]"
+                to="/#trending"
+                className="mt-5 inline-flex rounded-xl bg-[#4a36b3] px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#3a27a0]"
               >
-                Browse categories
+                Browse all products
               </Link>
             </div>
           </div>
@@ -163,19 +148,19 @@ export default function CategoryProducts() {
 
         {!loading && !error && category && (
           <>
-            <section className="mx-auto max-w-[1440px] px-5 pb-2 pt-8 sm:px-8 lg:px-12">
-              <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F2942] to-[#087E83] px-6 py-8 text-white sm:px-10 sm:py-10">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-100">
-                  Explore our collection
-                </p>
+            <section className="ref-container pb-2 pt-6">
+              <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#1c1836] to-[#2d2358] px-6 py-8 text-white sm:px-10 sm:py-10 shadow-md">
+                <span className="rounded-full bg-[#fb923c]/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#fb923c]">
+                  Category Collection
+                </span>
 
-                <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">
+                <h1 className="mt-3 text-2xl sm:text-4xl font-extrabold text-white">
                   {category.name}
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
+                <p className="mt-2.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#c4bcdc]">
                   {category.description?.trim() ||
-                    `Explore available ${category.name.toLowerCase()} products with flexible rental plans.`}
+                    `Explore available ${category.name.toLowerCase()} products with flexible rental plans, zero deposit, and free delivery.`}
                 </p>
               </div>
             </section>

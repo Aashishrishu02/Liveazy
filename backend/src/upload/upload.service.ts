@@ -39,8 +39,8 @@ export class UploadService {
     });
   }
 
-  async uploadImage(file: any) {
-    return this.uploadBuffer(file, 'liveazy/categories');
+  async uploadImage(file: any, folder: string = 'liveazy/uploads') {
+    return this.uploadBuffer(file, folder);
   }
 
   async uploadBanner(file: any) {

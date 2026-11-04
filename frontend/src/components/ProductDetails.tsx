@@ -652,7 +652,7 @@ export default function ProductDetails() {
 
    return (
 
-     <div className="min-h-screen bg-[#F6F8FC] text-[#102A43]">
+     <div className="min-h-screen bg-[#F6F8FC] text-[#1c1836]">
 
        <Navbar onSearchSubmit={() => navigate("/#products")} />
 
@@ -662,7 +662,7 @@ export default function ProductDetails() {
 
          <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
 
-           <button onClick={() => navigate("/")} className="hover:text-[#008A90]">
+           <button onClick={() => navigate("/")} className="hover:text-[#4a36b3]">
 
              Home
 
@@ -674,7 +674,7 @@ export default function ProductDetails() {
 
              onClick={() => navigate("/#products")}
 
-             className="hover:text-[#008A90]"
+             className="hover:text-[#4a36b3]"
 
            >
 
@@ -684,7 +684,7 @@ export default function ProductDetails() {
 
            <ChevronRight size={14} />
 
-           <span className="truncate font-semibold text-[#102A43]">
+           <span className="truncate font-semibold text-[#1c1836]">
 
              {productName || "Product details"}
 
@@ -708,7 +708,7 @@ export default function ProductDetails() {
 
            <section className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center">
 
-             <PackageCheck size={42} className="mx-auto text-[#008A90]" />
+             <PackageCheck size={42} className="mx-auto text-[#4a36b3]" />
 
              <h1 className="mt-4 text-2xl font-extrabold">Product unavailable</h1>
 
@@ -722,7 +722,7 @@ export default function ProductDetails() {
 
                onClick={() => navigate("/")}
 
-               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#102A43] px-5 py-3 text-sm font-bold text-white hover:bg-[#008A90]"
+               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1c1836] px-5 py-3 text-sm font-bold text-white hover:bg-[#4a36b3]"
 
              >
 
@@ -828,7 +828,7 @@ export default function ProductDetails() {
 
 
 
-                           className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#102A43] shadow-md transition hover:bg-[#E6F7F5] sm:left-3"
+                           className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#1c1836] shadow-md transition hover:bg-[#E6F7F5] sm:left-3"
 
 
 
@@ -860,7 +860,7 @@ export default function ProductDetails() {
 
 
 
-                           className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#102A43] shadow-md transition hover:bg-[#E6F7F5] sm:right-3"
+                           className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-[#1c1836] shadow-md transition hover:bg-[#E6F7F5] sm:right-3"
 
 
 
@@ -876,7 +876,7 @@ export default function ProductDetails() {
 
 
 
-                         <span className="absolute bottom-3 right-3 rounded-full bg-[#102A43]/80 px-3 py-1.5 text-xs font-bold text-white">
+                         <span className="absolute bottom-3 right-3 rounded-full bg-[#1c1836]/80 px-3 py-1.5 text-xs font-bold text-white">
 
 
 
@@ -954,7 +954,7 @@ export default function ProductDetails() {
 
 
 
-                             ? "border-[#008A90] ring-2 ring-[#008A90]/15"
+                             ? "border-[#4a36b3] ring-2 ring-[#4a36b3]/15"
 
 
 
@@ -992,9 +992,9 @@ export default function ProductDetails() {
 
                    <span className="inline-flex items-center gap-2">
 
-                     <PackageCheck size={16} className="text-[#008A90]" />
+                     <PackageCheck size={16} className="text-[#4a36b3]" />
 
-                     Product ID: <strong className="break-all text-[#102A43]" title={product.id}>{getShortProductId(product.id)}</strong>
+                     Product ID: <strong className="break-all text-[#1c1836]" title={product.id}>{getShortProductId(product.id)}</strong>
 
                    </span>
 
@@ -1002,7 +1002,7 @@ export default function ProductDetails() {
 
                      onClick={() => navigate("/")}
 
-                     className="inline-flex items-center gap-1 font-bold text-[#008A90] hover:underline"
+                     className="inline-flex items-center gap-1 font-bold text-[#4a36b3] hover:underline"
 
                    >
 
@@ -1022,7 +1022,7 @@ export default function ProductDetails() {
 
                  <div className="p-5 sm:p-7">
 
-                   <p className="text-[11px] font-extrabold uppercase tracking-[0.17em] text-[#008A90]">
+                   <p className="text-[11px] font-extrabold uppercase tracking-[0.17em] text-[#4a36b3]">
 
                      LIVEAZY curated rental
 
@@ -1034,7 +1034,7 @@ export default function ProductDetails() {
 
                    </p>
 
-                   <h1 className="mt-1 text-2xl font-extrabold leading-tight text-[#102A43] sm:text-3xl">
+                   <h1 className="mt-1 text-2xl font-extrabold leading-tight text-[#1c1836] sm:text-3xl">
 
                      {productName}
 
@@ -1058,7 +1058,7 @@ export default function ProductDetails() {
 
                      <div className="mt-1 flex items-baseline gap-2">
 
-                       <span className="text-3xl font-black tracking-tight text-[#102A43] sm:text-4xl">
+                       <span className="text-3xl font-black tracking-tight text-[#1c1836] sm:text-4xl">
 
                          {isPlanAvailable(selectedPlan)
 
@@ -1090,13 +1090,13 @@ export default function ProductDetails() {
 
                      <div className="flex items-center justify-between gap-3">
 
-                       <h2 className="text-sm font-extrabold text-[#102A43]">
+                       <h2 className="text-sm font-extrabold text-[#1c1836]">
 
                          Choose rental duration
 
                        </h2>
 
-                       <span className="text-[11px] font-semibold text-[#008A90]">
+                       <span className="text-[11px] font-semibold text-[#4a36b3]">
 
                          <Clock3 className="mr-1 inline" size={13} /> Flexible tenure
 
@@ -1128,11 +1128,11 @@ export default function ProductDetails() {
 
                                selected
 
-                                 ? "border-[#008A90] bg-[#E8F7F6] ring-1 ring-[#008A90]"
+                                 ? "border-[#4a36b3] bg-[#f0eaff] ring-1 ring-[#4a36b3]"
 
                                  : available
 
-                                 ? "border-slate-200 bg-white hover:border-[#008A90]"
+                                 ? "border-slate-200 bg-white hover:border-[#4a36b3]"
 
                                  : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
 
@@ -1146,7 +1146,7 @@ export default function ProductDetails() {
 
                              </span>
 
-                             <span className="mt-1 block text-sm font-black text-[#102A43]">
+                             <span className="mt-1 block text-sm font-black text-[#1c1836]">
 
                                {available ? formatPrice(Number(plan.rent)) : "N/A"}
 
@@ -1168,17 +1168,17 @@ export default function ProductDetails() {
 
                    <div className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F3F7FF] p-4">
 
-                     <ShieldCheck size={20} className="mt-0.5 shrink-0 text-[#008A90]" />
+                     <ShieldCheck size={20} className="mt-0.5 shrink-0 text-[#4a36b3]" />
 
                      <div className="min-w-0">
 
-                       <p className="text-xs font-bold text-[#102A43]">
+                       <p className="text-xs font-bold text-[#1c1836]">
 
                          Refundable security deposit
 
                        </p>
 
-                       <p className="mt-1 text-lg font-extrabold text-[#102A43]">
+                       <p className="mt-1 text-lg font-extrabold text-[#1c1836]">
 
                          {selectedPlan.deposit !== null && Number.isFinite(Number(selectedPlan.deposit))
 
@@ -1208,7 +1208,7 @@ export default function ProductDetails() {
 
                      disabled={!whatsappNumber || !whatsappMessage.trim() || !isPlanAvailable(selectedPlan)}
 
-                     className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#008A90] px-4 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#00767B] disabled:cursor-not-allowed disabled:opacity-50"
+                     className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#4a36b3] px-4 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#3a27a0] disabled:cursor-not-allowed disabled:opacity-50"
 
                    >
 
@@ -1236,7 +1236,7 @@ export default function ProductDetails() {
 
           <section className="relative mt-8 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(16,42,67,0.35)] sm:mt-10">
 
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#008A90] via-[#36B7B0] to-[#102A43]" />
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4a36b3] via-[#36B7B0] to-[#1c1836]" />
 
             <div className="p-5 sm:p-7 lg:p-8">
 
@@ -1244,13 +1244,13 @@ export default function ProductDetails() {
 
                 <div>
 
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#E8F7F6] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#007B80]">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#f0eaff] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#007B80]">
 
                     <PackageCheck size={14} /> Product information
 
                   </span>
 
-                  <h2 className="mt-3 text-2xl font-black tracking-tight text-[#102A43] sm:text-3xl">Product details <span className="text-[#008A90]">&amp; specifications</span></h2>
+                  <h2 className="mt-3 text-2xl font-black tracking-tight text-[#1c1836] sm:text-3xl">Product details <span className="text-[#4a36b3]">&amp; specifications</span></h2>
 
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Everything you need to know about this LIVEAZY rental, with pricing based on your selected tenure.</p>
 
@@ -1264,9 +1264,9 @@ export default function ProductDetails() {
 
                 <div className="group rounded-2xl border border-slate-100 bg-gradient-to-br from-[#F7FAFF] to-white p-4 transition hover:-translate-y-0.5 hover:border-[#CDEBE8] hover:shadow-md sm:p-5">
 
-                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E8F7F6] text-[#008A90]"><PackageCheck size={19} /></span><p className="text-xs font-semibold text-slate-500">Product name</p></div>
+                  <div className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f0eaff] text-[#4a36b3]"><PackageCheck size={19} /></span><p className="text-xs font-semibold text-slate-500">Product name</p></div>
 
-                  <p className="mt-4 break-words text-base font-extrabold leading-snug text-[#102A43]">{productName}</p>
+                  <p className="mt-4 break-words text-base font-extrabold leading-snug text-[#1c1836]">{productName}</p>
 
                 </div>
 
@@ -1274,7 +1274,7 @@ export default function ProductDetails() {
 
                   <div className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EEF3FF] text-[#315B9B]"><ChevronRight size={19} /></span><p className="text-xs font-semibold text-slate-500">Category</p></div>
 
-                  <p className="mt-4 break-words text-base font-extrabold leading-snug text-[#102A43]">{product.category?.name ?? "Not specified"}</p>
+                  <p className="mt-4 break-words text-base font-extrabold leading-snug text-[#1c1836]">{product.category?.name ?? "Not specified"}</p>
 
                 </div>
 
@@ -1282,7 +1282,7 @@ export default function ProductDetails() {
 
                   <div className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF4E8] text-[#B96B16]"><Clock3 size={19} /></span><p className="text-xs font-semibold text-slate-500">Selected rental duration</p></div>
 
-                  <p className="mt-4 text-base font-extrabold leading-snug text-[#102A43]">{selectedPlan.label}</p><p className="mt-1 text-xs text-slate-500">Flexible rental tenure</p>
+                  <p className="mt-4 text-base font-extrabold leading-snug text-[#1c1836]">{selectedPlan.label}</p><p className="mt-1 text-xs text-slate-500">Flexible rental tenure</p>
 
                 </div>
 
@@ -1300,7 +1300,7 @@ export default function ProductDetails() {
 
                   <div className="flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F1ECFF] text-[#7653B6]"><ShieldCheck size={19} /></span><p className="text-xs font-semibold text-slate-500">Refundable deposit</p></div>
 
-                  <p className="mt-4 text-xl font-extrabold text-[#102A43]">{selectedPlan.deposit !== null && Number.isFinite(Number(selectedPlan.deposit)) ? formatPrice(Number(selectedPlan.deposit)) : "Not specified"}</p><p className="mt-1 text-xs leading-5 text-slate-500">Deposit for the selected rental plan</p>
+                  <p className="mt-4 text-xl font-extrabold text-[#1c1836]">{selectedPlan.deposit !== null && Number.isFinite(Number(selectedPlan.deposit)) ? formatPrice(Number(selectedPlan.deposit)) : "Not specified"}</p><p className="mt-1 text-xs leading-5 text-slate-500">Deposit for the selected rental plan</p>
 
                 </div>
 
@@ -1314,9 +1314,9 @@ export default function ProductDetails() {
 
               </div>
 
-              {product.description?.trim() && <div className="mt-5 rounded-2xl border border-slate-200/80 bg-[#FAFCFF] p-4 sm:p-5"><div className="flex items-center gap-2"><span className="h-5 w-1 rounded-full bg-[#008A90]" /><h3 className="text-sm font-extrabold text-[#102A43]">About this product</h3></div><p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{product.description}</p></div>}
+              {product.description?.trim() && <div className="mt-5 rounded-2xl border border-slate-200/80 bg-[#FAFCFF] p-4 sm:p-5"><div className="flex items-center gap-2"><span className="h-5 w-1 rounded-full bg-[#4a36b3]" /><h3 className="text-sm font-extrabold text-[#1c1836]">About this product</h3></div><p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{product.description}</p></div>}
 
-              <div className="mt-5 flex flex-col gap-2 rounded-2xl border border-[#D9EEEC] bg-[#F2FBFA] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div className="flex items-start gap-3"><ShieldCheck size={19} className="mt-0.5 shrink-0 text-[#008A90]" /><div><p className="text-xs font-bold text-[#102A43]">Transparent rental information</p><p className="mt-1 text-xs leading-5 text-slate-500">Rental is an enquiry only and is not confirmed until LIVEAZY confirms it.</p></div></div><span className="text-xs font-bold text-[#008A90]">LIVEAZY Furniture Rental</span></div>
+              <div className="mt-5 flex flex-col gap-2 rounded-2xl border border-[#D9EEEC] bg-[#F2FBFA] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div className="flex items-start gap-3"><ShieldCheck size={19} className="mt-0.5 shrink-0 text-[#4a36b3]" /><div><p className="text-xs font-bold text-[#1c1836]">Transparent rental information</p><p className="mt-1 text-xs leading-5 text-slate-500">Rental is an enquiry only and is not confirmed until LIVEAZY confirms it.</p></div></div><span className="text-xs font-bold text-[#4a36b3]">LIVEAZY Furniture Rental</span></div>
 
             </div>
 
@@ -1336,11 +1336,11 @@ export default function ProductDetails() {
 
 
 
-                 <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">Product support</p>
+                 <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#4a36b3]">Product support</p>
 
 
 
-                 <h2 className="mt-1 text-xl font-extrabold text-[#102A43] sm:text-2xl">Frequently asked questions</h2>
+                 <h2 className="mt-1 text-xl font-extrabold text-[#1c1836] sm:text-2xl">Frequently asked questions</h2>
 
 
 
@@ -1364,11 +1364,11 @@ export default function ProductDetails() {
 
 
 
-                         <span className="text-sm font-bold text-[#102A43]">{faq.question}</span>
+                         <span className="text-sm font-bold text-[#1c1836]">{faq.question}</span>
 
 
 
-                         <ChevronRight size={18} className={`shrink-0 text-[#008A90] transition-transform ${openFaqId === faq.id ? "rotate-90" : ""}`} />
+                         <ChevronRight size={18} className={`shrink-0 text-[#4a36b3] transition-transform ${openFaqId === faq.id ? "rotate-90" : ""}`} />
 
 
 
@@ -1414,11 +1414,11 @@ export default function ProductDetails() {
 
 
 
-                   <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">Discover more</p>
+                   <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#4a36b3]">Discover more</p>
 
 
 
-                   <h2 className="mt-1 text-xl font-extrabold text-[#102A43] sm:text-2xl">Similar products</h2>
+                   <h2 className="mt-1 text-xl font-extrabold text-[#1c1836] sm:text-2xl">Similar products</h2>
 
 
 
@@ -1458,7 +1458,7 @@ export default function ProductDetails() {
 
 
 
-                       <button key={item.id} type="button" onClick={() => { navigate(`/product/${encodeURIComponent(item.id)}`); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:border-[#008A90] hover:shadow-md">
+                       <button key={item.id} type="button" onClick={() => { navigate(`/product/${encodeURIComponent(item.id)}`); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:border-[#4a36b3] hover:shadow-md">
 
 
 
@@ -1478,19 +1478,19 @@ export default function ProductDetails() {
 
 
 
-                           <p className="text-[10px] font-semibold text-[#008A90]">{item.category?.name ?? "Rental product"}</p>
+                           <p className="text-[10px] font-semibold text-[#4a36b3]">{item.category?.name ?? "Rental product"}</p>
 
 
 
-                           <h3 className="mt-1 line-clamp-2 text-sm font-bold text-[#102A43]">{itemName}</h3>
+                           <h3 className="mt-1 line-clamp-2 text-sm font-bold text-[#1c1836]">{itemName}</h3>
 
 
 
-                           <p className="mt-2 text-sm font-extrabold text-[#102A43]">{availablePlan ? `${formatPrice(Number(availablePlan.rent))}/month` : "Price on request"}</p>
+                           <p className="mt-2 text-sm font-extrabold text-[#1c1836]">{availablePlan ? `${formatPrice(Number(availablePlan.rent))}/month` : "Price on request"}</p>
 
 
 
-                           <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#008A90]">View details <ArrowRight size={14} /></span>
+                           <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#4a36b3]">View details <ArrowRight size={14} /></span>
 
 
 

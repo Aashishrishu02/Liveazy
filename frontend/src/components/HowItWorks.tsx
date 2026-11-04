@@ -1,92 +1,184 @@
-import React from 'react';
-import { MousePointerClick, FileCheck2, Truck, RefreshCw, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import {
+  ShoppingBag,
+  FileCheck2,
+  Truck,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  Package,
+} from "lucide-react";
+import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
-const STEPS = [
+interface StepItem {
+  id?: string;
+  title: string;
+  badge?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+interface SectionData {
+  sectionKey: string;
+  title: string;
+  subtitle?: string | null;
+  badge?: string | null;
+  items: StepItem[];
+}
+
+const DEFAULT_STEPS: StepItem[] = [
   {
-    step: '01',
-    icon: MousePointerClick,
-    title: 'Select Your Rentals',
+    badge: "01",
+    icon: "ShoppingBag",
+    title: "Browse & order",
     description:
-      'Choose from hundreds of curated sofas, double beds, refrigerators, washing machines, or electronics. Pick your preferred rental tenure from 3 to 24+ months.',
-    highlight: 'Zero Security Deposit',
+      "Explore 500+ premium furniture and appliance picks. Select your preferred tenure (3, 6, 9, or 12+ months) and add items to your cart or WhatsApp.",
   },
   {
-    step: '02',
-    icon: FileCheck2,
-    title: 'Quick Paperless KYC',
+    badge: "02",
+    icon: "FileCheck2",
+    title: "Verify & book",
     description:
-      'Complete our 2-minute instant digital KYC verification. No tedious paperwork or guarantor visits required—everything is verified online safely.',
-    highlight: 'Instant 10-Minute Approval',
+      "Complete a rapid, 100% secure paperless KYC online and pick a delivery time slot that fits comfortably into your moving schedule.",
   },
   {
-    step: '03',
-    icon: Truck,
-    title: 'Free Delivery & Installation',
+    badge: "03",
+    icon: "Truck",
+    title: "Delivery & move in",
     description:
-      'Our professional team brings your sanitized products to your doorstep in Pune within 48 hours, fully unboxes them, and handles complete assembly for free.',
-    highlight: 'Free Doorstep Setup',
-  },
-  {
-    step: '04',
-    icon: RefreshCw,
-    title: 'Enjoy, Swap or Relocate',
-    description:
-      'Live comfortably without long-term baggage. If you move within Pune, we relocate your rentals for free. When you want a change, easily swap to new models.',
-    highlight: 'Free Relocation & Upgrades',
+      "Our professional crew delivers, carries, assembles, and installs everything within 72 hours so you can instantly settle in and relax.",
   },
 ];
 
-export const HowItWorks: React.FC = () => {
+export const HowItWorks: React.FC<{ sectionData?: SectionData }> = ({
+  sectionData,
+}) => {
+  const [data, setData] = useState<SectionData>(
+    sectionData || {
+      sectionKey: "HOW_IT_WORKS",
+      badge: "Simple Process",
+      title: "How it works",
+      subtitle: "Renting furniture and appliances is smooth, paperless, and straightforward",
+      items: DEFAULT_STEPS,
+    }
+  );
+
+  useEffect(() => {
+    if (sectionData) {
+      setData(sectionData);
+      return;
+    }
+
+    let cancelled = false;
+    const apiBase = getApiBaseUrl();
+
+    async function loadSection() {
+      try {
+        const res = await fetchJsonDeduplicated<unknown>(
+          `${apiBase}/homepage-sections/public`
+        );
+        if (Array.isArray(res)) {
+          const match = (res as SectionData[]).find(
+            (s) => s.sectionKey === "HOW_IT_WORKS"
+          );
+          if (match && !cancelled) {
+            setData({
+              sectionKey: "HOW_IT_WORKS",
+              title: match.title || "How it works",
+              subtitle:
+                match.subtitle ||
+                "Renting furniture and appliances is smooth, paperless, and straightforward",
+              badge: match.badge || "Simple Process",
+              items: match.items && match.items.length > 0 ? match.items : DEFAULT_STEPS,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Could not load HowItWorks section config:", e);
+      }
+    }
+
+    void loadSection();
+    return () => {
+      cancelled = true;
+    };
+  }, [sectionData]);
+
+  const getStepIcon = (iconName?: string | null) => {
+    switch (iconName?.toLowerCase()) {
+      case "shoppingbag":
+      case "shopping-bag":
+        return ShoppingBag;
+      case "filecheck2":
+      case "filecheck":
+      case "verify":
+        return FileCheck2;
+      case "truck":
+      case "delivery":
+        return Truck;
+      case "sparkles":
+        return Sparkles;
+      case "shield":
+      case "shieldcheck":
+        return ShieldCheck;
+      case "package":
+        return Package;
+      default:
+        return CheckCircle2;
+    }
+  };
+
+  const activeSteps = data.items.filter((it) => it.isActive !== false);
+
   return (
-    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-[#faf9f7]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200/80 px-3.5 py-1 text-xs font-extrabold uppercase tracking-widest text-orange-600 mb-3">
-            <Sparkles size={13} className="text-orange-500" />
-            <span>SIMPLE & TRANSPARENT</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-950 tracking-tight">
-            How Renting Works
+    <section
+      id="how-it-works"
+      aria-label="How it works"
+      className="border-y border-gray-100 bg-white py-12 sm:py-16 scroll-mt-24"
+    >
+      <div className="ref-container">
+        <div className="mx-auto max-w-xl text-center mb-8 sm:mb-12">
+          <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+            {data.badge || "Simple Process"}
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+            {data.title}
           </h2>
-
-          <p className="mt-3 text-sm sm:text-base text-gray-500 leading-relaxed">
-            Get your entire apartment furnished or grab the latest tech gear in four easy steps.
-          </p>
+          {data.subtitle && (
+            <p className="mt-1.5 text-xs sm:text-sm text-gray-500">
+              {data.subtitle}
+            </p>
+          )}
         </div>
 
-        {/* 4 STEPS GRID */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((item) => {
-            const Icon = item.icon;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {activeSteps.map((s, idx) => {
+            const Icon = getStepIcon(s.icon);
+            const stepNumber = s.badge || String(idx + 1).padStart(2, "0");
+
             return (
               <div
-                key={item.step}
-                className="group relative flex flex-col justify-between rounded-3xl border border-gray-200/80 bg-white p-6 sm:p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/5"
+                key={s.id || idx}
+                className="group relative rounded-2xl border border-[#eee9fa] bg-[#faf9fd] p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#4a36b3] hover:bg-white hover:shadow-xl hover:shadow-[#4a36b3]/10 flex flex-col justify-between"
               >
+                {/* Large Background Step Number */}
+                <span className="absolute right-5 top-5 text-4xl sm:text-5xl font-black text-[#e4ddfa] group-hover:text-[#4a36b3]/15 transition duration-300 select-none">
+                  {stepNumber}
+                </span>
+
                 <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100/70 text-orange-600 transition-transform group-hover:scale-110">
-                      <Icon size={24} />
-                    </div>
-                    <span className="font-mono text-2xl font-black text-orange-200 group-hover:text-orange-400 transition-colors">
-                      {item.step}
-                    </span>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#f0eaff] text-[#4a36b3] mb-5 transition duration-300 group-hover:scale-110">
+                    <Icon size={26} className="stroke-[2.2]" />
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-gray-950 group-hover:text-orange-600 transition-colors">
-                    {item.title}
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                    {s.title}
                   </h3>
-
-                  <p className="mt-2 text-xs sm:text-sm text-gray-500 leading-relaxed">
-                    {item.description}
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    {s.description}
                   </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-gray-100">
-                  <span className="inline-block rounded-lg bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-orange-700">
-                    {item.highlight}
-                  </span>
                 </div>
               </div>
             );
