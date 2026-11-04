@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { CategorySettingsDto } from './dto/category-settings.dto';
 import { globalEtagCache } from '../common/services/etag-cache.service';
 
 @Injectable()
@@ -262,5 +263,109 @@ export class DealsService {
     return this.prisma.deal.delete({
       where: { id },
     });
+  }
+
+  async getCategorySettings() {
+    try {
+      const sec = await this.prisma.homepageSection.findUnique({
+        where: { sectionKey: 'DEALS' },
+        include: { items: true },
+      });
+
+      if (sec?.description) {
+        try {
+          const parsed = JSON.parse(sec.description);
+          if (parsed && typeof parsed === 'object') {
+            return {
+              icon: parsed.icon || 'Flame',
+              image: parsed.image || null,
+            };
+          }
+        } catch {
+          // Ignore parse error
+        }
+      }
+
+      const item = sec?.items?.[0];
+      return {
+        icon: item?.icon || 'Flame',
+        image: item?.image || null,
+      };
+    } catch {
+      return { icon: 'Flame', image: null };
+    }
+  }
+
+  async updateCategorySettings(dto: CategorySettingsDto) {
+    globalEtagCache.invalidate('deals');
+    globalEtagCache.invalidate('homepage-sections');
+
+    let sec = await this.prisma.homepageSection.findUnique({
+      where: { sectionKey: 'DEALS' },
+      include: { items: true },
+    });
+
+    const iconVal = dto.icon ?? 'Flame';
+    const imageVal = dto.image ?? null;
+    const descJson = JSON.stringify({ icon: iconVal, image: imageVal });
+
+    if (!sec) {
+      await this.prisma.homepageSection.create({
+        data: {
+          sectionKey: 'DEALS',
+          title: "This Week's Deals",
+          subtitle: 'Limited-time deals with live countdown timers and unbeatable prices.',
+          badge: 'Limited Offers',
+          sortOrder: 7,
+          isVisible: true,
+          description: descJson,
+          items: {
+            create: [
+              {
+                title: 'Deals & Offers',
+                subtitle: 'Limited Offers',
+                icon: iconVal,
+                image: imageVal,
+                linkUrl: '#deals',
+                sortOrder: 0,
+                isActive: true,
+              },
+            ],
+          },
+        },
+      });
+    } else {
+      await this.prisma.homepageSection.update({
+        where: { id: sec.id },
+        data: {
+          description: descJson,
+        },
+      });
+
+      if (sec.items && sec.items.length > 0) {
+        await this.prisma.homepageSectionItem.update({
+          where: { id: sec.items[0].id },
+          data: {
+            icon: iconVal,
+            image: imageVal,
+          },
+        });
+      } else {
+        await this.prisma.homepageSectionItem.create({
+          data: {
+            sectionId: sec.id,
+            title: 'Deals & Offers',
+            subtitle: 'Limited Offers',
+            icon: iconVal,
+            image: imageVal,
+            linkUrl: '#deals',
+            sortOrder: 0,
+            isActive: true,
+          },
+        });
+      }
+    }
+
+    return { icon: iconVal, image: imageVal };
   }
 }

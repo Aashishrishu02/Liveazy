@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CombosService } from './combos.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
+import { CategorySettingsDto } from './dto/category-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminEmailGuard } from '../auth/guards/admin-email.guard';
 
@@ -22,6 +24,18 @@ export class CombosController {
   @Get('public')
   getPublic() {
     return this.combosService.getPublicCombos();
+  }
+
+  // Category Icon & Image Settings endpoints
+  @Get('category-settings')
+  getCategorySettings() {
+    return this.combosService.getCategorySettings();
+  }
+
+  @Put('category-settings')
+  @UseGuards(JwtAuthGuard, AdminEmailGuard)
+  updateCategorySettings(@Body() dto: CategorySettingsDto) {
+    return this.combosService.updateCategorySettings(dto);
   }
 
   // Admin endpoints

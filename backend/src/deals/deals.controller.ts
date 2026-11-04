@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { DealsService } from './deals.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { CategorySettingsDto } from './dto/category-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminEmailGuard } from '../auth/guards/admin-email.guard';
 
@@ -27,6 +29,18 @@ export class DealsController {
   @Get('public')
   getPublicDeals() {
     return this.dealsService.getPublicDeals();
+  }
+
+  // Category Icon & Image Settings endpoints
+  @Get('category-settings')
+  getCategorySettings() {
+    return this.dealsService.getCategorySettings();
+  }
+
+  @Put('category-settings')
+  @UseGuards(JwtAuthGuard, AdminEmailGuard)
+  updateCategorySettings(@Body() dto: CategorySettingsDto) {
+    return this.dealsService.updateCategorySettings(dto);
   }
 
   // Admin endpoints

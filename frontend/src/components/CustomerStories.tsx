@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Home,
   Star,
@@ -10,6 +10,11 @@ import {
   Check,
   ShieldCheck,
   Users,
+  AlertCircle,
+  Award,
+  Heart,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 
@@ -25,23 +30,28 @@ interface CustomerStoryItem {
   isActive: boolean;
 }
 
-interface StatItem {
-  icon?: string | null;
-  num?: string;
+interface DynamicStat {
+  num: string;
+  label: string;
+  icon: string;
+}
+
+interface SectionItemData {
+  id?: string;
   title: string;
   subtitle?: string | null;
-  label?: string;
+  icon?: string | null;
+  badge?: string | null;
+  description?: string | null; // "auto" | "manual"
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 interface SectionData {
   title: string;
   subtitle?: string | null;
   badge?: string | null;
-  items: Array<{
-    title: string;
-    subtitle?: string | null;
-    icon?: string | null;
-  }>;
+  items?: SectionItemData[];
 }
 
 export const CustomerStories: React.FC = () => {
@@ -54,94 +64,226 @@ export const CustomerStories: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Dynamic statistics state (Zero hardcoded, zero fabricated numbers)
+  const [dynamicStats, setDynamicStats] = useState<DynamicStat[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState(false);
+
   // Section config from HomepageSections
   const [sectionConfig, setSectionConfig] = useState<{
     badge: string;
     title: string;
     subtitle: string;
-    stats: StatItem[];
   }>({
     badge: "Verified Reviews",
     title: "Customer stories",
     subtitle: "Real experiences from customers who furnished their spaces with LIVEAZY",
-    stats: [
-      { num: "2,50,000+", label: "Homes Furnished", icon: "Home", title: "2,50,000+" },
-      { num: "4.8 Rating", label: "Google & Customer Reviews", icon: "Star", title: "4.8 Rating" },
-      { num: "12+ Cities", label: "Across India", icon: "MapPin", title: "12+ Cities" },
-      { num: "8,00,000+", label: "Products Delivered", icon: "Truck", title: "8,00,000+" },
-    ],
   });
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadData = useCallback(async () => {
     const apiBase = getApiBaseUrl();
+    try {
+      setLoading(true);
+      setLoadingStats(true);
+      setStatsError(false);
 
-    async function loadData() {
-      try {
-        setLoading(true);
+      // Fetch real data from all reliable backend sources
+      const [storiesRes, feedbackRes, contactRes, sectionsRes] = await Promise.all([
+        fetchJsonDeduplicated<unknown>(`${apiBase}/customer-stories/public`),
+        fetchJsonDeduplicated<unknown>(`${apiBase}/feedback/approved`).catch(() => []),
+        fetchJsonDeduplicated<{ serviceLocations?: string }>(`${apiBase}/contact-settings`).catch(() => ({})),
+        fetchJsonDeduplicated<unknown>(`${apiBase}/homepage-sections/public`).catch(() => null),
+      ]);
 
-        const [storiesRes, sectionsRes] = await Promise.all([
-          fetchJsonDeduplicated<unknown>(`${apiBase}/customer-stories/public`),
-          fetchJsonDeduplicated<unknown>(`${apiBase}/homepage-sections/public`).catch(() => null),
-        ]);
-
-        if (!cancelled) {
-          // 1. Stories
-          let list: CustomerStoryItem[] = [];
-          if (Array.isArray(storiesRes)) {
-            list = storiesRes as CustomerStoryItem[];
-          } else if (
-            storiesRes &&
-            typeof storiesRes === "object" &&
-            "data" in storiesRes &&
-            Array.isArray((storiesRes as { data: unknown }).data)
-          ) {
-            list = (storiesRes as { data: CustomerStoryItem[] }).data;
-          }
-          setStories(list);
-
-          // 2. Section stats & titles from HomepageSections
-          if (Array.isArray(sectionsRes)) {
-            const sec = (sectionsRes as Array<{ sectionKey: string } & SectionData>).find(
-              (s) => s.sectionKey === "CUSTOMER_STORIES"
-            );
-            if (sec) {
-              const mappedStats: StatItem[] =
-                sec.items && sec.items.length > 0
-                  ? sec.items.map((it) => ({
-                      num: it.title,
-                      label: it.subtitle || "",
-                      icon: it.icon,
-                      title: it.title,
-                      subtitle: it.subtitle,
-                    }))
-                  : sectionConfig.stats;
-
-              setSectionConfig({
-                badge: sec.badge || "Verified Reviews",
-                title: sec.title || "Customer stories",
-                subtitle:
-                  sec.subtitle ||
-                  "Real experiences from customers who furnished their spaces with LIVEAZY",
-                stats: mappedStats,
-              });
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Could not load customer stories:", e);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+      // 1. Stories
+      let list: CustomerStoryItem[] = [];
+      if (Array.isArray(storiesRes)) {
+        list = storiesRes as CustomerStoryItem[];
+      } else if (
+        storiesRes &&
+        typeof storiesRes === "object" &&
+        "data" in storiesRes &&
+        Array.isArray((storiesRes as { data: unknown }).data)
+      ) {
+        list = (storiesRes as { data: CustomerStoryItem[] }).data;
       }
-    }
+      setStories(list);
 
-    void loadData();
-    return () => {
-      cancelled = true;
-    };
+      // 2. Real Dynamic Statistics calculation:
+      // Metric 1: Homes Furnished (Check actual completed rental/order records)
+      // Data source fact: LIVEAZY rental checkouts happen through WhatsApp; no completed orders table exists in DB.
+      // Rule: Show only actual completed rental records. Do not use product or user counts as substitute.
+      const homesFurnishedStat: DynamicStat = {
+        num: "—",
+        label: "Homes Furnished (No order records)",
+        icon: "Home",
+      };
+
+      // Metric 2: Customer Rating (Calculated from actual approved reviews)
+      const approvedFeedbackList = Array.isArray(feedbackRes)
+        ? (feedbackRes as Array<{ rating?: number }>)
+        : [];
+      const feedbackRatings = approvedFeedbackList
+        .map((f) => f.rating)
+        .filter((r): r is number => typeof r === "number" && r > 0);
+      const storyRatings = list
+        .map((s) => s.rating)
+        .filter((r): r is number => typeof r === "number" && r > 0);
+      const allRatings = [...feedbackRatings, ...storyRatings];
+
+      const customerRatingStat: DynamicStat =
+        allRatings.length > 0
+          ? {
+              num: `${(allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length).toFixed(1)} ★`,
+              label: `Customer Rating (${allRatings.length} verified reviews)`,
+              icon: "Star",
+            }
+          : {
+              num: "—",
+              label: "Customer Rating (No approved reviews yet)",
+              icon: "Star",
+            };
+
+      // Metric 3: Active Serviceable Cities (Count from actual location data in ContactPageSetting)
+      const contactObj = contactRes as { serviceLocations?: string } | null | undefined;
+      const rawServiceLocations = contactObj?.serviceLocations || "";
+      const activeCities: string[] = rawServiceLocations
+        ? rawServiceLocations
+            .split(/[,;&]|\sand\s/i)
+            .map((c: string) => c.trim())
+            .filter(Boolean)
+        : [];
+
+      const citiesStat: DynamicStat =
+        activeCities.length > 0
+          ? {
+              num: `${activeCities.length} ${activeCities.length === 1 ? "City" : "Cities"}`,
+              label: `Serviceable: ${activeCities.slice(0, 3).join(", ")}${activeCities.length > 3 ? "..." : ""}`,
+              icon: "MapPin",
+            }
+          : {
+              num: "—",
+              label: "Serviceable Cities (Location data unavailable)",
+              icon: "MapPin",
+            };
+
+      // Metric 4: Products Delivered (Count actual completed delivery records)
+      // Data source fact: There is no delivery tracking or shipment database model in the system.
+      // Rule: Count actual completed delivery records. Do not use total product catalog count as substitute.
+      const productsDeliveredStat: DynamicStat = {
+        num: "—",
+        label: "Products Delivered (Delivery records unavailable)",
+        icon: "Truck",
+      };
+
+      // Default automatic stats fallback
+      const defaultStats: DynamicStat[] = [
+        homesFurnishedStat,
+        customerRatingStat,
+        citiesStat,
+        productsDeliveredStat,
+      ];
+
+      // 3. Section config & Dynamic Trust Statistics from HomepageSections
+      if (Array.isArray(sectionsRes)) {
+        const sec = (sectionsRes as Array<{ sectionKey: string } & SectionData>).find(
+          (s) => s.sectionKey === "CUSTOMER_STORIES"
+        );
+        if (sec) {
+          setSectionConfig({
+            badge: sec.badge || "Verified Reviews",
+            title: sec.title || "Customer stories",
+            subtitle:
+              sec.subtitle ||
+              "Real experiences from customers who furnished their spaces with LIVEAZY",
+          });
+
+          // Consume configured Trust Statistics if available
+          if (Array.isArray(sec.items) && sec.items.length > 0) {
+            const mappedStats: DynamicStat[] = sec.items
+              .filter((item) => item.isActive !== false)
+              .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+              .map((item) => {
+                const isManual = item.description?.toLowerCase() === "manual";
+                if (isManual) {
+                  return {
+                    num: item.title,
+                    label: item.subtitle || item.title,
+                    icon: item.icon || "Star",
+                  };
+                }
+
+                // Automatic live system data calculation
+                const badgeKey = (item.badge || "").toUpperCase();
+                if (badgeKey === "HOMES_FURNISHED") {
+                  return {
+                    num: "—",
+                    label: item.subtitle || "Homes Furnished (No order records)",
+                    icon: item.icon || "Home",
+                  };
+                } else if (badgeKey === "CUSTOMER_RATING") {
+                  return {
+                    num:
+                      allRatings.length > 0
+                        ? `${(allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length).toFixed(1)} ★`
+                        : "—",
+                    label:
+                      item.subtitle ||
+                      (allRatings.length > 0
+                        ? `Customer Rating (${allRatings.length} verified reviews)`
+                        : "Customer Rating (No approved reviews yet)"),
+                    icon: item.icon || "Star",
+                  };
+                } else if (badgeKey === "SERVICEABLE_CITIES") {
+                  return {
+                    num:
+                      activeCities.length > 0
+                        ? `${activeCities.length} ${activeCities.length === 1 ? "City" : "Cities"}`
+                        : "—",
+                    label:
+                      item.subtitle ||
+                      (activeCities.length > 0
+                        ? `Serviceable: ${activeCities.slice(0, 3).join(", ")}${activeCities.length > 3 ? "..." : ""}`
+                        : "Serviceable Cities (Location data unavailable)"),
+                    icon: item.icon || "MapPin",
+                  };
+                } else if (badgeKey === "PRODUCTS_DELIVERED") {
+                  return {
+                    num: "—",
+                    label: item.subtitle || "Products Delivered (Delivery records unavailable)",
+                    icon: item.icon || "Truck",
+                  };
+                } else {
+                  return {
+                    num: item.title,
+                    label: item.subtitle || item.title,
+                    icon: item.icon || "Users",
+                  };
+                }
+              });
+
+            setDynamicStats(mappedStats.length > 0 ? mappedStats : defaultStats);
+          } else {
+            setDynamicStats(defaultStats);
+          }
+        } else {
+          setDynamicStats(defaultStats);
+        }
+      } else {
+        setDynamicStats(defaultStats);
+      }
+    } catch (e) {
+      console.warn("Could not load customer stories statistics:", e);
+      setStatsError(true);
+    } finally {
+      setLoading(false);
+      setLoadingStats(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,6 +333,16 @@ export const CustomerStories: React.FC = () => {
       case "shield":
       case "shieldcheck":
         return ShieldCheck;
+      case "award":
+        return Award;
+      case "heart":
+        return Heart;
+      case "sparkles":
+        return Sparkles;
+      case "checkcircle":
+      case "checkcircle2":
+      case "check":
+        return CheckCircle2;
       default:
         return Users;
     }
@@ -200,26 +352,54 @@ export const CustomerStories: React.FC = () => {
     <section aria-label="Customer Trust & Stories" className="py-10 sm:py-14 bg-[#fafbfc]">
       <div className="ref-container">
         {/* Dynamic Trust Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-xs mb-10">
-          {sectionConfig.stats.map((st, i) => {
-            const Icon = getStatIcon(st.icon);
-            return (
-              <div key={i} className="flex items-center gap-3 sm:gap-4">
-                <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#f0eaff] text-[#4a36b3]">
-                  <Icon size={22} className="stroke-[2.2]" />
-                </div>
-                <div>
-                  <div className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight">
-                    {st.num || st.title}
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium">
-                    {st.label || st.subtitle}
-                  </div>
+        {loadingStats ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-xs mb-10">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center gap-3 sm:gap-4 animate-pulse">
+                <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-gray-200 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-16" />
+                  <div className="h-3 bg-gray-200 rounded w-28" />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : statsError && dynamicStats.length === 0 ? (
+          <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 text-xs sm:text-sm text-amber-800 mb-10">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={18} className="text-amber-600 shrink-0" />
+              <span>Live statistics are temporarily unavailable.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadData()}
+              className="font-bold underline hover:text-amber-950 transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-xs mb-10">
+            {dynamicStats.map((st, i) => {
+              const Icon = getStatIcon(st.icon);
+              return (
+                <div key={i} className="flex items-center gap-3 sm:gap-4">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#f0eaff] text-[#4a36b3]">
+                    <Icon size={22} className="stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <div className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight">
+                      {st.num}
+                    </div>
+                    <div className="text-xs text-gray-500 font-medium">
+                      {st.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">

@@ -4,6 +4,7 @@ import { globalEtagCache } from '../common/services/etag-cache.service';
 import {
   CreateSectionItemDto,
   ReorderSectionsDto,
+  SaveTrustStatsDto,
   UpdateSectionDto,
   UpdateSectionItemDto,
 } from './dto/sections.dto';
@@ -191,29 +192,37 @@ const DEFAULT_SECTIONS = [
     isVisible: true,
     items: [
       {
-        title: '2,50,000+',
+        title: 'Homes Furnished',
         subtitle: 'Homes Furnished',
+        badge: 'HOMES_FURNISHED',
+        description: 'auto',
         icon: 'Home',
         sortOrder: 0,
         isActive: true,
       },
       {
-        title: '4.8 Rating',
-        subtitle: 'Google & Customer Reviews',
+        title: 'Customer Rating',
+        subtitle: 'Customer Rating',
+        badge: 'CUSTOMER_RATING',
+        description: 'auto',
         icon: 'Star',
         sortOrder: 1,
         isActive: true,
       },
       {
-        title: '12+ Cities',
+        title: 'Serviceable Cities',
         subtitle: 'Across India',
+        badge: 'SERVICEABLE_CITIES',
+        description: 'auto',
         icon: 'MapPin',
         sortOrder: 2,
         isActive: true,
       },
       {
-        title: '8,00,000+',
+        title: 'Products Delivered',
         subtitle: 'Products Delivered',
+        badge: 'PRODUCTS_DELIVERED',
+        description: 'auto',
         icon: 'Truck',
         sortOrder: 3,
         isActive: true,
@@ -328,8 +337,78 @@ export class HomepageSectionsService {
     }
   }
 
+  async ensureCustomerStoriesItems() {
+    try {
+      const sec = await this.prisma.homepageSection.findUnique({
+        where: { sectionKey: 'CUSTOMER_STORIES' },
+        include: { items: true },
+      });
+
+      if (!sec) return;
+
+      if (!sec.items || sec.items.length === 0) {
+        const defaultItems = [
+          {
+            badge: 'HOMES_FURNISHED',
+            title: 'Homes Furnished',
+            subtitle: 'Homes Furnished',
+            icon: 'Home',
+            description: 'auto',
+            sortOrder: 0,
+            isActive: true,
+          },
+          {
+            badge: 'CUSTOMER_RATING',
+            title: 'Customer Rating',
+            subtitle: 'Customer Rating',
+            icon: 'Star',
+            description: 'auto',
+            sortOrder: 1,
+            isActive: true,
+          },
+          {
+            badge: 'SERVICEABLE_CITIES',
+            title: 'Serviceable Cities',
+            subtitle: 'Across India',
+            icon: 'MapPin',
+            description: 'auto',
+            sortOrder: 2,
+            isActive: true,
+          },
+          {
+            badge: 'PRODUCTS_DELIVERED',
+            title: 'Products Delivered',
+            subtitle: 'Products Delivered',
+            icon: 'Truck',
+            description: 'auto',
+            sortOrder: 3,
+            isActive: true,
+          },
+        ];
+
+        for (const item of defaultItems) {
+          await this.prisma.homepageSectionItem.create({
+            data: {
+              sectionId: sec.id,
+              badge: item.badge,
+              title: item.title,
+              subtitle: item.subtitle,
+              icon: item.icon,
+              description: item.description,
+              sortOrder: item.sortOrder,
+              isActive: item.isActive,
+            },
+          });
+        }
+      }
+    } catch {
+      // Ignore if DB not ready
+    }
+  }
+
   async getPublicSections() {
     await this.seedIfEmpty();
+    await this.ensureCustomerStoriesItems();
 
     return this.prisma.homepageSection.findMany({
       where: { isVisible: true },
@@ -345,6 +424,7 @@ export class HomepageSectionsService {
 
   async findAll() {
     await this.seedIfEmpty();
+    await this.ensureCustomerStoriesItems();
 
     return this.prisma.homepageSection.findMany({
       include: {
@@ -466,6 +546,132 @@ export class HomepageSectionsService {
 
     return this.prisma.homepageSectionItem.delete({
       where: { id: itemId },
+    });
+  }
+
+  async getTrustStatsAdmin() {
+    await this.seedIfEmpty();
+    await this.ensureCustomerStoriesItems();
+
+    let sec = await this.prisma.homepageSection.findUnique({
+      where: { sectionKey: 'CUSTOMER_STORIES' },
+      include: {
+        items: {
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
+    });
+
+    if (!sec) {
+      sec = await this.prisma.homepageSection.create({
+        data: {
+          sectionKey: 'CUSTOMER_STORIES',
+          title: 'Customer stories',
+          subtitle: 'Real experiences from customers who furnished their spaces with LIVEAZY',
+          badge: 'Verified Reviews',
+          sortOrder: 10,
+          isVisible: true,
+        },
+        include: {
+          items: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      });
+      await this.ensureCustomerStoriesItems();
+      sec = await this.prisma.homepageSection.findUnique({
+        where: { id: sec.id },
+        include: {
+          items: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      });
+    }
+
+    return sec;
+  }
+
+  async saveTrustStats(dto: SaveTrustStatsDto) {
+    globalEtagCache.invalidate('homepage-sections');
+
+    let sec = await this.prisma.homepageSection.findUnique({
+      where: { sectionKey: 'CUSTOMER_STORIES' },
+      include: { items: true },
+    });
+
+    if (!sec) {
+      sec = await this.prisma.homepageSection.create({
+        data: {
+          sectionKey: 'CUSTOMER_STORIES',
+          title: 'Customer stories',
+          subtitle: 'Real experiences from customers who furnished their spaces with LIVEAZY',
+          badge: 'Verified Reviews',
+          sortOrder: 10,
+          isVisible: true,
+        },
+        include: { items: true },
+      });
+    }
+
+    const sectionId = sec.id;
+
+    for (const stat of dto.stats) {
+      if (stat.id) {
+        await this.prisma.homepageSectionItem.update({
+          where: { id: stat.id },
+          data: {
+            title: stat.title,
+            subtitle: stat.subtitle,
+            icon: stat.icon,
+            badge: stat.badge,
+            description: stat.description || 'auto',
+            sortOrder: stat.sortOrder ?? 0,
+            isActive: stat.isActive ?? true,
+          },
+        });
+      } else {
+        const existing = await this.prisma.homepageSectionItem.findFirst({
+          where: { sectionId, badge: stat.badge },
+        });
+
+        if (existing) {
+          await this.prisma.homepageSectionItem.update({
+            where: { id: existing.id },
+            data: {
+              title: stat.title,
+              subtitle: stat.subtitle,
+              icon: stat.icon,
+              badge: stat.badge,
+              description: stat.description || 'auto',
+              sortOrder: stat.sortOrder ?? 0,
+              isActive: stat.isActive ?? true,
+            },
+          });
+        } else {
+          await this.prisma.homepageSectionItem.create({
+            data: {
+              sectionId,
+              title: stat.title,
+              subtitle: stat.subtitle,
+              icon: stat.icon,
+              badge: stat.badge,
+              description: stat.description || 'auto',
+              sortOrder: stat.sortOrder ?? 0,
+              isActive: stat.isActive ?? true,
+            },
+          });
+        }
+      }
+    }
+
+    return this.prisma.homepageSection.findUnique({
+      where: { id: sectionId },
+      include: {
+        items: {
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
     });
   }
 }

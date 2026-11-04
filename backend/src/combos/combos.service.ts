@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
+import { CategorySettingsDto } from './dto/category-settings.dto';
 import { globalEtagCache } from '../common/services/etag-cache.service';
 
 @Injectable()
@@ -172,5 +173,109 @@ export class CombosService {
     return this.prisma.comboOffer.delete({
       where: { id },
     });
+  }
+
+  async getCategorySettings() {
+    try {
+      const sec = await this.prisma.homepageSection.findUnique({
+        where: { sectionKey: 'COMBOS' },
+        include: { items: true },
+      });
+
+      if (sec?.description) {
+        try {
+          const parsed = JSON.parse(sec.description);
+          if (parsed && typeof parsed === 'object') {
+            return {
+              icon: parsed.icon || 'Package',
+              image: parsed.image || null,
+            };
+          }
+        } catch {
+          // Ignore parse error
+        }
+      }
+
+      const item = sec?.items?.[0];
+      return {
+        icon: item?.icon || 'Package',
+        image: item?.image || null,
+      };
+    } catch {
+      return { icon: 'Package', image: null };
+    }
+  }
+
+  async updateCategorySettings(dto: CategorySettingsDto) {
+    globalEtagCache.invalidate('combos');
+    globalEtagCache.invalidate('homepage-sections');
+
+    let sec = await this.prisma.homepageSection.findUnique({
+      where: { sectionKey: 'COMBOS' },
+      include: { items: true },
+    });
+
+    const iconVal = dto.icon ?? 'Package';
+    const imageVal = dto.image ?? null;
+    const descJson = JSON.stringify({ icon: iconVal, image: imageVal });
+
+    if (!sec) {
+      await this.prisma.homepageSection.create({
+        data: {
+          sectionKey: 'COMBOS',
+          title: 'Value Combo Packages',
+          subtitle: 'Carefully curated furniture & appliance packages for every room.',
+          badge: 'Room Combos',
+          sortOrder: 6,
+          isVisible: true,
+          description: descJson,
+          items: {
+            create: [
+              {
+                title: 'Combos',
+                subtitle: 'Value Packages',
+                icon: iconVal,
+                image: imageVal,
+                linkUrl: '#combos',
+                sortOrder: 0,
+                isActive: true,
+              },
+            ],
+          },
+        },
+      });
+    } else {
+      await this.prisma.homepageSection.update({
+        where: { id: sec.id },
+        data: {
+          description: descJson,
+        },
+      });
+
+      if (sec.items && sec.items.length > 0) {
+        await this.prisma.homepageSectionItem.update({
+          where: { id: sec.items[0].id },
+          data: {
+            icon: iconVal,
+            image: imageVal,
+          },
+        });
+      } else {
+        await this.prisma.homepageSectionItem.create({
+          data: {
+            sectionId: sec.id,
+            title: 'Combos',
+            subtitle: 'Value Packages',
+            icon: iconVal,
+            image: imageVal,
+            linkUrl: '#combos',
+            sortOrder: 0,
+            isActive: true,
+          },
+        });
+      }
+    }
+
+    return { icon: iconVal, image: imageVal };
   }
 }

@@ -120,3 +120,42 @@ export class UpdateSectionItemDto {
   @IsOptional()
   isActive?: boolean;
 }
+
+export class TrustStatItemDto {
+  @IsString()
+  @IsOptional()
+  id?: string;
+
+  @IsString()
+  badge: string;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  subtitle?: string;
+
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string; // "auto" | "manual"
+
+  @IsNumber()
+  @IsOptional()
+  sortOrder?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+}
+
+export class SaveTrustStatsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TrustStatItemDto)
+  stats: TrustStatItemDto[];
+}

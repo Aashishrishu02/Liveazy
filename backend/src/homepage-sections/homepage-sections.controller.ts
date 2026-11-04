@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { HomepageSectionsService } from './homepage-sections.service';
 import {
   CreateSectionItemDto,
   ReorderSectionsDto,
+  SaveTrustStatsDto,
   UpdateSectionDto,
   UpdateSectionItemDto,
 } from './dto/sections.dto';
@@ -35,6 +37,19 @@ export class HomepageSectionsController {
   @UseGuards(JwtAuthGuard, AdminEmailGuard)
   findAll() {
     return this.sectionsService.findAll();
+  }
+
+  // Dedicated Trust Statistics endpoints (defined before :key parameter)
+  @Get('trust-stats/admin')
+  @UseGuards(JwtAuthGuard, AdminEmailGuard)
+  getTrustStatsAdmin() {
+    return this.sectionsService.getTrustStatsAdmin();
+  }
+
+  @Put('trust-stats')
+  @UseGuards(JwtAuthGuard, AdminEmailGuard)
+  saveTrustStats(@Body() dto: SaveTrustStatsDto) {
+    return this.sectionsService.saveTrustStats(dto);
   }
 
   @Get(':key')
