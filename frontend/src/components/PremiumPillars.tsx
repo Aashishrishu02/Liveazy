@@ -115,20 +115,20 @@ export const PremiumPillars: React.FC<{ sectionData?: SectionData }> = ({
   return (
     <section aria-label="Quality Standards" className="py-6 sm:py-10">
       <div className="ref-container">
-        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1c1836] to-[#2d2358] p-6 sm:p-10 md:p-12 text-white shadow-xl">
+        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#001F47] via-[#002B62] to-[#007C8A] p-6 sm:p-10 md:p-12 text-white shadow-xl">
           <div className="mx-auto max-w-2xl text-center mb-8 sm:mb-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight">
               {data.title.includes(".") ? (
                 <>
                   {data.title.split(".")[0]}.<br />
-                  <span className="text-[#fb923c]">{data.title.split(".")[1]?.trim()}</span>
+                  <span className="text-[#00A8B5]">{data.title.split(".")[1]?.trim()}</span>
                 </>
               ) : (
                 data.title
               )}
             </h2>
             {data.subtitle && (
-              <p className="mt-3 text-xs sm:text-sm text-[#c4bcdc] leading-relaxed">
+              <p className="mt-3 text-xs sm:text-sm text-[#E6F5F7] leading-relaxed">
                 {data.subtitle}
               </p>
             )}
@@ -143,14 +143,14 @@ export const PremiumPillars: React.FC<{ sectionData?: SectionData }> = ({
                   className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 backdrop-blur-sm transition duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/20 flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#fb923c]/15 text-[#fb923c] mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00A8B5]/15 text-[#00A8B5] mb-4">
                       <Icon size={24} className="stroke-[2.2]" />
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-white mb-2">
                       {p.title}
                     </h3>
                     {p.description && (
-                      <p className="text-xs sm:text-sm text-[#c4bcdc] leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#E6F5F7]/90 leading-relaxed">
                         {p.description}
                       </p>
                     )}

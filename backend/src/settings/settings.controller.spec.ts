@@ -56,6 +56,32 @@ describe('SettingsController', () => {
     expect(mockService.getSocialSettings).toHaveBeenCalled();
   });
 
+  it('should return whatsapp settings from service', async () => {
+    mockService.getWhatsAppSettings.mockResolvedValue({
+      whatsappNumber: '919876543210',
+      whatsappMessage: 'Hi LIVEAZY',
+    });
+
+    const res = await controller.getWhatsAppSettings();
+    expect(res).toEqual({
+      whatsappNumber: '919876543210',
+      whatsappMessage: 'Hi LIVEAZY',
+    });
+    expect(mockService.getWhatsAppSettings).toHaveBeenCalled();
+  });
+
+  it('should delegate whatsapp settings update to service', async () => {
+    const payload = {
+      whatsappNumber: '919876543210',
+      whatsappMessage: 'Hi LIVEAZY',
+    };
+    mockService.updateWhatsAppSettings.mockResolvedValue(payload);
+
+    const res = await controller.updateWhatsAppSettings(payload);
+    expect(res).toEqual(payload);
+    expect(mockService.updateWhatsAppSettings).toHaveBeenCalledWith('919876543210', 'Hi LIVEAZY');
+  });
+
   it('should delegate social settings update to service', async () => {
     const payload = {
       facebookUrl: 'https://facebook.com/liveazy',

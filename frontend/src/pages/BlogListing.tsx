@@ -86,8 +86,8 @@ export default function BlogListing() {
   const categories = [...new Set(blogs.map((blog) => blog.category))];
 
   return (
-    <main className="min-h-screen bg-[#F6F8FD]">
-      <section className="bg-[#0F2942] px-4 py-16 text-white sm:py-20">
+    <main className="min-h-screen bg-[#F4F8FA]">
+      <section className="bg-[#002B62] px-4 py-16 text-white sm:py-20">
         <div className="mx-auto max-w-6xl">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-teal-300">
             The LIVEAZY Journal
@@ -114,7 +114,7 @@ export default function BlogListing() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search articles..."
               aria-label="Search blogs"
-              className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 outline-none focus:border-[#008A90] focus:ring-4 focus:ring-[#008A90]/10"
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 outline-none focus:border-[#007C8A] focus:ring-4 focus:ring-[#007C8A]/10"
             />
           </div>
 
@@ -122,7 +122,7 @@ export default function BlogListing() {
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             aria-label="Filter by category"
-            className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#0F2942] outline-none focus:border-[#008A90]"
+            className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-[#002B62] outline-none focus:border-[#007C8A]"
           >
             <option value="">All categories</option>
             {categories.map((item) => (
@@ -146,7 +146,7 @@ export default function BlogListing() {
           </div>
         ) : blogs.length === 0 ? (
           <div className="rounded-xl bg-white px-6 py-16 text-center">
-            <h2 className="text-xl font-semibold text-[#0F2942]">
+            <h2 className="text-xl font-semibold text-[#002B62]">
               No articles found
             </h2>
             <p className="mt-2 text-sm text-slate-500">
@@ -176,7 +176,7 @@ export default function BlogListing() {
 
                   <div className="p-5">
                     <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                      <span className="rounded-full bg-[#008A90]/10 px-3 py-1 font-semibold text-[#008A90]">
+                      <span className="rounded-full bg-[#007C8A]/10 px-3 py-1 font-semibold text-[#007C8A]">
                         {blog.category}
                       </span>
                       <span className="flex items-center gap-1">
@@ -185,7 +185,7 @@ export default function BlogListing() {
                       </span>
                     </div>
 
-                    <h2 className="line-clamp-2 text-xl font-bold text-[#0F2942] transition group-hover:text-[#008A90]">
+                    <h2 className="line-clamp-2 text-xl font-bold text-[#002B62] transition group-hover:text-[#007C8A]">
                       {blog.title}
                     </h2>
 
@@ -193,7 +193,7 @@ export default function BlogListing() {
                       {blog.excerpt}
                     </p>
 
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#008A90]">
+                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#007C8A]">
                       Read article <ArrowRight size={16} />
                     </span>
                   </div>

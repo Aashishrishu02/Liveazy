@@ -57,7 +57,7 @@ export const CityModal: React.FC<CityModalProps> = ({
         </button>
 
         <div className="mb-4">
-          <div className="flex items-center gap-2 text-[#4a36b3]">
+          <div className="flex items-center gap-2 text-[#007C8A]">
             <MapPin size={22} className="stroke-[2.2]" />
             <h3 id="city-modal-title" className="text-xl font-bold text-gray-900">Select Your City</h3>
           </div>
@@ -73,7 +73,7 @@ export const CityModal: React.FC<CityModalProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search city (e.g. Pune, Bangalore, Mumbai)..."
-            className="w-full rounded-xl border border-gray-200 bg-[#f4f4f5] py-2.5 pl-10 pr-4 text-xs sm:text-sm text-gray-900 outline-none transition focus:border-[#4a36b3] focus:bg-white focus:ring-2 focus:ring-[#4a36b3]/15"
+            className="w-full rounded-xl border border-gray-200 bg-[#f4f4f5] py-2.5 pl-10 pr-4 text-xs sm:text-sm text-gray-900 outline-none transition focus:border-[#007C8A] focus:bg-white focus:ring-2 focus:ring-[#007C8A]/15"
           />
         </div>
 
@@ -90,20 +90,20 @@ export const CityModal: React.FC<CityModalProps> = ({
                 }}
                 className={`flex flex-col items-start justify-between rounded-xl border p-3 text-left transition ${
                   isSelected
-                    ? "border-[#4a36b3] bg-[#f0eaff] text-[#4a36b3] shadow-xs"
-                    : "border-gray-200 bg-white hover:border-[#4a36b3]/50 hover:bg-[#fafbfc]"
+                    ? "border-[#007C8A] bg-[#E6F5F7] text-[#002B62] shadow-xs"
+                    : "border-gray-200 bg-white hover:border-[#007C8A]/50 hover:bg-[#fafbfc]"
                 }`}
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-semibold text-xs sm:text-sm text-gray-900">
                     {c.name}
                   </span>
-                  {isSelected && <Check size={14} className="text-[#4a36b3]" />}
+                  {isSelected && <Check size={14} className="text-[#007C8A]" />}
                 </div>
                 <div className="mt-1 flex w-full items-center justify-between">
                   <span className="text-[10px] text-gray-500">{c.state}</span>
                   {c.badge && (
-                    <span className="rounded-full bg-[#ff6b35]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#ff6b35]">
+                    <span className="rounded-full bg-[#007C8A]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#007C8A]">
                       {c.badge}
                     </span>
                   )}

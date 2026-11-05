@@ -160,23 +160,11 @@ export default function Footer() {
   const normalizedPhone = normalizeWhatsAppNumber(rawPhone);
   const waUrl = normalizedPhone ? `https://wa.me/${normalizedPhone}` : "https://wa.me/917061460429";
 
-  const citiesList = [
-    "Bangalore",
-    "Mumbai",
-    "Delhi",
-    "Gurgaon",
-    "Noida",
-    "Pune",
-    "Hyderabad",
-    "Ghaziabad",
-    "Faridabad",
-  ];
-
   return (
-    <footer className="bg-[#171622] text-[#d1d5db] pt-14 pb-8 text-xs sm:text-[13px] border-t border-[#2a2839]">
+    <footer className="bg-[#001F47] text-[#CBDCE6] pt-14 pb-8 text-xs sm:text-[13px] border-t border-[#002B62]">
       <div className="ref-container">
         {/* Top Columns Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 sm:gap-10 pb-10 border-b border-[#2a2839]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 sm:gap-10 pb-10 border-b border-[#002B62]">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center group">
@@ -358,29 +346,8 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Cities Row */}
-        <div className="py-6 border-b border-[#2a2839] flex flex-col sm:flex-row sm:items-center gap-3 text-xs">
-          <span className="font-bold text-white uppercase tracking-wider shrink-0">
-            Furnishing Homes Across India:
-          </span>
-          <div className="flex flex-wrap gap-2 text-[#9ca3af]">
-            {citiesList.map((city, idx) => (
-              <span key={city} className="flex items-center gap-2">
-                <a
-                  href="/#trending"
-                  onClick={(e) => handleSectionClick(e, "trending")}
-                  className="hover:text-white transition"
-                >
-                  {city}
-                </a>
-                {idx < citiesList.length - 1 && <span className="text-[#36334d]">·</span>}
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* Footer Bottom */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9ca3af]">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#CBDCE6]">
           <div>
             &copy; {new Date().getFullYear()} LIVEAZY Furniture India Pvt. Ltd. All Rights Reserved.
           </div>
@@ -393,7 +360,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#252336] text-gray-300 transition hover:bg-[#4a36b3] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#002B62] text-gray-200 transition hover:bg-[#007C8A] hover:text-white"
               >
                 <FacebookIcon className="h-4 w-4" />
               </a>
@@ -405,7 +372,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#252336] text-gray-300 transition hover:bg-[#e1306c] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#002B62] text-gray-200 transition hover:bg-[#e1306c] hover:text-white"
               >
                 <InstagramIcon className="h-4 w-4" />
               </a>
@@ -417,7 +384,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#252336] text-gray-300 transition hover:bg-[#ff0000] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#002B62] text-gray-200 transition hover:bg-[#ff0000] hover:text-white"
               >
                 <YouTubeIcon className="h-4 w-4" />
               </a>
@@ -429,7 +396,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#252336] text-gray-300 transition hover:bg-[#166634] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#002B62] text-gray-200 transition hover:bg-[#166634] hover:text-white"
               >
                 <MessageCircle size={16} />
               </a>

@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import type { Product } from "../types/rental";
 import { fetchCategoriesDeduplicated } from "../utils/api";
 import { getWishlist, subscribeWishlist, toggleWishlist } from "../utils/wishlist";
+import { fetchConfiguredWhatsAppNumber } from "../utils/whatsappCheckout";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -99,11 +100,20 @@ export default function CategoryProducts() {
     toggleWishlist(product.id);
   };
 
-  const handleRentNow = (product: Product) => {
-    const waUrl = `https://wa.me/919423838109?text=${encodeURIComponent(
-      `Hello LIVEAZY! I would like to rent "${product.name}". Please share booking details.`
-    )}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+  const handleRentNow = async (product: Product) => {
+    try {
+      const num = await fetchConfiguredWhatsAppNumber({ forceFresh: true });
+      const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(
+        `Hello LIVEAZY! I would like to rent "${product.name}". Please share booking details.`
+      )}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      alert(
+        err instanceof Error
+          ? err.message
+          : "WhatsApp checkout is currently unavailable. Please try again."
+      );
+    }
   };
 
   return (
@@ -114,7 +124,7 @@ export default function CategoryProducts() {
         <div className="ref-container pt-6">
           <Link
             to="/#trending"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#4a36b3] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#007C8A] hover:underline"
           >
             <ArrowLeft size={16} /> Back to all products
           </Link>
@@ -138,7 +148,7 @@ export default function CategoryProducts() {
               <p className="mt-2 text-sm text-gray-500">{error}</p>
               <Link
                 to="/#trending"
-                className="mt-5 inline-flex rounded-xl bg-[#4a36b3] px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#3a27a0]"
+                className="mt-5 inline-flex rounded-xl bg-[#002B62] px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#001F47]"
               >
                 Browse all products
               </Link>
@@ -149,8 +159,8 @@ export default function CategoryProducts() {
         {!loading && !error && category && (
           <>
             <section className="ref-container pb-2 pt-6">
-              <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#1c1836] to-[#2d2358] px-6 py-8 text-white sm:px-10 sm:py-10 shadow-md">
-                <span className="rounded-full bg-[#fb923c]/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#fb923c]">
+              <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#001F47] via-[#002B62] to-[#007C8A] px-6 py-8 text-white sm:px-10 sm:py-10 shadow-md">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#E6F5F7]">
                   Category Collection
                 </span>
 
@@ -158,7 +168,7 @@ export default function CategoryProducts() {
                   {category.name}
                 </h1>
 
-                <p className="mt-2.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#c4bcdc]">
+                <p className="mt-2.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#E6F5F7]/90">
                   {category.description?.trim() ||
                     `Explore available ${category.name.toLowerCase()} products with flexible rental plans, zero deposit, and free delivery.`}
                 </p>

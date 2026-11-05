@@ -217,7 +217,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B62] leading-tight">
               {categoryTitle}
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-gray-500">
@@ -226,7 +226,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-            <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-xs font-bold text-[#4a36b3]">
+            <span className="rounded-full bg-[#E6F5F7] px-3 py-1 text-xs font-bold text-[#007C8A]">
               {filteredProducts.length} {filteredProducts.length === 1 ? "Product" : "Products"}
             </span>
 
@@ -234,7 +234,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
               aria-label="Sort Products"
-              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 outline-none transition focus:border-[#4a36b3]"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 outline-none transition focus:border-[#007C8A]"
             >
               <option value="popular">Sort: Popular</option>
               <option value="price-asc">Price: Low to High</option>
@@ -245,7 +245,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
             <button
               type="button"
               onClick={() => onSelectCategory("all")}
-              className="flex items-center gap-1 text-xs font-semibold text-[#4a36b3] hover:underline"
+              className="flex items-center gap-1 text-xs font-semibold text-[#007C8A] hover:underline"
             >
               View All <ChevronRight size={14} />
             </button>
@@ -259,8 +259,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
             onClick={() => onSelectCategory("all")}
             className={`shrink-0 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition border ${
               selectedCategory.toLowerCase() === "all"
-                ? "border-[#4a36b3] bg-[#4a36b3] text-white shadow-md shadow-[#4a36b3]/25"
-                : "border-gray-200 bg-white text-gray-700 hover:border-[#4a36b3] hover:bg-[#f0eaff] hover:text-[#4a36b3]"
+                ? "border-[#002B62] bg-[#002B62] text-white shadow-md shadow-[#002B62]/20"
+                : "border-gray-200 bg-white text-gray-700 hover:border-[#007C8A] hover:bg-[#E6F5F7] hover:text-[#002B62]"
             }`}
           >
             All
@@ -277,8 +277,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                 onClick={() => onSelectCategory(cat.id)}
                 className={`shrink-0 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition border ${
                   isActive
-                    ? "border-[#4a36b3] bg-[#4a36b3] text-white shadow-md shadow-[#4a36b3]/25"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-[#4a36b3] hover:bg-[#f0eaff] hover:text-[#4a36b3]"
+                    ? "border-[#002B62] bg-[#002B62] text-white shadow-md shadow-[#002B62]/20"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-[#007C8A] hover:bg-[#E6F5F7] hover:text-[#002B62]"
                 }`}
               >
                 {cat.name}
@@ -325,7 +325,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
             <button
               type="button"
               onClick={() => onSelectCategory("all")}
-              className="mt-4 rounded-xl bg-[#4a36b3] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#3a27a0]"
+              className="mt-4 rounded-xl bg-[#002B62] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#001F47]"
             >
               Reset to All Products
             </button>

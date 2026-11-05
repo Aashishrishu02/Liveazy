@@ -86,10 +86,10 @@ export const RentalGuideSection: React.FC<{ sectionData?: SectionData }> = ({
   const activeMedia = data.items.filter((it) => it.isActive !== false);
 
   return (
-    <section aria-label="Rental Guide & Media" className="py-10 sm:py-14 bg-[#f8f7fb] border-t border-gray-200">
+    <section aria-label="Rental Guide & Media" className="py-10 sm:py-14 bg-[#F8FBFC] border-t border-[#EBF2FA]">
       <div className="ref-container">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-xs">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+        <div className="rounded-2xl border border-[#EBF2FA] bg-white p-6 sm:p-8 shadow-xs">
+          <h2 className="text-lg sm:text-xl font-bold text-[#002B62] mb-3">
             {data.title}
           </h2>
 
@@ -133,7 +133,7 @@ export const RentalGuideSection: React.FC<{ sectionData?: SectionData }> = ({
           <button
             type="button"
             onClick={() => setExpanded((prev) => !prev)}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#4a36b3] hover:underline"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#007C8A] hover:underline"
           >
             <span>{expanded ? "Read Less" : "Read More"}</span>
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

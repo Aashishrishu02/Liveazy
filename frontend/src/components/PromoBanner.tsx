@@ -98,10 +98,10 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
   return (
     <section aria-label="Promotional Showcase" className="py-8 sm:py-12">
       <div className="ref-container">
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#1c1836] via-[#2d2358] to-[#3a27a0] p-6 sm:p-10 md:p-12 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#002B62] via-[#001F47] to-[#007C8A] p-6 sm:p-10 md:p-12 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="max-w-xl z-10">
             {banner.label && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fb923c]/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#fb923c] mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#00C2CB] mb-3">
                 <Sparkles size={13} />
                 {banner.label}
               </span>
@@ -111,7 +111,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
               {banner.heading || "Make Your Space Feel Like Home"}
             </h2>
 
-            <p className="mt-3 text-xs sm:text-sm text-[#c4bcdc] leading-relaxed">
+            <p className="mt-3 text-xs sm:text-sm text-[#E1ECF2] leading-relaxed">
               {banner.subtitle ||
                 "Enjoy complete freedom and comfort with our flexible monthly furniture rentals."}
             </p>
@@ -119,7 +119,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
             <button
               type="button"
               onClick={handleCta}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#ff6b35] px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#e5531d] hover:scale-105 active:scale-95"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#00A8B5] px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#0095A6] hover:scale-105 active:scale-95"
             >
               <span>{banner.buttonText || "Explore Collection"}</span>
               <ArrowRight size={16} />
@@ -138,8 +138,8 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({ onCtaClick }) => {
           )}
 
           {/* Background decorative glows */}
-          <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-[#4a36b3]/30 blur-3xl pointer-events-none" />
-          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#ff6b35]/20 blur-3xl pointer-events-none" />
+          <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-[#007C8A]/30 blur-3xl pointer-events-none" />
+          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#00A8B5]/20 blur-3xl pointer-events-none" />
         </div>
       </div>
     </section>

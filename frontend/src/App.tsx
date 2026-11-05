@@ -25,8 +25,11 @@ import RentalGuideSection from "./components/RentalGuideSection";
 import Footer from "./components/Footer";
 import QuickViewModal from "./components/QuickViewModal";
 import CartDrawer from "./components/CartDrawer";
+import LoginModal from "./components/LoginModal";
+import { CustomerAuthProvider, useCustomerAuth } from "./context/CustomerAuthContext";
 import type { CartItem, Product } from "./types/rental";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "./utils/api";
+import { proceedToWhatsAppCheckout } from "./utils/whatsappCheckout";
 
 const ProductDetails = lazy(() => import("./components/ProductDetails"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
@@ -245,15 +248,11 @@ function HomePage() {
     );
   };
 
-  const handleCartProceedCheckout = () => {
-    const lines = cartItems.map(
-      (item) => `• ${item.product.name} (${item.selectedTenure}M tenure) x ${item.quantity}`
-    );
-    const message = `Hello LIVEAZY! I would like to book rental for:\n${lines.join(
-      "\n"
-    )}\n\nDelivery City: ${selectedCity}\nPlease share rental booking confirmation!`;
-    const waUrl = `https://wa.me/917061460429?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+  const handleCartProceedCheckout = async () => {
+    const res = await proceedToWhatsAppCheckout(cartItems, selectedCity);
+    if (!res.success && res.error) {
+      alert(res.error);
+    }
   };
 
   const renderSection = (sec: HomepageSectionData) => {
@@ -383,6 +382,7 @@ function HomePage() {
         onRemoveItem={handleRemoveCartItem}
         onUpdateTenure={handleUpdateCartTenure}
         onProceedToCheckout={handleCartProceedCheckout}
+        selectedCity={selectedCity}
       />
     </div>
   );
@@ -413,50 +413,58 @@ function ContactPage() {
   );
 }
 
+function GlobalCustomerLoginModal() {
+  const { isLoginModalOpen, closeLoginModal } = useCustomerAuth();
+  return <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />;
+}
+
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
+    <CustomerAuthProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <GlobalCustomerLoginModal />
 
-      <Suspense fallback={<div className="min-h-screen bg-[#fafbfc]" />}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
+        <Suspense fallback={<div className="min-h-screen bg-[#fafbfc]" />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
 
-          {/* Category-specific product listing */}
-          <Route path="/category/:id" element={<CategoryProducts />} />
+            {/* Category-specific product listing */}
+            <Route path="/category/:id" element={<CategoryProducts />} />
 
-          {/* Existing admin routes (strictly preserved) */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/categories" element={<Categories />} />
-          <Route path="/admin/products" element={<Products />} />
-          <Route path="/admin/banner" element={<Banner />} />
-          <Route path="/admin/settings" element={<WhatsAppSettings />} />
-          <Route path="/admin/social-media" element={<SocialMediaSettings />} />
-          <Route path="/admin/social-settings" element={<SocialMediaSettings />} />
-          <Route path="/admin/promo-banners" element={<PromoBanners />} />
+            {/* Existing admin routes (strictly preserved) */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/categories" element={<Categories />} />
+            <Route path="/admin/products" element={<Products />} />
+            <Route path="/admin/banner" element={<Banner />} />
+            <Route path="/admin/settings" element={<WhatsAppSettings />} />
+            <Route path="/admin/social-media" element={<SocialMediaSettings />} />
+            <Route path="/admin/social-settings" element={<SocialMediaSettings />} />
+            <Route path="/admin/promo-banners" element={<PromoBanners />} />
 
-          <Route
-            path="/admin/contact-management"
-            element={<ContactManagement />}
-          />
+            <Route
+              path="/admin/contact-management"
+              element={<ContactManagement />}
+            />
 
-          <Route path="/admin/feedback" element={<FeedbackMaster />} />
-          <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
-          <Route path="/admin/combos" element={<ComboOffersAdmin />} />
-          <Route path="/admin/deals" element={<DealsAdmin />} />
-          <Route path="/admin/customer-stories" element={<CustomerStoriesAdmin />} />
-          <Route path="/admin/sections" element={<HomepageSectionsAdmin />} />
-          <Route path="/admin/homepage-sections" element={<HomepageSectionsAdmin />} />
-          <Route path="/admin/blogs" element={<Blogs />} />
-          <Route path="/blogs" element={<BlogListing />} />
-          <Route path="/blogs/:slug" element={<BlogDetails />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            <Route path="/admin/feedback" element={<FeedbackMaster />} />
+            <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
+            <Route path="/admin/combos" element={<ComboOffersAdmin />} />
+            <Route path="/admin/deals" element={<DealsAdmin />} />
+            <Route path="/admin/customer-stories" element={<CustomerStoriesAdmin />} />
+            <Route path="/admin/sections" element={<HomepageSectionsAdmin />} />
+            <Route path="/admin/homepage-sections" element={<HomepageSectionsAdmin />} />
+            <Route path="/admin/blogs" element={<Blogs />} />
+            <Route path="/blogs" element={<BlogListing />} />
+            <Route path="/blogs/:slug" element={<BlogDetails />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </CustomerAuthProvider>
   );
 }
 

@@ -1,6 +1,20 @@
-import React from 'react';
-import { X, Trash2, ShieldCheck, Truck, ArrowRight, ShoppingBag } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  X,
+  Trash2,
+  ShieldCheck,
+  Truck,
+  ArrowRight,
+  ShoppingBag,
+  MessageCircle,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react';
 import type { CartItem } from '../types/rental';
+import {
+  fetchConfiguredWhatsAppNumber,
+  proceedToWhatsAppCheckout,
+} from '../utils/whatsappCheckout';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -8,7 +22,8 @@ interface CartDrawerProps {
   cartItems: CartItem[];
   onRemoveItem: (productId: string) => void;
   onUpdateTenure: (productId: string, tenure: number) => void;
-  onProceedToCheckout: () => void;
+  onProceedToCheckout?: () => void;
+  selectedCity?: string;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -18,7 +33,69 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onRemoveItem,
   onUpdateTenure,
   onProceedToCheckout,
+  selectedCity = "Pune",
 }) => {
+  const [whatsappNumber, setWhatsappNumber] = useState<string | null>(null);
+  const [loadingNumber, setLoadingNumber] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadNumber = useCallback(async () => {
+    setLoadingNumber(true);
+    setCheckoutError(null);
+    try {
+      const num = await fetchConfiguredWhatsAppNumber({ forceFresh: true });
+      setWhatsappNumber(num);
+      return num;
+    } catch (err) {
+      setWhatsappNumber(null);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "WhatsApp checkout is currently unavailable. Please try again.";
+      setCheckoutError(msg);
+      return null;
+    } finally {
+      setLoadingNumber(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      void loadNumber();
+    }
+  }, [isOpen, loadNumber]);
+
+  const handleCheckoutClick = async () => {
+    if (loadingNumber || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setCheckoutError(null);
+
+    try {
+      // Re-verify latest WhatsApp number on click to guarantee freshness
+      const num = await fetchConfiguredWhatsAppNumber({ forceFresh: true });
+      setWhatsappNumber(num);
+
+      if (onProceedToCheckout) {
+        onProceedToCheckout();
+      } else {
+        const res = await proceedToWhatsAppCheckout(cartItems, selectedCity);
+        if (!res.success && res.error) {
+          setCheckoutError(res.error);
+        }
+      }
+    } catch (err) {
+      setCheckoutError(
+        err instanceof Error
+          ? err.message
+          : "Unable to connect to WhatsApp. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const totalMonthly = cartItems.reduce((acc, item) => {
@@ -35,7 +112,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           {/* HEADER */}
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A]">
                 <ShoppingBag size={18} />
               </div>
               <div>
@@ -62,7 +139,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 return (
                   <div
                     key={item.product.id}
-                    className="flex gap-4 rounded-2xl border border-gray-100 bg-[#faf9f7] p-3.5"
+                    className="flex gap-4 rounded-2xl border border-gray-100 bg-[#F4F8FA] p-3.5"
                   >
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white">
                       <img
@@ -106,7 +183,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </select>
 
                         <div className="text-right">
-                          <span className="text-xs font-bold text-orange-600">
+                          <span className="text-xs font-bold text-[#007C8A]">
                             ₹{monthlyPrice}/mo
                           </span>
                         </div>
@@ -132,7 +209,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span>₹0 Security Deposit with quick KYC</span>
               </div>
               <div className="flex items-center gap-2">
-                <Truck size={14} className="text-orange-500" />
+                <Truck size={14} className="text-[#007C8A]" />
                 <span>Free doorstep delivery & installation in Pune</span>
               </div>
             </div>
@@ -140,7 +217,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* FOOTER TOTAL & CHECKOUT */}
           {cartItems.length > 0 && (
-            <div className="border-t border-gray-100 bg-[#fbfaf8] p-6 space-y-3">
+            <div className="border-t border-gray-100 bg-[#F4F8FA] p-6 space-y-3">
               <div className="flex items-center justify-between text-xs text-gray-600">
                 <span>Total Monthly Rent</span>
                 <span className="text-lg font-extrabold text-gray-950">
@@ -152,13 +229,42 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span>FREE (₹0)</span>
               </div>
 
+              {checkoutError && (
+                <div className="flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700 animate-in fade-in duration-150">
+                  <AlertCircle size={16} className="shrink-0 text-red-600 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold leading-relaxed">{checkoutError}</p>
+                    <button
+                      type="button"
+                      onClick={() => void loadNumber()}
+                      className="mt-1.5 inline-flex items-center gap-1 font-bold text-red-800 underline hover:text-red-950 cursor-pointer"
+                    >
+                      <RefreshCw size={12} className={loadingNumber ? "animate-spin" : ""} />
+                      <span>Retry Connecting</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="button"
-                onClick={onProceedToCheckout}
-                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-orange-500 py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-orange-500/25 hover:bg-orange-600 transition active:scale-95"
+                disabled={loadingNumber || isSubmitting || (!whatsappNumber && Boolean(checkoutError))}
+                onClick={handleCheckoutClick}
+                title={whatsappNumber ? `Proceed to WhatsApp Checkout (+${whatsappNumber})` : "Proceed to WhatsApp Checkout"}
+                className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#002B62] py-3.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#002B62]/20 hover:bg-[#001F47] transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
-                <span>Proceed to Rental Checkout</span>
-                <ArrowRight size={16} />
+                {loadingNumber || isSubmitting ? (
+                  <>
+                    <RefreshCw size={16} className="animate-spin" />
+                    <span>Connecting to WhatsApp...</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle size={16} />
+                    <span>Proceed to WhatsApp Checkout</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
               </button>
             </div>
           )}

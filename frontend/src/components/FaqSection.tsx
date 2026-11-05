@@ -96,10 +96,10 @@ export const FaqSection: React.FC = () => {
     <section id="faqs" className="scroll-mt-24 py-12 sm:py-16 bg-white border-t border-gray-100">
       <div className="ref-container">
         <div className="mx-auto max-w-xl text-center mb-8 sm:mb-10">
-          <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+          <span className="rounded-full bg-[#E6F5F7] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#007C8A]">
             Got Questions?
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B62] mt-2">
             Frequently Asked Questions
           </h2>
           <p className="mt-1.5 text-xs sm:text-sm text-gray-500">
@@ -124,20 +124,20 @@ export const FaqSection: React.FC = () => {
                   key={faq.id || idx}
                   className={`rounded-2xl border transition duration-200 overflow-hidden ${
                     isOpen
-                      ? "border-[#4a36b3]/40 bg-[#faf9fe] shadow-xs"
+                      ? "border-[#007C8A]/40 bg-[#F4F8FA] shadow-xs"
                       : "border-gray-200 bg-white hover:border-gray-300"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggle(idx)}
-                    className="flex w-full items-center justify-between p-4 sm:p-5 text-left text-xs sm:text-sm font-bold text-gray-900 transition hover:text-[#4a36b3]"
+                    className="flex w-full items-center justify-between p-4 sm:p-5 text-left text-xs sm:text-sm font-bold text-gray-900 transition hover:text-[#007C8A]"
                   >
                     <span className="pr-4">{faq.question}</span>
                     <ChevronDown
                       size={18}
                       className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-[#4a36b3]" : ""
+                        isOpen ? "rotate-180 text-[#007C8A]" : ""
                       }`}
                     />
                   </button>

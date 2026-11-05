@@ -154,22 +154,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     return (
       <section aria-label="Welcome" className="py-3 sm:py-5">
         <div className="ref-container">
-          <div className="rounded-2xl bg-gradient-to-r from-[#1c1836] to-[#2d2358] p-8 sm:p-12 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="rounded-2xl bg-gradient-to-r from-[#002B62] to-[#007C8A] p-8 sm:p-12 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="max-w-xl">
-              <span className="rounded-full bg-[#fb923c]/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#fb923c]">
+              <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#00C2CB]">
                 NO INVESTMENT, JUST COMFORT
               </span>
               <h2 className="mt-3 text-2xl sm:text-4xl font-extrabold leading-tight">
                 Furnish Your Home in Just 2 Days.
               </h2>
-              <p className="mt-2 text-xs sm:text-sm text-[#c4bcdc] leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-[#E1ECF2] leading-relaxed">
                 Delivery, Setup &amp; Support — All Included. Enjoy comfortable living with affordable furniture rentals.
               </p>
             </div>
             <button
               type="button"
               onClick={onExploreClick}
-              className="rounded-xl bg-[#4a36b3] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#3a27a0] shadow-md flex items-center gap-2"
+              className="rounded-xl bg-[#00A8B5] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0095A6] shadow-md flex items-center gap-2"
             >
               <span>Explore Collection</span>
               <ArrowRight size={16} />
@@ -188,7 +188,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="ref-container">
-        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-md bg-[#ede9fe] aspect-[16/8] sm:aspect-[1920/600]">
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-md bg-[#F4F8FA] aspect-[16/8] sm:aspect-[1920/600]">
           {/* Banner Slides */}
           <div
             className="flex h-full w-full transition-transform duration-500 ease-in-out"
@@ -217,7 +217,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous Slide"
-                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#4a36b3] hover:scale-110"
+                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110"
               >
                 <ChevronLeft size={22} className="stroke-[2.5]" />
               </button>
@@ -225,7 +225,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 type="button"
                 onClick={handleNext}
                 aria-label="Next Slide"
-                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#4a36b3] hover:scale-110"
+                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110"
               >
                 <ChevronRight size={22} className="stroke-[2.5]" />
               </button>
@@ -243,7 +243,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   aria-label={`Go to slide ${i + 1}`}
                   className={`h-2.5 rounded-full transition-all duration-300 ${
                     i === activeIndex
-                      ? "w-7 bg-[#4a36b3]"
+                      ? "w-7 bg-[#007C8A]"
                       : "w-2.5 bg-white/70 hover:bg-white"
                   }`}
                 />

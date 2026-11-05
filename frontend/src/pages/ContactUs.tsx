@@ -382,7 +382,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
   const displayFaqs = faqUsingFallback ? FALLBACK_FAQS : faqs;
 
   return (
-    <div className="min-h-screen bg-[#F6F8FF] font-sans text-[#0F2942]">
+    <div className="min-h-screen bg-[#F4F8FA] font-sans text-[#002B62]">
       <Navbar onSearchSubmit={onSearchSubmit ?? (() => undefined)} />
 
       <main>
@@ -390,22 +390,22 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
           {/* Breadcrumb */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-500 sm:text-xs">
             <p>
-              <a href="/" className="hover:text-[#008A90]">Home</a>
+              <a href="/" className="hover:text-[#007C8A]">Home</a>
               <span className="mx-2">/</span>
-              <span className="font-semibold text-[#0F2942]">Contact Us</span>
+              <span className="font-semibold text-[#002B62]">Contact Us</span>
             </p>
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-medium shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-[#008A90]" />
+              <span className="h-2 w-2 rounded-full bg-[#007C8A]" />
               LIVEAZY Concierge · Support enquiries welcome
             </span>
           </div>
 
           {/* Dynamic page heading */}
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#DDEBFF] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#315D9B]">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F5F7] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#007C8A]">
               <Headphones size={13} /> LIVEAZY Concierge &amp; Support
             </span>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-[#071D33] sm:text-4xl lg:text-5xl">
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-[#001F47] sm:text-4xl lg:text-5xl">
               {settings.pageTitle}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -416,44 +416,44 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
           {/* Contact channel cards */}
           <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5EEFF] text-[#315D9B]"><Mail size={18} /></div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A]"><Mail size={18} /></div>
               <p className="mt-3 text-[9px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Email assistance</p>
-              <p className="mt-1 break-words text-sm font-bold text-[#0F2942]">{settings.supportEmail}</p>
+              <p className="mt-1 break-words text-sm font-bold text-[#002B62]">{settings.supportEmail}</p>
               <p className="mt-1 min-h-10 text-[11px] leading-5 text-slate-500">Send your questions to our support inbox.</p>
-              <a href={`mailto:${settings.supportEmail}`} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#008A90] hover:underline">Send Email <ArrowRight size={13} /></a>
+              <a href={`mailto:${settings.supportEmail}`} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#007C8A] hover:underline">Send Email <ArrowRight size={13} /></a>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5EEFF] text-[#315D9B]"><Phone size={18} /></div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A]"><Phone size={18} /></div>
               <p className="mt-3 text-[9px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Dedicated hotline</p>
-              <p className="mt-1 text-sm font-bold text-[#0F2942]">{formatPhone(settings.supportPhone)}</p>
+              <p className="mt-1 text-sm font-bold text-[#002B62]">{formatPhone(settings.supportPhone)}</p>
               <p className="mt-1 min-h-10 text-[11px] leading-5 text-slate-500">Call our team to discuss your rental enquiry.</p>
-              <a href={phoneDigits ? `tel:+${phoneDigits}` : undefined} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#008A90] hover:underline">Call Now <ArrowRight size={13} /></a>
+              <a href={phoneDigits ? `tel:+${phoneDigits}` : undefined} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#007C8A] hover:underline">Call Now <ArrowRight size={13} /></a>
               <p className="mt-2 text-[10px] leading-4 text-slate-400">{settings.supportHours}</p>
             </div>
 
             <div className="rounded-2xl border border-[#A8EEEE] bg-[#E8FBFB] p-4 shadow-sm">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#42DADA] text-[#064E55]"><MessageCircle size={18} /></div>
-              <p className="mt-3 text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#008A90]">WhatsApp concierge</p>
-              <p className="mt-1 text-sm font-bold text-[#0F2942]">Live Desk Chat</p>
+              <p className="mt-3 text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#007C8A]">WhatsApp concierge</p>
+              <p className="mt-1 text-sm font-bold text-[#002B62]">Live Desk Chat</p>
               <p className="mt-1 min-h-10 text-[11px] leading-5 text-slate-600">Get help with product details, rental plans, and availability.</p>
-              <button type="button" onClick={openGeneralWhatsApp} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#006F73] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#005B5E]"><MessageCircle size={14} /> Open WhatsApp Chat</button>
+              <button type="button" onClick={openGeneralWhatsApp} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#007C8A] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#006773]"><MessageCircle size={14} /> Open WhatsApp Chat</button>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5EEFF] text-[#315D9B]"><MapPin size={18} /></div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A]"><MapPin size={18} /></div>
               <p className="mt-3 text-[9px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Service locations</p>
-              <p className="mt-1 text-sm font-bold text-[#0F2942]">{settings.serviceLocations}</p>
+              <p className="mt-1 text-sm font-bold text-[#002B62]">{settings.serviceLocations}</p>
               <p className="mt-1 min-h-10 text-[11px] leading-5 text-slate-500">Service coverage depends on your location and product.</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#008A90]"><CheckCircle2 size={13} /> Check availability with us</span>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#007C8A]"><CheckCircle2 size={13} /> Check availability with us</span>
             </div>
           </div>
 
           {/* Contact form + live assistance */}
           <div className="mt-8 grid items-start gap-5 lg:grid-cols-[1.08fr_0.92fr]">
             <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-md sm:p-7">
-              <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#008A90]">Direct inquiry form</p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#071D33]">Send Us a Message</h2>
+              <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#007C8A]">Direct inquiry form</p>
+              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#001F47]">Send Us a Message</h2>
               <p className="mt-2 text-xs leading-5 text-slate-500">Submit this form to save your enquiry with our team. You can then choose to continue on WhatsApp too.</p>
 
               {submitError && (
@@ -466,24 +466,24 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
                 <div role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-xs leading-5 text-emerald-800">
                   <p className="font-bold">Enquiry saved successfully</p>
                   <p className="mt-1">{submitSuccess}</p>
-                  <button type="button" onClick={openSavedEnquiryOnWhatsApp} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#006F73] px-3 py-2.5 font-bold text-white transition hover:bg-[#005B5E]">
+                  <button type="button" onClick={openSavedEnquiryOnWhatsApp} className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#007C8A] px-3 py-2.5 font-bold text-white transition hover:bg-[#006773]">
                     <MessageCircle size={14} /> Continue on WhatsApp
                   </button>
                 </div>
               )}
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <label className="block text-xs font-bold text-[#0F2942]">Full Name *
-                  <input value={fullName} onChange={(event) => setFullName(event.target.value)} required maxLength={100} autoComplete="name" placeholder="e.g. Rahul Sharma" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F3F6FF] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#008A90] focus:bg-white" />
+                <label className="block text-xs font-bold text-[#002B62]">Full Name *
+                  <input value={fullName} onChange={(event) => setFullName(event.target.value)} required maxLength={100} autoComplete="name" placeholder="e.g. Rahul Sharma" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F4F8FA] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#007C8A] focus:bg-white" />
                 </label>
-                <label className="block text-xs font-bold text-[#0F2942]">Email Address *
-                  <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={160} autoComplete="email" placeholder="you@example.com" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F3F6FF] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#008A90] focus:bg-white" />
+                <label className="block text-xs font-bold text-[#002B62]">Email Address *
+                  <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={160} autoComplete="email" placeholder="you@example.com" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F4F8FA] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#007C8A] focus:bg-white" />
                 </label>
-                <label className="block text-xs font-bold text-[#0F2942]">Phone Number *
-                  <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} required maxLength={30} autoComplete="tel" placeholder="+91 98765 43210" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F3F6FF] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#008A90] focus:bg-white" />
+                <label className="block text-xs font-bold text-[#002B62]">Phone Number *
+                  <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} required maxLength={30} autoComplete="tel" placeholder="+91 98765 43210" className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F4F8FA] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#007C8A] focus:bg-white" />
                 </label>
-                <label className="block text-xs font-bold text-[#0F2942]">Inquiry Category *
-                  <select value={inquiryCategory} onChange={(event) => setInquiryCategory(event.target.value)} required className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F3F6FF] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#008A90] focus:bg-white">
+                <label className="block text-xs font-bold text-[#002B62]">Inquiry Category *
+                  <select value={inquiryCategory} onChange={(event) => setInquiryCategory(event.target.value)} required className="mt-1.5 w-full rounded-lg border border-slate-200 bg-[#F4F8FA] px-3 py-3 text-xs font-normal outline-none transition focus:border-[#007C8A] focus:bg-white">
                     <option value="" disabled>Select reason for inquiry</option>
                     <option>Product availability</option>
                     <option>Rental tenure and pricing</option>
@@ -493,17 +493,17 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
                     <option>Other</option>
                   </select>
                 </label>
-                <label className="block text-xs font-bold text-[#0F2942] sm:col-span-2">How Can We Help? *
-                  <textarea value={message} onChange={(event) => setMessage(event.target.value)} required minLength={5} maxLength={3000} rows={4} placeholder="Tell us how we can help with your rental, delivery timing, product selection, or configuration..." className="mt-1.5 w-full resize-y rounded-lg border border-slate-200 bg-[#F3F6FF] px-3 py-3 text-xs font-normal leading-5 outline-none transition focus:border-[#008A90] focus:bg-white" />
+                <label className="block text-xs font-bold text-[#002B62] sm:col-span-2">How Can We Help? *
+                  <textarea value={message} onChange={(event) => setMessage(event.target.value)} required minLength={5} maxLength={3000} rows={4} placeholder="Tell us how we can help with your rental, delivery timing, product selection, or configuration..." className="mt-1.5 w-full resize-y rounded-lg border border-slate-200 bg-[#F4F8FA] px-3 py-3 text-xs font-normal leading-5 outline-none transition focus:border-[#007C8A] focus:bg-white" />
                 </label>
               </div>
 
               <label className="mt-4 flex cursor-pointer items-start gap-2 text-[10px] leading-4 text-slate-500">
-                <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 accent-[#008A90]" />
+                <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 accent-[#007C8A]" />
                 <span>I'm happy to be contacted about this enquiry. Submitting this form saves my enquiry with LIVEAZY; WhatsApp is optional.</span>
               </label>
 
-              <button type="submit" disabled={submitting} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#071D33] px-5 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#008A90] disabled:cursor-not-allowed disabled:opacity-60">
+              <button type="submit" disabled={submitting} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#001F47] px-5 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#007C8A] disabled:cursor-not-allowed disabled:opacity-60">
                 <Send size={14} />
                 {submitting ? "Submitting enquiry..." : "Submit Message"}
                 {!submitting && <ArrowRight size={13} />}
@@ -512,7 +512,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
 
             <div className="space-y-4">
               <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md">
-                <div className="relative min-h-[210px] overflow-hidden bg-gradient-to-br from-[#0F2942] via-[#176B75] to-[#42DADA]">
+                <div className="relative min-h-[210px] overflow-hidden bg-gradient-to-br from-[#002B62] via-[#176B75] to-[#42DADA]">
                   <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="Customer support team discussing a request" className="absolute inset-0 h-full w-full object-cover opacity-55" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#061B2D]/90 via-[#061B2D]/15 to-transparent" />
                   <div className="relative flex min-h-[210px] flex-col justify-end p-5 text-white">
@@ -524,28 +524,28 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
                 <div className="p-5">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#008A90]">Live channel</p>
-                      <p className="mt-1 text-base font-extrabold text-[#0F2942]">Chat with us on WhatsApp</p>
+                      <p className="text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#007C8A]">Live channel</p>
+                      <p className="mt-1 text-base font-extrabold text-[#002B62]">Chat with us on WhatsApp</p>
                     </div>
-                    <span className="rounded-full bg-[#E8F7F6] px-2.5 py-1 text-[9px] font-bold text-[#007B80]">Message us</span>
+                    <span className="rounded-full bg-[#E8F7F6] px-2.5 py-1 text-[9px] font-bold text-[#007C8A]">Message us</span>
                   </div>
                   <p className="mt-2 text-xs leading-5 text-slate-500">A quick way to ask about product availability, rental tenure, deposits, or support.</p>
-                  <button type="button" onClick={openGeneralWhatsApp} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#006F73] px-4 py-3 text-xs font-extrabold text-white transition hover:bg-[#005B5E]"><MessageCircle size={15} /> Chat with Us on WhatsApp</button>
+                  <button type="button" onClick={openGeneralWhatsApp} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#007C8A] px-4 py-3 text-xs font-extrabold text-white transition hover:bg-[#006773]"><MessageCircle size={15} /> Chat with Us on WhatsApp</button>
                   <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-[10px] text-slate-500">
-                    <p className="flex items-start gap-2"><ShieldCheck size={13} className="shrink-0 text-[#008A90]" /> Deposit and verification terms can be confirmed before you book.</p>
-                    <p className="flex items-start gap-2"><Truck size={13} className="shrink-0 text-[#008A90]" /> Delivery and assembly schedules depend on location and availability.</p>
-                    <p className="flex items-start gap-2"><CheckCircle2 size={13} className="shrink-0 text-[#008A90]" /> Our team can help you choose a suitable rental plan.</p>
+                    <p className="flex items-start gap-2"><ShieldCheck size={13} className="shrink-0 text-[#007C8A]" /> Deposit and verification terms can be confirmed before you book.</p>
+                    <p className="flex items-start gap-2"><Truck size={13} className="shrink-0 text-[#007C8A]" /> Delivery and assembly schedules depend on location and availability.</p>
+                    <p className="flex items-start gap-2"><CheckCircle2 size={13} className="shrink-0 text-[#007C8A]" /> Our team can help you choose a suitable rental plan.</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-[#D9E7FF] bg-[#EAF1FF] p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#315D9B]"><LifeBuoy size={17} /></div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#007C8A]"><LifeBuoy size={17} /></div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-[#0F2942]">Need a Dedicated Rental Advisor?</h3>
+                    <h3 className="text-sm font-extrabold text-[#002B62]">Need a Dedicated Rental Advisor?</h3>
                     <p className="mt-2 text-xs leading-5 text-slate-600">Tell us your space, preferred products, and rental duration. Our team can help you explore suitable options.</p>
-                    <button type="button" onClick={openGeneralWhatsApp} className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-[#007B80] hover:underline">Ask for an advisor <ChevronRight size={14} /></button>
+                    <button type="button" onClick={openGeneralWhatsApp} className="mt-3 inline-flex items-center gap-1 text-xs font-extrabold text-[#007C8A] hover:underline">Ask for an advisor <ChevronRight size={14} /></button>
                   </div>
                 </div>
               </div>
@@ -556,12 +556,12 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
         {/* FAQs load from the FAQ Master API. */}
         <section
   id="faqs"
-  className="scroll-mt-24 border-y border-[#E4EBFB] bg-[#EEF3FF] py-12 sm:py-16"
+  className="scroll-mt-24 border-y border-[#E4EBFB] bg-[#F4F8FA] py-12 sm:py-16"
 >
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D7E7FF] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#315D9B]"><CheckCircle2 size={12} /> Instant clarity</span>
-              <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-[#071D33] sm:text-3xl">Frequently Asked Questions</h2>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#D7E7FF] px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-[#007C8A]"><CheckCircle2 size={12} /> Instant clarity</span>
+              <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-[#001F47] sm:text-3xl">Frequently Asked Questions</h2>
               <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">Quick answers to common questions about booking, payments, delivery times, and rental tenures.</p>
             </div>
 
@@ -579,8 +579,8 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
                   const Icon = FAQ_ICONS[(faq.iconName ?? "help-circle").toLowerCase()] ?? HelpCircle;
                   return (
                     <article key={faq.id ?? faq.question ?? index} className="rounded-2xl border border-white bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                      <p className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[#008A90]"><Icon size={13} /> {faq.label || "GENERAL"}</p>
-                      <h3 className="mt-3 text-sm font-extrabold leading-5 text-[#0F2942]">{faq.question}</h3>
+                      <p className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.13em] text-[#007C8A]"><Icon size={13} /> {faq.label || "GENERAL"}</p>
+                      <h3 className="mt-3 text-sm font-extrabold leading-5 text-[#002B62]">{faq.question}</h3>
                       <p className="mt-2 text-xs leading-5 text-slate-500">{faq.answer}</p>
                       {faq.foot && <p className="mt-4 border-t border-slate-100 pt-3 text-[10px] font-semibold text-slate-400">{faq.foot}</p>}
                     </article>
@@ -601,7 +601,7 @@ const ContactUs: React.FC<ContactUsProps> = ({ onSearchSubmit }) => {
                   <p className="mt-1 text-[11px] leading-5 text-slate-300">Contact our team for help with rental options, delivery timing, and product details.</p>
                 </div>
               </div>
-              <button type="button" onClick={openGeneralWhatsApp} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#008A90] px-4 py-3 text-xs font-extrabold text-white transition hover:bg-[#00A0A6]"><MessageCircle size={14} /> Live WhatsApp Chat</button>
+              <button type="button" onClick={openGeneralWhatsApp} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#007C8A] px-4 py-3 text-xs font-extrabold text-white transition hover:bg-[#00A0A6]"><MessageCircle size={14} /> Live WhatsApp Chat</button>
             </div>
           </div>
         </section>

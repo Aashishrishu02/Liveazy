@@ -102,20 +102,20 @@ export const TrendingRentals: React.FC<TrendingRentalsProps> = ({
   return (
     <section
       aria-labelledby="trending-rentals-heading"
-      className="border-t border-gray-100 bg-[#f8f7fc] py-10 sm:py-14"
+      className="border-t border-gray-100 bg-[#F4F8FA] py-10 sm:py-14"
     >
       <div className="ref-container">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
-              <Sparkles size={13} className="text-[#4a36b3]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6F5F7] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#007C8A]">
+              <Sparkles size={13} className="text-[#007C8A]" />
               Curated Picks
             </span>
 
             <h2
               id="trending-rentals-heading"
-              className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight"
+              className="mt-2 text-2xl sm:text-3xl font-extrabold text-[#002B62] leading-tight"
             >
               {data.heading || "Trending Rentals in Your City"}
             </h2>
@@ -128,7 +128,7 @@ export const TrendingRentals: React.FC<TrendingRentalsProps> = ({
 
           <a
             href="#trending"
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#4a36b3] hover:underline shrink-0"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#007C8A] hover:underline shrink-0"
           >
             <span>View all products</span>
             <ArrowRight size={16} />

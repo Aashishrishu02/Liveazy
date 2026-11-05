@@ -13,6 +13,10 @@ import {
   subscribeWishlist,
   clearWishlist,
 } from "../utils/wishlist";
+import {
+  proceedToWhatsAppCheckout,
+  fetchConfiguredWhatsAppNumber,
+} from "../utils/whatsappCheckout";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -142,21 +146,26 @@ export default function WishlistPage() {
     );
   };
 
-  const handleCartProceedCheckout = () => {
-    const lines = cartItems.map(
-      (item) => `• ${item.product.name} (${item.selectedTenure}M tenure) x ${item.quantity}`
-    );
-    const message = `Hello LIVEAZY! I would like to book rental for:\n${lines.join(
-      "\n"
-    )}\nPlease share rental booking confirmation!`;
-    const waUrl = `https://wa.me/917061460429?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+  const handleCartProceedCheckout = async () => {
+    const res = await proceedToWhatsAppCheckout(cartItems);
+    if (!res.success && res.error) {
+      alert(res.error);
+    }
   };
 
-  const handleRentNow = (product: Product, tenure = 12) => {
-    const message = `Hello LIVEAZY! I am interested in renting: *${product.name}* (${tenure} Months plan). Please share rental details & delivery schedule!`;
-    const waUrl = `https://wa.me/917061460429?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+  const handleRentNow = async (product: Product, tenure = 12) => {
+    try {
+      const num = await fetchConfiguredWhatsAppNumber({ forceFresh: true });
+      const message = `Hello LIVEAZY! I am interested in renting: *${product.name}* (${tenure} Months plan). Please share rental details & delivery schedule!`;
+      const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      alert(
+        err instanceof Error
+          ? err.message
+          : "WhatsApp checkout is currently unavailable. Please try again."
+      );
+    }
   };
 
   const handleClearAll = () => {
@@ -176,11 +185,11 @@ export default function WishlistPage() {
         <main className="ref-container py-6 sm:py-10">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-gray-500">
-            <Link to="/" className="hover:text-[#0F2942] transition">
+            <Link to="/" className="hover:text-[#002B62] transition">
               Home
             </Link>
             <span>/</span>
-            <span className="font-medium text-[#0F2942]">Wishlist</span>
+            <span className="font-medium text-[#002B62]">Wishlist</span>
           </nav>
 
           {/* Header Row */}
@@ -190,7 +199,7 @@ export default function WishlistPage() {
                 <Heart size={22} className="fill-rose-500 stroke-rose-500" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F2942]">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#002B62]">
                   My Saved Wishlist
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500">
@@ -213,7 +222,7 @@ export default function WishlistPage() {
                 </button>
                 <Link
                   to="/"
-                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-[#0F2942] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163857]"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-[#002B62] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#001F47]"
                 >
                   <Sparkles size={14} />
                   <span>Explore More</span>
@@ -225,7 +234,7 @@ export default function WishlistPage() {
           {/* Content Area */}
           {loading ? (
             <div className="flex min-h-[360px] flex-col items-center justify-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#0F2942] border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-3 border-[#002B62] border-t-transparent" />
               <p className="text-xs font-medium text-gray-500">Loading your saved items...</p>
             </div>
           ) : wishlistIds.length === 0 ? (
@@ -234,7 +243,7 @@ export default function WishlistPage() {
               <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-rose-50 text-rose-400">
                 <Heart size={36} className="stroke-[1.7]" />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#0F2942] mb-2">
+              <h2 className="text-lg sm:text-xl font-bold text-[#002B62] mb-2">
                 Your wishlist is empty
               </h2>
               <p className="text-xs sm:text-sm text-gray-500 leading-relaxed mb-6">
@@ -243,7 +252,7 @@ export default function WishlistPage() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#0F2942] px-6 py-3 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0F2942]/15 transition hover:bg-[#163857] hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#002B62] px-6 py-3 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#002B62]/15 transition hover:bg-[#001F47] hover:scale-[1.02]"
               >
                 <ArrowLeft size={16} />
                 <span>Explore Furniture &amp; Appliances</span>

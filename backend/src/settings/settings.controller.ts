@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Patch,
   UseGuards,
 } from '@nestjs/common';
@@ -35,6 +36,8 @@ export class SettingsController {
 
   // Public: existing WhatsApp settings read endpoint
   @Get('whatsapp')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
   getWhatsAppSettings() {
     return this.settingsService.getWhatsAppSettings();
   }

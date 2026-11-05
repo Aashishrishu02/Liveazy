@@ -140,14 +140,14 @@ export const WhyRent: React.FC<{ sectionData?: SectionData }> = ({
     <section
       id="about"
       aria-label="Why rent with LIVEAZY"
-      className="py-10 sm:py-14 bg-[#f8f7fc] border-t border-gray-100 scroll-mt-24"
+      className="py-10 sm:py-14 bg-[#F4F8FA] border-t border-gray-100 scroll-mt-24"
     >
       <div className="ref-container">
         <div className="mx-auto max-w-xl text-center mb-8 sm:mb-10">
-          <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+          <span className="rounded-full bg-[#E6F5F7] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#007C8A]">
             {data.badge || "Smart Living"}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B62] mt-2">
             {data.title}
           </h2>
           {data.subtitle && (
@@ -163,10 +163,10 @@ export const WhyRent: React.FC<{ sectionData?: SectionData }> = ({
             return (
               <div
                 key={p.id || idx}
-                className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#4a36b3] hover:shadow-md flex flex-col justify-between"
+                className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#007C8A] hover:shadow-md flex flex-col justify-between"
               >
                 <div>
-                  <div className="mx-auto flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#f0eaff] text-[#4a36b3] mb-3">
+                  <div className="mx-auto flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#E6F5F7] text-[#007C8A] mb-3">
                     <Icon size={22} className="stroke-[2.2]" />
                   </div>
                   <h4 className="text-xs sm:text-[13.5px] font-bold text-gray-900 mb-1">

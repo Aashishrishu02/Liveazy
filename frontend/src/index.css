@@ -1,32 +1,83 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #002B62;
+  --color-brand-primary-dark: #001F47;
+  --color-brand-primary-light: #0A3B7C;
+  --color-brand-primary-wash: #EBF2FA;
+
+  --color-brand-secondary: #007C8A;
+  --color-brand-secondary-dark: #006773;
+  --color-brand-secondary-light: #0095A6;
+  --color-brand-secondary-wash: #E6F5F7;
+
+  --color-brand-accent: #00A8B5;
+  --color-brand-accent-bright: #00C2CB;
+  --color-brand-accent-wash: #EDFBFC;
+
+  --color-brand-bg: #F4F8FA;
+  --color-brand-card: #FFFFFF;
+  --color-brand-border: #E1ECF2;
+  --color-brand-border-strong: #CBDCE6;
+
+  --color-brand-text: #0F2942;
+  --color-brand-text-muted: #50667A;
+}
+
 :root {
-  --navy: #4a36b3;
-  --navy-dk: #3a27a0;
-  --navy-lt: #634fd4;
-  --pwash: #f0eaff;
-  --accent: #ff6b35;
-  --accent-dk: #e5531d;
-  --accent-lt: #fff4ed;
+  /* LIVEAZY Centralized Brand Identity System (Source: Official Logo) */
+  --primary: #002B62;
+  --primary-dark: #001F47;
+  --primary-light: #0A3B7C;
+  --primary-wash: #EBF2FA;
 
-  --g900: #18181b;
-  --g800: #27272a;
-  --g700: #3f3f46;
-  --g600: #52525b;
-  --g500: #71717a;
-  --g400: #a1a1aa;
-  --g300: #d4d4d8;
-  --g200: #e4e4e7;
-  --g100: #f4f4f5;
-  --g50: #fafafa;
-  --white: #ffffff;
+  --secondary: #007C8A;
+  --secondary-dark: #006773;
+  --secondary-light: #0095A6;
+  --secondary-wash: #E6F5F7;
 
-  --ok: #166634;
-  --ok-bg: #e8f8f0;
-  --warn: #854d0e;
-  --warn-bg: #fef9c3;
-  --err: #b91c1c;
-  --err-bg: #fee2e2;
+  --accent: #00A8B5;
+  --accent-bright: #00C2CB;
+  --accent-wash: #EDFBFC;
+
+  /* Surfaces & Layout */
+  --bg-page: #F4F8FA;
+  --surface-card: #FFFFFF;
+  --surface-hover: #F0F7FA;
+  --border-color: #E1ECF2;
+  --border-strong: #CBDCE6;
+
+  /* Typography Colors */
+  --text-main: #0F2942;
+  --text-body: #1E3750;
+  --text-muted: #50667A;
+  --text-subtle: #8295A8;
+
+  /* Semantic System Status Colors */
+  --ok: #059669;
+  --ok-bg: #ecfdf5;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --err: #dc2626;
+  --err-bg: #fef2f2;
+
+  /* Backward Compatibility Mapping */
+  --navy: #002B62;
+  --navy-dk: #001F47;
+  --navy-lt: #007C8A;
+  --pwash: #E6F5F7;
+
+  --g900: #0F2942;
+  --g800: #1D354D;
+  --g700: #334D65;
+  --g600: #50667A;
+  --g500: #6B8299;
+  --g400: #93A7BC;
+  --g300: #CBD7E2;
+  --g200: #E1ECF2;
+  --g100: #EDF3F7;
+  --g50: #F6F9FB;
+  --white: #FFFFFF;
 
   --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-secondary: 'Inter', sans-serif;
@@ -36,10 +87,10 @@
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 16px 32px -4px rgba(74, 54, 179, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 43, 98, 0.05);
+  --shadow-md: 0 4px 12px -1px rgba(0, 43, 98, 0.08), 0 2px 4px -2px rgba(0, 43, 98, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 43, 98, 0.12), 0 4px 6px -2px rgba(0, 43, 98, 0.05);
+  --shadow-hover: 0 16px 32px -4px rgba(0, 124, 138, 0.16), 0 6px 12px -2px rgba(0, 43, 98, 0.06);
 
   --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   --container-max: 1280px;

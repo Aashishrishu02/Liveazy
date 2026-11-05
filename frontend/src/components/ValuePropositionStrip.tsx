@@ -106,9 +106,9 @@ export const ValuePropositionStrip: React.FC<{ sectionData?: SectionData }> = ({
             return (
               <div
                 key={item.id || idx}
-                className="flex items-center gap-2.5 sm:gap-3 rounded-xl border border-[#f0ecfa] bg-[#fcfbfe] p-2.5 sm:p-3 transition hover:border-[#4a36b3]/30 hover:bg-[#f0eaff]/40"
+                className="flex items-center gap-2.5 sm:gap-3 rounded-xl border border-[#E1ECF2] bg-[#F4F8FA] p-2.5 sm:p-3 transition hover:border-[#007C8A]/30 hover:bg-[#E6F5F7]/40"
               >
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-[#f0eaff] text-[#4a36b3]">
+                <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-[#E6F5F7] text-[#007C8A]">
                   <Icon size={19} className="stroke-[2.2]" />
                 </div>
                 <div className="min-w-0">

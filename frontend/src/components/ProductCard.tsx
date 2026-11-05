@@ -140,10 +140,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <article
       onClick={handleCardClick}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#d1c8f8] hover:shadow-xl hover:shadow-[#4a36b3]/10 cursor-pointer"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#007C8A]/30 hover:shadow-xl hover:shadow-[#007C8A]/10 cursor-pointer"
     >
       {/* Media / Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f7f6fb]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F4F8FA]">
         {currentImage ? (
           <img
             src={currentImage}
@@ -166,7 +166,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Floating Toast Notification */}
         {shareToast && (
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 rounded-full bg-[#0F2942]/90 px-3 py-1 text-[10px] font-semibold text-white shadow-md backdrop-blur-xs">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 rounded-full bg-[#002B62]/90 px-3 py-1 text-[10px] font-semibold text-white shadow-md backdrop-blur-xs">
             {shareToast}
           </div>
         )}
@@ -203,7 +203,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             aria-label="Share product"
             title="Share product"
             onClick={handleShareClick}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-xs backdrop-blur-xs transition hover:scale-110 hover:bg-white hover:text-[#008A90]"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-xs backdrop-blur-xs transition hover:scale-110 hover:bg-white hover:text-[#007C8A]"
           >
             <Share2 size={14} />
           </button>
@@ -214,7 +214,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {allImages.length > 1 && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF9FD] border-b border-gray-100 overflow-x-auto no-scrollbar"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border-b border-gray-100 overflow-x-auto no-scrollbar"
         >
           {allImages.slice(0, 5).map((imgUrl, idx) => (
             <button
@@ -227,7 +227,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               }}
               className={`relative h-7 w-7 sm:h-8 sm:w-8 shrink-0 overflow-hidden rounded-md border transition ${
                 activeImageIndex === idx
-                  ? "border-[#0F2942] ring-2 ring-[#0F2942]/30 scale-105"
+                  ? "border-[#007C8A] ring-2 ring-[#007C8A]/30 scale-105"
                   : "border-gray-200 opacity-60 hover:opacity-100"
               }`}
             >
@@ -249,7 +249,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Card Body */}
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         {/* Title */}
-        <h3 className="line-clamp-2 h-10 text-[13px] sm:text-[14.5px] font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#4a36b3]">
+        <h3 className="line-clamp-2 h-10 text-[13px] sm:text-[14.5px] font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#007C8A]">
           {productName}
         </h3>
 
@@ -259,7 +259,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <Star size={12} className="fill-amber-400 text-amber-400" />
             <span className="font-bold text-gray-900">4.8</span>
           </div>
-          <span className="text-[11px] text-[#4a36b3] font-medium truncate max-w-[120px]">
+          <span className="text-[11px] text-[#007C8A] font-medium truncate max-w-[120px]">
             {product.category}
           </span>
         </div>
@@ -273,7 +273,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               onClick={(e) => handleTenureClick(e, t)}
               className={`flex-1 rounded py-1 text-center text-[10.5px] font-bold transition ${
                 selectedTenure === t
-                  ? "bg-white text-[#4a36b3] shadow-xs"
+                  ? "bg-white text-[#002B62] shadow-xs"
                   : "text-gray-500 hover:text-gray-800"
               }`}
             >
@@ -311,7 +311,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border transition ${
               justAdded
                 ? "border-emerald-500 bg-emerald-500 text-white"
-                : "border-[#d4c8fa] bg-[#f0eaff] text-[#4a36b3] hover:border-[#4a36b3] hover:bg-[#4a36b3] hover:text-white hover:scale-105"
+                : "border-[#CBDCE6] bg-[#E6F5F7] text-[#002B62] hover:border-[#007C8A] hover:bg-[#007C8A] hover:text-white hover:scale-105"
             }`}
           >
             {justAdded ? (

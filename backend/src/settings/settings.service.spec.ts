@@ -83,6 +83,67 @@ describe('SettingsService', () => {
     });
   });
 
+  describe('getWhatsAppSettings', () => {
+    it('should return saved whatsapp settings', async () => {
+      mockPrisma.siteSetting.findFirst.mockResolvedValue({
+        id: 1,
+        whatsappNumber: '919876543210',
+        whatsappMessage: 'Hi LIVEAZY team!',
+        updatedAt: new Date(),
+      });
+
+      const result = await service.getWhatsAppSettings();
+      expect(result).toEqual({
+        whatsappNumber: '919876543210',
+        whatsappMessage: 'Hi LIVEAZY team!',
+      });
+    });
+
+    it('should create default settings if row does not exist', async () => {
+      mockPrisma.siteSetting.findFirst.mockResolvedValue(null);
+      mockPrisma.siteSetting.create.mockResolvedValue({
+        id: 1,
+        whatsappNumber: '919423838109',
+        whatsappMessage: '',
+        facebookUrl: '',
+        instagramUrl: '',
+        updatedAt: new Date(),
+      });
+
+      const result = await service.getWhatsAppSettings();
+      expect(result).toEqual({
+        whatsappNumber: '919423838109',
+        whatsappMessage: '',
+      });
+    });
+  });
+
+  describe('updateWhatsAppSettings', () => {
+    it('should update valid whatsapp number and message', async () => {
+      mockPrisma.siteSetting.findFirst.mockResolvedValue({ id: 1, whatsappNumber: '919423838109', whatsappMessage: '' });
+      mockPrisma.siteSetting.upsert.mockResolvedValue({
+        id: 1,
+        whatsappNumber: '919123456789',
+        whatsappMessage: 'Hello Liveazy',
+      });
+
+      const result = await service.updateWhatsAppSettings('+91 91234 56789', 'Hello Liveazy');
+      expect(mockPrisma.siteSetting.upsert).toHaveBeenCalledWith({
+        where: { id: 1 },
+        update: {
+          whatsappNumber: '919123456789',
+          whatsappMessage: 'Hello Liveazy',
+        },
+        create: expect.any(Object),
+      });
+
+      expect(result).toEqual({
+        whatsappNumber: '919123456789',
+        whatsappMessage: 'Hello Liveazy',
+      });
+    });
+  });
+
   describe('updateSocialSettings', () => {
     it('should update valid facebook, instagram and whatsapp fields', async () => {
       mockPrisma.siteSetting.findFirst.mockResolvedValue({ id: 1 });

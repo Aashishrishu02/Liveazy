@@ -11,6 +11,7 @@ import {
 import type { Product } from "../types/rental";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 import { isInWishlist, toggleWishlist, subscribeWishlist } from "../utils/wishlist";
+import { fetchConfiguredWhatsAppNumber } from "../utils/whatsappCheckout";
 
 interface ComboPlansProps {
   onQuickView?: (product: Product, defaultTenure?: number) => void;
@@ -62,7 +63,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
   const navigate = useNavigate();
   const [combos, setCombos] = useState<ComboOffer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [siteWhatsApp, setSiteWhatsApp] = useState("917061460429");
+  const [siteWhatsApp, setSiteWhatsApp] = useState<string | null>(null);
   const [tenureState, setTenureState] = useState<Record<string, number>>({});
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
     try {
@@ -89,13 +90,13 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
     async function loadCombos() {
       try {
         setLoading(true);
-        const [combosRes, socialRes] = await Promise.all([
+        const [combosRes, waNum] = await Promise.all([
           fetchJsonDeduplicated<unknown>(`${apiBase}/combos/public`),
-          fetchJsonDeduplicated<{ whatsappNumber?: string }>(`${apiBase}/settings/social`).catch(() => null),
+          fetchConfiguredWhatsAppNumber().catch(() => null),
         ]);
 
-        if (!cancelled && socialRes?.whatsappNumber) {
-          setSiteWhatsApp(socialRes.whatsappNumber.replace(/[^0-9]/g, ""));
+        if (!cancelled && waNum) {
+          setSiteWhatsApp(waNum);
         }
 
         let list: ComboOffer[] = [];
@@ -248,17 +249,27 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
     };
   };
 
-  const handleWhatsAppInquiry = (combo: ComboOffer, tenureMonths: number) => {
-    const pricing = getTenurePricing(combo, tenureMonths);
-    const tenureLabel = tenureMonths === 12 ? "12M+" : `${tenureMonths} Months`;
-    const prods = combo.products.map((p) => `• ${p.product?.name || "Premium Item"}`).join("\n");
+  const handleWhatsAppInquiry = async (combo: ComboOffer, tenureMonths: number) => {
+    try {
+      const num = siteWhatsApp || (await fetchConfiguredWhatsAppNumber({ forceFresh: true }));
+      setSiteWhatsApp(num);
+      const pricing = getTenurePricing(combo, tenureMonths);
+      const tenureLabel = tenureMonths === 12 ? "12M+" : `${tenureMonths} Months`;
+      const prods = combo.products.map((p) => `• ${p.product?.name || "Premium Item"}`).join("\n");
 
-    const message = `Hello LIVEAZY! I am interested in renting the combo plan:\n*${combo.title}*\n• Duration: ${tenureLabel}\n• Monthly Rent: ₹${pricing.specialPrice.toLocaleString()}/mo${
-      pricing.originalPrice > pricing.specialPrice ? ` (Original: ₹${pricing.originalPrice.toLocaleString()})` : ""
-    }\n• Included Items:\n${prods}\n\nPlease share booking availability for my city!`;
+      const message = `Hello LIVEAZY! I am interested in renting the combo plan:\n*${combo.title}*\n• Duration: ${tenureLabel}\n• Monthly Rent: ₹${pricing.specialPrice.toLocaleString()}/mo${
+        pricing.originalPrice > pricing.specialPrice ? ` (Original: ₹${pricing.originalPrice.toLocaleString()})` : ""
+      }\n• Included Items:\n${prods}\n\nPlease share booking availability for my city!`;
 
-    const waUrl = `https://wa.me/${siteWhatsApp}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, "_blank", "noopener,noreferrer");
+      const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      alert(
+        err instanceof Error
+          ? err.message
+          : "WhatsApp inquiry is currently unavailable. Please try again."
+      );
+    }
   };
 
   const handleAddCombo = (combo: ComboOffer, tenureMonths: number) => {
@@ -300,7 +311,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
       { text: "NEW", className: "bg-sky-50 text-sky-700 border border-sky-200/80 font-black" },
       { text: "POPULAR", className: "bg-amber-50 text-amber-800 border border-amber-200/80 font-black" },
       { text: "BEST SELLER", className: "bg-orange-50 text-orange-800 border border-orange-200/80 font-black" },
-      { text: "VALUE COMBO", className: "bg-purple-50 text-purple-700 border border-purple-200/80 font-black" },
+      { text: "VALUE COMBO", className: "bg-[#E6F5F7] text-[#007C8A] border border-[#CBDCE6] font-black" },
     ];
 
     return badgeRotation[index % badgeRotation.length];
@@ -330,7 +341,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
 
           <a
             href="#trending"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#4a36b3] hover:underline shrink-0 group"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#007C8A] hover:underline shrink-0 group"
           >
             <span>See all combos</span>
             <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
@@ -385,7 +396,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
               return (
                 <div
                   key={combo.id}
-                  className="group relative flex flex-col justify-between rounded-3xl border border-gray-100 bg-white p-3 sm:p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-[#4a36b3]/30 hover:shadow-xl hover:shadow-[#4a36b3]/8"
+                  className="group relative flex flex-col justify-between rounded-3xl border border-gray-100 bg-white p-3 sm:p-3.5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-[#007C8A]/30 hover:shadow-xl hover:shadow-[#007C8A]/8"
                 >
                   <div>
                     {/* Top Image Container */}
@@ -435,7 +446,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
                     {/* Middle Info */}
                     <div className="mt-3 space-y-1">
                       <h3
-                        className="text-sm sm:text-[14.5px] font-bold text-gray-900 group-hover:text-[#4a36b3] transition line-clamp-1 leading-snug"
+                        className="text-sm sm:text-[14.5px] font-bold text-gray-900 group-hover:text-[#007C8A] transition line-clamp-1 leading-snug"
                         title={combo.title}
                       >
                         {combo.title}
@@ -456,7 +467,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
                       {/* Included Items Text */}
                       {combo.products && combo.products.length > 0 && (
                         <p
-                          className="text-xs font-semibold text-[#4a36b3] truncate pt-0.5"
+                          className="text-xs font-semibold text-[#007C8A] truncate pt-0.5"
                           title={productNames}
                         >
                           {combo.products.length} items included ({productNames})
@@ -476,7 +487,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
                                 title={`View details for ${p.name}`}
                                 aria-label={`View details for ${p.name}`}
                                 onClick={(e) => handleProductClick(e, p)}
-                                className="group/thumb relative h-9 w-9 rounded-xl border border-gray-200 bg-white p-0.5 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs transition-all duration-200 hover:scale-110 hover:border-[#4a36b3] hover:shadow-md hover:ring-2 hover:ring-[#4a36b3]/20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4a36b3]"
+                                className="group/thumb relative h-9 w-9 rounded-xl border border-gray-200 bg-white p-0.5 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs transition-all duration-200 hover:scale-110 hover:border-[#007C8A] hover:shadow-md hover:ring-2 hover:ring-[#007C8A]/20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#007C8A]"
                               >
                                 {p.image ? (
                                   <img
@@ -508,7 +519,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
                             onClick={() => handleTenureChange(combo.id, t.months)}
                             className={`rounded-lg py-1 text-center text-[11px] transition cursor-pointer ${
                               isSelected
-                                ? "bg-white text-[#4a36b3] font-black shadow-xs"
+                                ? "bg-white text-[#002B62] font-black shadow-xs"
                                 : "text-gray-600 font-semibold hover:text-gray-900"
                             }`}
                           >
@@ -551,7 +562,7 @@ export const ComboPlans: React.FC<ComboPlansProps> = ({ onQuickView, onAddToCart
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition shadow-xs cursor-pointer ${
                           addedComboId === combo.id
                             ? "bg-emerald-600 text-white"
-                            : "bg-[#f0eaff] text-[#4a36b3] hover:bg-[#4a36b3] hover:text-white"
+                            : "bg-[#E6F5F7] text-[#002B62] hover:bg-[#002B62] hover:text-white"
                         }`}
                         title="Book / Add Combo"
                       >

@@ -159,7 +159,7 @@ export default function BlogDetails() {
   if (error || !blog) {
     return (
       <main className="min-h-[50vh] px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold text-[#0F2942]">
+        <h1 className="text-2xl font-bold text-[#002B62]">
           Article not found
         </h1>
 
@@ -169,7 +169,7 @@ export default function BlogDetails() {
 
         <Link
           to="/blogs"
-          className="mt-6 inline-flex rounded-xl bg-[#0F2942] px-5 py-3 font-semibold text-white hover:bg-[#008A90]"
+          className="mt-6 inline-flex rounded-xl bg-[#002B62] px-5 py-3 font-semibold text-white hover:bg-[#007C8A]"
         >
           <ArrowLeft className="mr-2" size={18} />
           Back to Blog
@@ -185,18 +185,18 @@ export default function BlogDetails() {
       <article className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
         <Link
           to="/blogs"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#008A90] hover:underline"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#007C8A] hover:underline"
         >
           <ArrowLeft size={17} />
           All articles
         </Link>
 
         <div className="mt-8">
-          <span className="inline-flex rounded-full bg-[#008A90]/10 px-3 py-1 text-sm font-semibold text-[#008A90]">
+          <span className="inline-flex rounded-full bg-[#007C8A]/10 px-3 py-1 text-sm font-semibold text-[#007C8A]">
             {blog.category}
           </span>
 
-          <h1 className="mt-5 text-3xl font-bold leading-tight text-[#0F2942] sm:text-5xl">
+          <h1 className="mt-5 text-3xl font-bold leading-tight text-[#002B62] sm:text-5xl">
             {blog.title}
           </h1>
 
@@ -246,8 +246,8 @@ export default function BlogDetails() {
           </div>
         )}
 
-        <div className="mt-12 rounded-2xl bg-[#F6F8FD] p-6 sm:p-8">
-          <h2 className="text-xl font-bold text-[#0F2942]">
+        <div className="mt-12 rounded-2xl bg-[#F4F8FA] p-6 sm:p-8">
+          <h2 className="text-xl font-bold text-[#002B62]">
             Explore more from LIVEAZY
           </h2>
 
@@ -257,7 +257,7 @@ export default function BlogDetails() {
 
           <Link
             to="/blogs"
-            className="mt-5 inline-flex items-center gap-2 font-semibold text-[#008A90]"
+            className="mt-5 inline-flex items-center gap-2 font-semibold text-[#007C8A]"
           >
             Explore all articles
             <ArrowLeft className="rotate-180" size={17} />

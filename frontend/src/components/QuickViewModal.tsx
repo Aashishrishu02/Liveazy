@@ -303,7 +303,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                     onClick={() => setActivePhotoIndex(idx)}
                     className={`h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition ${
                       idx === activePhotoIndex
-                        ? "border-[#4a36b3] shadow-xs"
+                        ? "border-[#007C8A] shadow-xs"
                         : "border-gray-200 opacity-70 hover:opacity-100"
                     }`}
                   >
@@ -329,7 +329,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           <div className="flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="rounded-full bg-[#f0eaff] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#4a36b3]">
+                <span className="rounded-full bg-[#E6F5F7] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#007C8A]">
                   {product.category}
                 </span>
                 {product.tag && (
@@ -376,7 +376,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                       onClick={() => setSelectedTenure(t)}
                       className={`rounded-md py-1.5 text-xs font-bold transition ${
                         selectedTenure === t
-                          ? "bg-white text-[#4a36b3] shadow-xs"
+                          ? "bg-white text-[#002B62] shadow-xs"
                           : "text-gray-600 hover:text-gray-900"
                       }`}
                     >
@@ -390,7 +390,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               <div className="mt-4 flex items-baseline justify-between border-t border-dashed border-gray-200 pt-3">
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold text-[#4a36b3]">
+                    <span className="text-2xl font-extrabold text-[#002B62]">
                       ₹{currentRent.toLocaleString("en-IN")}
                     </span>
                     <span className="text-xs font-semibold text-gray-500">/month</span>
@@ -457,7 +457,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white py-2.5 text-xs font-bold text-gray-800 transition hover:border-[#4a36b3] hover:bg-[#f0eaff] hover:text-[#4a36b3]"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white py-2.5 text-xs font-bold text-gray-800 transition hover:border-[#007C8A] hover:bg-[#E6F5F7] hover:text-[#002B62]"
                 >
                   <ShoppingBag size={15} />
                   <span>Add to Cart</span>

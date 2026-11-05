@@ -130,7 +130,7 @@ export class SettingsService {
     };
 
     this.cachedSettings = response;
-    this.cacheExpiresAt = now + 60000;
+    this.cacheExpiresAt = now + 3000;
     return response;
   }
 

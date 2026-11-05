@@ -384,7 +384,7 @@ export const CustomerStories: React.FC = () => {
               const Icon = getStatIcon(st.icon);
               return (
                 <div key={i} className="flex items-center gap-3 sm:gap-4">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#f0eaff] text-[#4a36b3]">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F5F7] text-[#007C8A]">
                     <Icon size={22} className="stroke-[2.2]" />
                   </div>
                   <div>
@@ -404,10 +404,10 @@ export const CustomerStories: React.FC = () => {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+            <span className="rounded-full bg-[#E6F5F7] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#007C8A]">
               {sectionConfig.badge}
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B62] mt-2">
               {sectionConfig.title}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
@@ -418,7 +418,7 @@ export const CustomerStories: React.FC = () => {
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#4a36b3] bg-white px-4 py-2.5 text-xs font-bold text-[#4a36b3] transition hover:bg-[#f0eaff] shadow-xs shrink-0 self-start sm:self-auto"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#007C8A] bg-white px-4 py-2.5 text-xs font-bold text-[#007C8A] transition hover:bg-[#E6F5F7] shadow-xs shrink-0 self-start sm:self-auto"
           >
             <MessageSquarePlus size={16} />
             <span>Write a Review</span>
@@ -444,7 +444,7 @@ export const CustomerStories: React.FC = () => {
             {stories.map((st) => (
               <div
                 key={st.id}
-                className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-xs transition duration-300 hover:-translate-y-1 hover:border-[#4a36b3] hover:shadow-md flex flex-col justify-between"
+                className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-xs transition duration-300 hover:-translate-y-1 hover:border-[#007C8A] hover:shadow-md flex flex-col justify-between"
               >
                 <div>
                   {/* Customer Avatar & Name & City */}
@@ -453,10 +453,10 @@ export const CustomerStories: React.FC = () => {
                       <img
                         src={st.photo}
                         alt={st.customerName}
-                        className="h-10 w-10 rounded-full object-cover border border-[#eee9fa]"
+                        className="h-10 w-10 rounded-full object-cover border border-[#E1ECF2]"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f0eaff] text-xs font-bold text-[#4a36b3]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E6F5F7] text-xs font-bold text-[#007C8A]">
                         {st.customerName.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -500,7 +500,7 @@ export const CustomerStories: React.FC = () => {
                       href={st.videoUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#4a36b3] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#007C8A] hover:underline"
                     >
                       <Video size={13} />
                       <span>Watch Story</span>
@@ -552,7 +552,7 @@ export const CustomerStories: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-900 focus:border-[#4a36b3] focus:outline-hidden"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-900 focus:border-[#007C8A] focus:outline-hidden"
                   />
                 </div>
 
@@ -594,14 +594,14 @@ export const CustomerStories: React.FC = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell us what you rented and how your experience was..."
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-900 focus:border-[#4a36b3] focus:outline-hidden"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-900 focus:border-[#007C8A] focus:outline-hidden"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full rounded-xl bg-[#4a36b3] py-2.5 text-xs font-bold text-white transition hover:bg-[#3d2c96] shadow-sm disabled:opacity-50"
+                  className="w-full rounded-xl bg-[#002B62] py-2.5 text-xs font-bold text-white transition hover:bg-[#001F47] shadow-sm disabled:opacity-50"
                 >
                   {submitting ? "Submitting..." : "Submit Review"}
                 </button>

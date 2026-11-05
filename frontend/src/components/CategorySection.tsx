@@ -221,7 +221,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   return (
     <section
       aria-label="Category Navigation"
-      className="border-b border-gray-100 bg-[#FAF9FD] py-4 sm:py-5"
+      className="border-b border-[#E1ECF2] bg-[#F4F8FA] py-4 sm:py-5"
     >
       <div className="ref-container">
         <div className="flex items-center justify-start gap-5 sm:gap-7 md:gap-8 overflow-x-auto pb-2 px-1 no-scrollbar whitespace-nowrap">
@@ -234,8 +234,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <div
               className={`flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full p-3 transition duration-200 border-2 ${
                 selectedCategory.toLowerCase() === "all"
-                  ? "border-[#4a36b3] bg-[#f0eaff] shadow-md shadow-[#4a36b3]/20 scale-105 text-[#4a36b3]"
-                  : "border-[#ede9fe] bg-white text-[#4a36b3] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#4a36b3] group-hover:shadow-md"
+                  ? "border-[#007C8A] bg-[#E6F5F7] shadow-md shadow-[#007C8A]/20 scale-105 text-[#007C8A]"
+                  : "border-[#E1ECF2] bg-white text-[#007C8A] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#007C8A] group-hover:shadow-md"
               }`}
             >
               <Sparkles size={28} className="stroke-[2.2]" />
@@ -243,8 +243,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <span
               className={`text-xs sm:text-[13px] font-medium whitespace-nowrap transition ${
                 selectedCategory.toLowerCase() === "all"
-                  ? "text-[#4a36b3] font-bold"
-                  : "text-gray-700 group-hover:text-[#4a36b3] group-hover:font-semibold"
+                  ? "text-[#007C8A] font-bold"
+                  : "text-gray-700 group-hover:text-[#007C8A] group-hover:font-semibold"
               }`}
             >
               All Items
@@ -270,8 +270,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   <div
                     className={`relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full overflow-hidden transition duration-200 border-2 bg-white ${
                       isSelected
-                        ? "border-[#4a36b3] ring-2 ring-[#4a36b3]/25 shadow-md shadow-[#4a36b3]/20 scale-105"
-                        : "border-[#ede9fe] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#4a36b3] group-hover:shadow-md"
+                        ? "border-[#007C8A] ring-2 ring-[#007C8A]/25 shadow-md shadow-[#007C8A]/20 scale-105"
+                        : "border-[#E1ECF2] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#007C8A] group-hover:shadow-md"
                     }`}
                   >
                     {hasValidImage ? (
@@ -283,7 +283,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[#4a36b3] bg-[#f8f7fc] p-3">
+                      <div className="flex h-full w-full items-center justify-center text-[#007C8A] bg-[#F4F8FA] p-3">
                         {getCategoryFallbackIcon(item.name)}
                       </div>
                     )}
@@ -291,8 +291,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   <span
                     className={`text-xs sm:text-[13px] font-medium whitespace-nowrap transition max-w-[85px] sm:max-w-[105px] truncate ${
                       isSelected
-                        ? "text-[#4a36b3] font-bold"
-                        : "text-gray-700 group-hover:text-[#4a36b3] group-hover:font-semibold"
+                        ? "text-[#007C8A] font-bold"
+                        : "text-gray-700 group-hover:text-[#007C8A] group-hover:font-semibold"
                     }`}
                     title={item.name}
                   >
@@ -311,8 +311,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <div
               className={`relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full overflow-hidden transition duration-200 border-2 bg-white ${
                 isCombosActive
-                  ? "border-[#4a36b3] ring-2 ring-[#4a36b3]/25 shadow-md shadow-[#4a36b3]/20 scale-105"
-                  : "border-[#ede9fe] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#4a36b3] group-hover:shadow-md"
+                  ? "border-[#007C8A] ring-2 ring-[#007C8A]/25 shadow-md shadow-[#007C8A]/20 scale-105"
+                  : "border-[#E1ECF2] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#007C8A] group-hover:shadow-md"
               }`}
             >
               {combosSettings.image ? (
@@ -323,7 +323,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[#4a36b3] bg-[#f8f7fc] p-3">
+                <div className="flex h-full w-full items-center justify-center text-[#007C8A] bg-[#F4F8FA] p-3">
                   {renderCustomIcon(combosSettings.icon || "Package")}
                 </div>
               )}
@@ -331,8 +331,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <span
               className={`text-xs sm:text-[13px] font-medium whitespace-nowrap transition max-w-[85px] sm:max-w-[105px] truncate ${
                 isCombosActive
-                  ? "text-[#4a36b3] font-bold"
-                  : "text-gray-700 group-hover:text-[#4a36b3] group-hover:font-semibold"
+                  ? "text-[#007C8A] font-bold"
+                  : "text-gray-700 group-hover:text-[#007C8A] group-hover:font-semibold"
               }`}
               title="Combos"
             >
@@ -349,8 +349,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <div
               className={`relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full overflow-hidden transition duration-200 border-2 bg-white ${
                 isDealsActive
-                  ? "border-[#4a36b3] ring-2 ring-[#4a36b3]/25 shadow-md shadow-[#4a36b3]/20 scale-105"
-                  : "border-[#ede9fe] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#4a36b3] group-hover:shadow-md"
+                  ? "border-[#007C8A] ring-2 ring-[#007C8A]/25 shadow-md shadow-[#007C8A]/20 scale-105"
+                  : "border-[#E1ECF2] group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#007C8A] group-hover:shadow-md"
               }`}
             >
               {dealsSettings.image ? (
@@ -361,7 +361,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[#4a36b3] bg-[#f8f7fc] p-3">
+                <div className="flex h-full w-full items-center justify-center text-[#007C8A] bg-[#F4F8FA] p-3">
                   {renderCustomIcon(dealsSettings.icon || "Flame")}
                 </div>
               )}
@@ -369,8 +369,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <span
               className={`text-xs sm:text-[13px] font-medium whitespace-nowrap transition max-w-[85px] sm:max-w-[105px] truncate ${
                 isDealsActive
-                  ? "text-[#4a36b3] font-bold"
-                  : "text-gray-700 group-hover:text-[#4a36b3] group-hover:font-semibold"
+                  ? "text-[#007C8A] font-bold"
+                  : "text-gray-700 group-hover:text-[#007C8A] group-hover:font-semibold"
               }`}
               title="Deals & Offers"
             >

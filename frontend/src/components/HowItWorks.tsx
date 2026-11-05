@@ -140,10 +140,10 @@ export const HowItWorks: React.FC<{ sectionData?: SectionData }> = ({
     >
       <div className="ref-container">
         <div className="mx-auto max-w-xl text-center mb-8 sm:mb-12">
-          <span className="rounded-full bg-[#f0eaff] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4a36b3]">
+          <span className="rounded-full bg-[#E6F5F7] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#007C8A]">
             {data.badge || "Simple Process"}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#002B62] mt-2">
             {data.title}
           </h2>
           {data.subtitle && (
@@ -161,15 +161,15 @@ export const HowItWorks: React.FC<{ sectionData?: SectionData }> = ({
             return (
               <div
                 key={s.id || idx}
-                className="group relative rounded-2xl border border-[#eee9fa] bg-[#faf9fd] p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#4a36b3] hover:bg-white hover:shadow-xl hover:shadow-[#4a36b3]/10 flex flex-col justify-between"
+                className="group relative rounded-2xl border border-[#E1ECF2] bg-[#F4F8FA] p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#007C8A] hover:bg-white hover:shadow-xl hover:shadow-[#007C8A]/10 flex flex-col justify-between"
               >
                 {/* Large Background Step Number */}
-                <span className="absolute right-5 top-5 text-4xl sm:text-5xl font-black text-[#e4ddfa] group-hover:text-[#4a36b3]/15 transition duration-300 select-none">
+                <span className="absolute right-5 top-5 text-4xl sm:text-5xl font-black text-[#CBDCE6] group-hover:text-[#007C8A]/15 transition duration-300 select-none">
                   {stepNumber}
                 </span>
 
                 <div>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#f0eaff] text-[#4a36b3] mb-5 transition duration-300 group-hover:scale-110">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A] mb-5 transition duration-300 group-hover:scale-110">
                     <Icon size={26} className="stroke-[2.2]" />
                   </div>
 

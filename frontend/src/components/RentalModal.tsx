@@ -41,10 +41,10 @@ export const RentalModal: React.FC<RentalModalProps> = ({
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-100 text-orange-600 font-bold text-xs">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E6F5F7] text-[#007C8A] font-bold text-xs">
               <Sparkles size={14} />
             </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#007C8A]">
               Customize Your Rental Plan
             </span>
           </div>
@@ -60,7 +60,7 @@ export const RentalModal: React.FC<RentalModalProps> = ({
         {/* MODAL BODY */}
         <div className="max-h-[75vh] overflow-y-auto p-6 space-y-6">
           {/* PRODUCT SUMMARY */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 rounded-2xl bg-[#faf9f7] border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 rounded-2xl bg-[#F4F8FA] border border-gray-100">
             <div className="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-white border border-gray-200">
               <img
                 src={product.image}
@@ -92,10 +92,10 @@ export const RentalModal: React.FC<RentalModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
-                <Calendar size={14} className="text-orange-500" />
+                <Calendar size={14} className="text-[#007C8A]" />
                 Select Rental Duration
               </label>
-              <span className="text-xs text-orange-600 font-semibold">
+              <span className="text-xs text-[#007C8A] font-semibold">
                 Longer duration = Lower monthly rent
               </span>
             </div>
@@ -112,18 +112,18 @@ export const RentalModal: React.FC<RentalModalProps> = ({
                     onClick={() => setSelectedTenure(t.months)}
                     className={`relative flex flex-col items-center justify-between rounded-2xl p-3 text-center transition-all ${
                       isSelected
-                        ? 'border-2 border-orange-500 bg-orange-50/50 shadow-md ring-2 ring-orange-500/20'
-                        : 'border border-gray-200 bg-white hover:border-orange-300 hover:bg-gray-50'
+                        ? 'border-2 border-[#007C8A] bg-[#E6F5F7] shadow-md ring-2 ring-[#007C8A]/20'
+                        : 'border border-gray-200 bg-white hover:border-[#007C8A]/50 hover:bg-gray-50'
                     }`}
                   >
                     <span className="text-xs font-bold text-gray-800">{t.label}</span>
-                    <span className="mt-2 text-sm font-extrabold text-orange-600">
+                    <span className="mt-2 text-sm font-extrabold text-[#007C8A]">
                       ₹{monthlyPriceForTenure}/mo
                     </span>
                     <span
                       className={`mt-1 rounded-full px-1.5 py-0.5 text-[9px] font-extrabold ${
                         isSelected
-                          ? 'bg-orange-500 text-white'
+                          ? 'bg-[#007C8A] text-white'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -150,20 +150,20 @@ export const RentalModal: React.FC<RentalModalProps> = ({
             </div>
             <div className="flex items-center justify-between text-gray-600">
               <span className="flex items-center gap-1">
-                <Truck size={14} className="text-orange-500" />
+                <Truck size={14} className="text-[#007C8A]" />
                 Delivery & Assembly in Pune
               </span>
               <span className="font-bold text-emerald-600">FREE</span>
             </div>
             <div className="border-t border-gray-200 pt-2 flex items-center justify-between text-sm font-bold text-gray-950">
               <span>First Month Payable:</span>
-              <span className="text-base text-orange-600">₹{discountedMonthly}</span>
+              <span className="text-base text-[#007C8A]">₹{discountedMonthly}</span>
             </div>
           </div>
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="border-t border-gray-100 bg-[#fbfaf8] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="border-t border-gray-100 bg-[#F4F8FA] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-center sm:text-left">
             <p className="text-[11px] text-gray-400">Lock-in tenure: {selectedTenure} months</p>
             <p className="text-xs font-semibold text-gray-700">Cancel or upgrade after tenure anytime</p>
@@ -172,7 +172,7 @@ export const RentalModal: React.FC<RentalModalProps> = ({
           <button
             type="button"
             onClick={handleConfirm}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-[#002B62] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#002B62]/20 transition hover:bg-[#001F47] active:scale-95"
           >
             <span>Add to Rental Cart</span>
             <ArrowRight size={16} />

@@ -839,7 +839,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
           <div>
 
-            <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#4a36b3] sm:text-sm">
+            <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#007C8A] sm:text-sm">
 
               <Sparkles size={16} />
 
@@ -847,7 +847,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
             </p>
 
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#1c1836] sm:text-4xl">
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#002B62] sm:text-4xl">
 
               {activeCategory === "All"
 
@@ -867,9 +867,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
           </div>
 
-          <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#1c1836]">
+          <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#002B62]">
 
-            <PackageOpen size={17} className="text-[#4a36b3]" />
+            <PackageOpen size={17} className="text-[#007C8A]" />
 
             {loading ? "Loading..." : `${filteredProducts.length} products`}
 
@@ -879,17 +879,17 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
         {searchFilter && (
 
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4a36b3]/15 bg-white px-4 py-4 sm:px-5">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#007C8A]/15 bg-white px-4 py-4 sm:px-5">
 
             <div className="flex items-center gap-3">
 
-              <Search size={18} className="text-[#4a36b3]" />
+              <Search size={18} className="text-[#007C8A]" />
 
               <p className="text-sm text-slate-600">
 
                 Results for{" "}
 
-                <span className="font-bold text-[#1c1836]">
+                <span className="font-bold text-[#002B62]">
 
                   "{searchFilter}"
 
@@ -907,7 +907,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                 onClick={onClearSearch}
 
-                className="text-sm font-bold text-[#4a36b3] hover:underline"
+                className="text-sm font-bold text-[#007C8A] hover:underline"
 
               >
 
@@ -959,9 +959,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
               <div className="mb-4 flex items-center justify-between gap-2">
 
-                <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#1c1836]">
+                <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#002B62]">
 
-                  <Filter size={16} className="text-[#4a36b3]" /> Filters
+                  <Filter size={16} className="text-[#007C8A]" /> Filters
 
                 </h3>
 
@@ -971,7 +971,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   onClick={clearAllFilters}
 
-                  className="text-[11px] font-bold text-[#4a36b3] hover:underline"
+                  className="text-[11px] font-bold text-[#007C8A] hover:underline"
 
                 >
 
@@ -997,7 +997,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                     onClick={() => handleSelectCategory("All")}
 
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${activeCategory === "All" ? "bg-[#f0eaff] font-bold text-[#007B80]" : "text-slate-600 hover:bg-slate-50"}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${activeCategory === "All" ? "bg-[#E6F5F7] font-bold text-[#007B80]" : "text-slate-600 hover:bg-slate-50"}`}
 
                   >
 
@@ -1015,7 +1015,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                       onClick={() => handleSelectCategory(category)}
 
-                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${activeCategory === category ? "bg-[#f0eaff] font-bold text-[#007B80]" : "text-slate-600 hover:bg-slate-50"}`}
+                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${activeCategory === category ? "bg-[#E6F5F7] font-bold text-[#007B80]" : "text-slate-600 hover:bg-slate-50"}`}
 
                     >
 
@@ -1067,7 +1067,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         onChange={() => setBudgetFilter(value)}
 
-                        className="accent-[#4a36b3]"
+                        className="accent-[#007C8A]"
 
                       />
 
@@ -1115,7 +1115,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         onChange={() => setTenureFilter(value)}
 
-                        className="accent-[#4a36b3]"
+                        className="accent-[#007C8A]"
 
                       />
 
@@ -1137,7 +1137,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                 <p className="text-xs text-slate-500 sm:text-sm">
 
-                  Showing <strong className="text-[#1c1836]">{filteredProducts.length}</strong> of {backendProducts.length} rental products
+                  Showing <strong className="text-[#002B62]">{filteredProducts.length}</strong> of {backendProducts.length} rental products
 
                 </p>
 
@@ -1151,7 +1151,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                     onChange={(event) => setSortOrder(event.target.value as typeof sortOrder)}
 
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#1c1836] outline-none focus:border-[#4a36b3]"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#002B62] outline-none focus:border-[#007C8A]"
 
                   >
 
@@ -1193,7 +1193,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   key={product.id}
 
-                  className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#4a36b3]/35 hover:shadow-xl hover:shadow-[#1c1836]/[0.07]"
+                  className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#007C8A]/35 hover:shadow-xl hover:shadow-[#002B62]/[0.07]"
 
                 >
 
@@ -1225,7 +1225,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                     )}
 
-                    <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#4a36b3] shadow-sm sm:left-3 sm:top-3 sm:text-[10px]">
+                    <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#007C8A] shadow-sm sm:left-3 sm:top-3 sm:text-[10px]">
 
                       Available
 
@@ -1250,13 +1250,9 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
                       aria-pressed={isWishlisted}
 
                       className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition sm:right-3 sm:top-3 ${
-
                         isWishlisted
-
-                          ? "bg-[#FF6A3D] text-white"
-
-                          : "bg-white/95 text-[#1c1836] hover:bg-[#FF6A3D] hover:text-white"
-
+                          ? "bg-rose-500 text-white"
+                          : "bg-white/95 text-[#002B62] hover:bg-rose-50 hover:text-rose-500"
                       }`}
 
                     >
@@ -1275,13 +1271,13 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   <div className="flex flex-1 flex-col p-3 sm:p-4">
 
-                    <p className="mb-1.5 truncate text-[10px] font-bold uppercase tracking-wider text-[#4a36b3] sm:text-xs">
+                    <p className="mb-1.5 truncate text-[10px] font-bold uppercase tracking-wider text-[#007C8A] sm:text-xs">
 
                       {product.category?.name || "Furniture"}
 
                     </p>
 
-                    <h3 className="line-clamp-2 min-h-10 text-sm font-bold leading-5 text-[#1c1836] transition-colors group-hover:text-[#4a36b3] sm:text-base">
+                    <h3 className="line-clamp-2 min-h-10 text-sm font-bold leading-5 text-[#002B62] transition-colors group-hover:text-[#007C8A] sm:text-base">
 
                       {displayProductName}
 
@@ -1351,11 +1347,11 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                                 selected
 
-                                  ? "border-[#4a36b3] bg-[#4a36b3] text-white"
+                                  ? "border-[#007C8A] bg-[#002B62] text-white"
 
                                   : available
 
-                                  ? "border-slate-200 bg-white text-[#1c1836] hover:border-[#4a36b3] hover:text-[#4a36b3]"
+                                  ? "border-slate-200 bg-white text-[#002B62] hover:border-[#007C8A] hover:text-[#007C8A]"
 
                                   : "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
 
@@ -1387,7 +1383,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                             <div className="mt-1 flex flex-wrap items-baseline gap-x-1">
 
-                              <span className="text-lg font-extrabold text-[#1c1836] sm:text-xl">
+                              <span className="text-lg font-extrabold text-[#002B62] sm:text-xl">
 
                                 {formatPrice(Number(selectedPlan.rent))}
 
@@ -1409,7 +1405,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                               size={14}
 
-                              className="mt-0.5 shrink-0 text-[#4a36b3]"
+                              className="mt-0.5 shrink-0 text-[#007C8A]"
 
                             />
 
@@ -1421,7 +1417,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                               </p>
 
-                              <p className="text-xs font-bold text-[#1c1836]">
+                              <p className="text-xs font-bold text-[#002B62]">
 
                                 {selectedPlan.deposit !== null &&
 
@@ -1469,7 +1465,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`)}
 
-                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-[#1c1836]/15 bg-white px-2 py-2.5 text-[11px] font-bold text-[#1c1836] transition hover:border-[#4a36b3] hover:bg-[#F0F8F8] hover:text-[#4a36b3] sm:text-xs"
+                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-[#002B62]/15 bg-white px-2 py-2.5 text-[11px] font-bold text-[#002B62] transition hover:border-[#007C8A] hover:bg-[#F0F8F8] hover:text-[#007C8A] sm:text-xs"
 
                       >
 
@@ -1495,7 +1491,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         }
 
-                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-[#FF6A3D] px-2 py-2.5 text-[11px] font-bold text-white transition duration-200 hover:bg-[#e9572e] disabled:cursor-not-allowed disabled:opacity-50 sm:text-xs"
+                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-[#00A8B5] px-2 py-2.5 text-[11px] font-bold text-white transition duration-200 hover:bg-[#0095A6] disabled:cursor-not-allowed disabled:opacity-50 sm:text-xs"
 
                       >
 
@@ -1523,11 +1519,11 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F0F8F8]">
 
-                    <Search size={28} className="text-[#4a36b3]" />
+                    <Search size={28} className="text-[#007C8A]" />
 
                   </div>
 
-                  <h3 className="text-lg font-bold text-[#1c1836]">
+                  <h3 className="text-lg font-bold text-[#002B62]">
 
                     No products found
 
@@ -1545,7 +1541,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                     onClick={clearAllFilters}
 
-                    className="mt-5 inline-flex items-center justify-center rounded-xl bg-[#1c1836] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#4a36b3]"
+                    className="mt-5 inline-flex items-center justify-center rounded-xl bg-[#002B62] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#001F47]"
 
                   >
 
