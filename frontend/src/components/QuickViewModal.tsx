@@ -208,11 +208,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="qv-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 sm:p-4 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar rounded-2xl bg-white p-5 sm:p-7 shadow-2xl transition-transform animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar rounded-2xl bg-white p-4 sm:p-7 shadow-2xl transition-transform animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Floating Toast Feedback */}

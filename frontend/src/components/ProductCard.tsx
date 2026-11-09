@@ -247,7 +247,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       )}
 
       {/* Card Body */}
-      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-4">
         {/* Title */}
         <h3 className="line-clamp-2 h-10 text-[13px] sm:text-[14.5px] font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#007C8A]">
           {productName}
@@ -265,13 +265,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Tenure Switcher Pills */}
-        <div className="my-2.5 flex items-center gap-1 rounded-md bg-[#f4f4f5] p-1">
+        <div className="my-2 flex items-center gap-0.5 sm:gap-1 rounded-md bg-[#f4f4f5] p-0.5 sm:p-1">
           {[3, 6, 12].map((t) => (
             <button
               key={t}
               type="button"
               onClick={(e) => handleTenureClick(e, t)}
-              className={`flex-1 rounded py-1 text-center text-[10.5px] font-bold transition ${
+              className={`flex-1 rounded py-1 text-center text-[10px] sm:text-[10.5px] font-bold transition ${
                 selectedTenure === t
                   ? "bg-white text-[#002B62] shadow-xs"
                   : "text-gray-500 hover:text-gray-800"
@@ -286,13 +286,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="mt-auto flex items-center justify-between border-t border-dashed border-gray-100 pt-2.5">
           <div className="min-w-0">
             <div className="flex items-baseline gap-1">
-              <span className="text-base sm:text-lg font-bold text-gray-900">
+              <span className="text-sm sm:text-lg font-bold text-gray-900">
                 ₹{currentRent.toLocaleString("en-IN")}
               </span>
-              <span className="text-[11px] font-medium text-gray-400">/mo</span>
+              <span className="text-[10px] sm:text-[11px] font-medium text-gray-400">/mo</span>
             </div>
             {mrpPrice > currentRent && (
-              <div className="flex items-center gap-1.5 text-[10.5px]">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-[10.5px]">
                 <span className="text-gray-400 line-through">
                   ₹{mrpPrice.toLocaleString("en-IN")}
                 </span>
@@ -308,7 +308,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             type="button"
             onClick={handleAddClick}
             aria-label="Add to cart"
-            className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border transition ${
+            className={`flex h-7.5 w-7.5 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border transition cursor-pointer ${
               justAdded
                 ? "border-emerald-500 bg-emerald-500 text-white"
                 : "border-[#CBDCE6] bg-[#E6F5F7] text-[#002B62] hover:border-[#007C8A] hover:bg-[#007C8A] hover:text-white hover:scale-105"

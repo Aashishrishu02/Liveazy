@@ -5,8 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ProductCard } from "../components/ProductCard";
 import QuickViewModal from "../components/QuickViewModal";
-import CartDrawer from "../components/CartDrawer";
-import type { CartItem, Product } from "../types/rental";
+import type { Product } from "../types/rental";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "../utils/api";
 import {
   getWishlist,
@@ -14,9 +13,9 @@ import {
   clearWishlist,
 } from "../utils/wishlist";
 import {
-  proceedToWhatsAppCheckout,
   fetchConfiguredWhatsAppNumber,
 } from "../utils/whatsappCheckout";
+import { useCart } from "../context/CartContext";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -26,8 +25,7 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
 
   // Cart and modal state
-  const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { cartCount, openCart, addToCart } = useCart();
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
@@ -120,37 +118,7 @@ export default function WishlistPage() {
   }, [allProducts, wishlistIds]);
 
   const handleAddToCart = (product: Product, tenure: number, quantity = 1) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, selectedTenure: tenure }
-            : item
-        );
-      }
-      return [...prev, { product, selectedTenure: tenure, quantity }];
-    });
-    setCartOpen(true);
-  };
-
-  const handleRemoveCartItem = (productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.product.id !== productId));
-  };
-
-  const handleUpdateCartTenure = (productId: string, tenure: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, selectedTenure: tenure } : item
-      )
-    );
-  };
-
-  const handleCartProceedCheckout = async () => {
-    const res = await proceedToWhatsAppCheckout(cartItems);
-    if (!res.success && res.error) {
-      alert(res.error);
-    }
+    addToCart(product, tenure, quantity);
   };
 
   const handleRentNow = async (product: Product, tenure = 12) => {
@@ -178,8 +146,8 @@ export default function WishlistPage() {
     <div className="min-h-screen bg-[#fafbfc] font-['Poppins',sans-serif] text-[#27272a] antialiased flex flex-col justify-between">
       <div>
         <Navbar
-          cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-          onOpenCart={() => setCartOpen(true)}
+          cartCount={cartCount}
+          onOpenCart={openCart}
         />
 
         <main className="ref-container py-6 sm:py-10">
@@ -260,7 +228,7 @@ export default function WishlistPage() {
             </div>
           ) : (
             /* Wishlist Products Grid */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-5">
               {wishlistedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -287,16 +255,6 @@ export default function WishlistPage() {
         isOpen={quickViewOpen}
         onClose={() => setQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
-      />
-
-      {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cartItems={cartItems}
-        onRemoveItem={handleRemoveCartItem}
-        onUpdateTenure={handleUpdateCartTenure}
-        onProceedToCheckout={handleCartProceedCheckout}
       />
     </div>
   );

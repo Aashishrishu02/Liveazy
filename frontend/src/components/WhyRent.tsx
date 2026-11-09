@@ -157,13 +157,13 @@ export const WhyRent: React.FC<{ sectionData?: SectionData }> = ({
           )}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-4">
           {activePerks.map((p, idx) => {
             const Icon = getPerkIcon(p.icon);
             return (
               <div
                 key={p.id || idx}
-                className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#007C8A] hover:shadow-md flex flex-col justify-between"
+                className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#007C8A] hover:shadow-md flex flex-col justify-between"
               >
                 <div>
                   <div className="mx-auto flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#E6F5F7] text-[#007C8A] mb-3">

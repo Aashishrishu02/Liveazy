@@ -289,7 +289,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
         {/* Loading State */}
         {loading && (
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {[1, 2, 3, 4].map((n) => (
               <div key={n} className="rounded-2xl border border-gray-200 bg-white p-4 animate-pulse">
                 <div className="aspect-[4/3] rounded-xl bg-gray-200 mb-3" />
@@ -302,7 +302,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
         {/* Products Grid */}
         {!loading && filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {filteredProducts.map((p) => (
               <ProductCard
                 key={p.id}

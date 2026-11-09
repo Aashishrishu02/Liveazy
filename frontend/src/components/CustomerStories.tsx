@@ -379,19 +379,19 @@ export const CustomerStories: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-xs mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 rounded-2xl border border-gray-200 bg-white p-3.5 sm:p-7 shadow-xs mb-10">
             {dynamicStats.map((st, i) => {
               const Icon = getStatIcon(st.icon);
               return (
-                <div key={i} className="flex items-center gap-3 sm:gap-4">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F5F7] text-[#007C8A]">
-                    <Icon size={22} className="stroke-[2.2]" />
+                <div key={i} className="flex items-center gap-2.5 sm:gap-4">
+                  <div className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F5F7] text-[#007C8A]">
+                    <Icon className="h-4.5 w-4.5 sm:h-5.5 sm:w-5.5 stroke-[2.2]" />
                   </div>
                   <div>
-                    <div className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight">
+                    <div className="text-base sm:text-2xl font-extrabold text-gray-900 leading-tight">
                       {st.num}
                     </div>
-                    <div className="text-xs text-gray-500 font-medium">
+                    <div className="text-[10px] sm:text-xs text-gray-500 font-medium">
                       {st.label}
                     </div>
                   </div>

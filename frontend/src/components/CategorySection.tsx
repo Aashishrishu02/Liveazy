@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Layers,
+  LayoutGrid,
   Bed,
   Armchair,
   Utensils,
@@ -220,11 +221,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
   return (
     <section
+      id="categories"
       aria-label="Category Navigation"
-      className="border-b border-[#E1ECF2] bg-[#F4F8FA] py-4 sm:py-5"
+      className="border-b border-[#E1ECF2] bg-[#F4F8FA] py-4 sm:py-5 scroll-mt-24"
     >
       <div className="ref-container">
-        <div className="flex items-center justify-start gap-5 sm:gap-7 md:gap-8 overflow-x-auto pb-2 px-1 no-scrollbar whitespace-nowrap">
+        <div className="flex items-center justify-start gap-4 sm:gap-7 md:gap-8 overflow-x-auto pb-2 px-1 no-scrollbar whitespace-nowrap">
           {/* "All Items" Circle Thumbnail */}
           <button
             type="button"
@@ -375,6 +377,25 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               title="Deals & Offers"
             >
               Deals &amp; Offers
+            </span>
+          </button>
+
+          {/* All Categories Circular Thumbnail */}
+          <button
+            type="button"
+            onClick={() => navigate("/categories")}
+            className="group flex flex-col items-center gap-2 text-center shrink-0 min-w-[72px] sm:min-w-[86px] transition cursor-pointer"
+          >
+            <div className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full overflow-hidden transition duration-200 border-2 border-dashed border-[#007C8A]/60 bg-white group-hover:-translate-y-1 group-hover:scale-105 group-hover:border-[#007C8A] group-hover:shadow-md">
+              <div className="flex h-full w-full items-center justify-center text-[#007C8A] bg-[#E6F5F7]/50 group-hover:bg-[#E6F5F7] transition-colors p-3">
+                <LayoutGrid size={24} className="stroke-[2.2]" />
+              </div>
+            </div>
+            <span
+              className="text-xs sm:text-[13px] font-semibold whitespace-nowrap transition text-[#007C8A] group-hover:underline max-w-[85px] sm:max-w-[105px] truncate"
+              title="All Categories"
+            >
+              All Categories
             </span>
           </button>
         </div>

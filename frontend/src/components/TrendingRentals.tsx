@@ -136,7 +136,7 @@ export const TrendingRentals: React.FC<TrendingRentalsProps> = ({
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {mappedProducts.map((product) => (
             <ProductCard
               key={product.id}

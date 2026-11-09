@@ -257,7 +257,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="login-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#001F47]/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#001F47]/60 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-[#E1ECF2] animate-in zoom-in-95 duration-200">
         {/* Top Accent Strip */}
@@ -273,7 +273,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <X size={18} />
         </button>
 
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           {/* Brand Header */}
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center justify-center rounded-2xl bg-[#EBF2FA] p-3 border border-[#CBDCE6] mb-4">
@@ -460,7 +460,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </label>
 
                 {/* 6 Digit Input Boxes */}
-                <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2.5">
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
@@ -475,7 +475,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                       onPaste={handleOtpPaste}
-                      className={`h-12 w-11 sm:h-13 sm:w-12 rounded-xl text-center text-lg sm:text-xl font-black outline-none transition-all border ${
+                      className={`h-11 w-9 sm:h-13 sm:w-12 rounded-xl text-center text-base sm:text-xl font-black outline-none transition-all border ${
                         digit
                           ? "border-[#007C8A] bg-[#E6F5F7] text-[#002B62] shadow-2xs"
                           : "border-[#CBDCE6] bg-[#F4F8FA] text-slate-900 focus:border-[#007C8A] focus:bg-white focus:ring-2 focus:ring-[#007C8A]/20"

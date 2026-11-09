@@ -15,6 +15,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getApiBaseUrl, fetchCategoriesDeduplicated, fetchJsonDeduplicated } from "../utils/api";
 import { getWishlistCount, subscribeWishlist } from "../utils/wishlist";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
+import { useCart } from "../context/CartContext";
 
 interface NavbarProps {
   onSearchSubmit?: (query: string, categoryId?: string) => void;
@@ -41,10 +42,23 @@ export default function Navbar({
   onSearchSubmit,
   selectedCategory = "all",
   onSelectCategory,
-  cartCount = 0,
-  onOpenCart,
+  cartCount: propCartCount,
+  onOpenCart: propOnOpenCart,
 }: NavbarProps) {
   const { user, isAuthenticated, openLoginModal, logout } = useCustomerAuth();
+
+  let ctxCartCount = 0;
+  let ctxOpenCart: (() => void) | undefined;
+  try {
+    const cartCtx = useCart();
+    ctxCartCount = cartCtx.cartCount;
+    ctxOpenCart = cartCtx.openCart;
+  } catch {
+    // Graceful fallback if rendered outside CartProvider
+  }
+
+  const cartCount = propCartCount !== undefined ? propCartCount : ctxCartCount;
+  const onOpenCart = propOnOpenCart || ctxOpenCart;
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -215,7 +229,7 @@ export default function Navbar({
               <img
                 src="/liveazy-logo-cropped.png"
                 alt="LIVEAZY Furniture Rental"
-                className="h-9 sm:h-11 md:h-12 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[250px] object-contain transition group-hover:opacity-95"
+                className="h-8 sm:h-11 md:h-12 w-auto max-w-[135px] sm:max-w-[220px] md:max-w-[250px] object-contain transition group-hover:opacity-95"
               />
             </Link>
 
@@ -239,7 +253,7 @@ export default function Navbar({
             </form>
 
             {/* Header Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* WhatsApp Fast Connect */}
               <a
                 href={whatsappUrl}
@@ -257,7 +271,7 @@ export default function Navbar({
                 to="/wishlist"
                 title="View Saved Wishlist"
                 aria-label="View Saved Wishlist"
-                className="relative flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:border-[#002B62] hover:bg-slate-50 hover:text-[#002B62]"
+                className="relative flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white p-2 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:border-[#002B62] hover:bg-slate-50 hover:text-[#002B62]"
               >
                 <Heart size={18} className="text-[#002B62] stroke-[2]" />
                 <span className="hidden sm:inline">Wishlist</span>
@@ -274,7 +288,7 @@ export default function Navbar({
                 onClick={onOpenCart}
                 title="View Rental Cart"
                 aria-label="View Cart"
-                className="relative flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:border-[#007C8A] hover:bg-[#E6F5F7] hover:text-[#002B62]"
+                className="relative flex items-center gap-1.5 sm:gap-2 rounded-xl border border-gray-200 bg-white p-2 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:border-[#007C8A] hover:bg-[#E6F5F7] hover:text-[#002B62] cursor-pointer"
               >
                 <ShoppingBag size={18} className="stroke-[2]" />
                 <span className="hidden sm:inline">Cart</span>
@@ -353,7 +367,7 @@ export default function Navbar({
                 onClick={() => setMobileMenu((prev) => !prev)}
                 aria-label={mobileMenu ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenu}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition hover:border-[#007C8A] hover:text-[#002B62] md:hidden"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-700 transition hover:border-[#007C8A] hover:text-[#002B62] md:hidden cursor-pointer"
               >
                 {mobileMenu ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -402,6 +416,16 @@ export default function Navbar({
                   </li>
                 );
               })}
+
+              <li className="shrink-0">
+                <Link
+                  to="/categories"
+                  className="flex items-center gap-1 font-bold text-[#007C8A] hover:underline py-1 ml-1"
+                >
+                  <span>All Categories</span>
+                  <ArrowRight size={13} />
+                </Link>
+              </li>
             </ul>
           </div>
         </nav>
@@ -479,6 +503,15 @@ export default function Navbar({
                 <span>All Products</span>
                 <ArrowRight size={14} className="text-gray-400" />
               </button>
+
+              <Link
+                to="/categories"
+                onClick={closeMenu}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs font-bold text-[#007C8A] hover:bg-[#E6F5F7]"
+              >
+                <span>Browse All Categories</span>
+                <ArrowRight size={14} />
+              </Link>
 
               {categories.map((item) => (
                 <button

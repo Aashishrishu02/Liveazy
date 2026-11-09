@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import { fetchJsonDeduplicated } from "../utils/api";
 
 
@@ -658,7 +659,7 @@ export default function ProductDetails() {
 
 
 
-       <main className="mx-auto max-w-[1280px] px-4 pb-12 pt-5 sm:px-6 lg:px-8">
+       <main className="mx-auto max-w-[1280px] px-3 pb-12 pt-5 sm:px-6 lg:px-8">
 
          <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:text-sm">
 
@@ -742,7 +743,7 @@ export default function ProductDetails() {
 
                <div className="space-y-4">
 
-                 <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-5 sm:min-h-[460px] sm:p-8">
+                 <div className="relative flex min-h-[260px] items-center justify-center overflow-hidden rounded-3xl border border-slate-200/70 bg-white p-3.5 sm:min-h-[460px] sm:p-8">
 
                    <div
 
@@ -1020,7 +1021,7 @@ export default function ProductDetails() {
 
                <div className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-sm">
 
-                 <div className="p-5 sm:p-7">
+                 <div className="p-3.5 sm:p-7">
 
                    <p className="text-[11px] font-extrabold uppercase tracking-[0.17em] text-[#007C8A]">
 
@@ -1104,7 +1105,7 @@ export default function ProductDetails() {
 
                      </div>
 
-                     <div className="mt-3 grid grid-cols-3 gap-2">
+                     <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2">
 
                        {plans.map((plan) => {
 
@@ -1124,7 +1125,7 @@ export default function ProductDetails() {
 
                              onClick={() => setSelectedDuration(plan.duration)}
 
-                             className={`rounded-xl border p-3 text-left transition ${
+                             className={`min-w-0 rounded-xl border p-2 text-left transition sm:p-3 ${
 
                                selected
 
@@ -1140,19 +1141,19 @@ export default function ProductDetails() {
 
                            >
 
-                             <span className="block text-xs font-extrabold">
+                             <span className="block truncate text-[11px] font-extrabold sm:text-xs">
 
                                {plan.label}
 
                              </span>
 
-                             <span className="mt-1 block text-sm font-black text-[#002B62]">
+                             <span className="mt-1 block truncate text-xs font-black text-[#002B62] sm:text-sm">
 
                                {available ? formatPrice(Number(plan.rent)) : "N/A"}
 
                              </span>
 
-                             <span className="text-[10px] text-slate-500">per month</span>
+                             <span className="block truncate text-[9px] text-slate-500 sm:text-[10px]">per month</span>
 
                            </button>
 
@@ -1527,6 +1528,8 @@ export default function ProductDetails() {
          )}
 
        </main>
+
+       <Footer />
 
      </div>
 

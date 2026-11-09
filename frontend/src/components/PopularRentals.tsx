@@ -1171,7 +1171,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
               {filteredProducts.length > 0 ? (
 
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-5 xl:grid-cols-4">
 
                   {filteredProducts.map((product) => {
 
@@ -1269,7 +1269,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                   </div>
 
-                  <div className="flex flex-1 flex-col p-3 sm:p-4">
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-4">
 
                     <p className="mb-1.5 truncate text-[10px] font-bold uppercase tracking-wider text-[#007C8A] sm:text-xs">
 
@@ -1457,7 +1457,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="mt-4 grid grid-cols-2 gap-1.5 sm:gap-2">
 
                       <button
 
@@ -1465,7 +1465,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`)}
 
-                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-[#002B62]/15 bg-white px-2 py-2.5 text-[11px] font-bold text-[#002B62] transition hover:border-[#007C8A] hover:bg-[#F0F8F8] hover:text-[#007C8A] sm:text-xs"
+                        className="flex min-h-9 sm:min-h-10 items-center justify-center gap-1 sm:gap-1.5 rounded-xl border border-[#002B62]/15 bg-white px-1.5 sm:px-2 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-[#002B62] transition hover:border-[#007C8A] hover:bg-[#F0F8F8] hover:text-[#007C8A]"
 
                       >
 
@@ -1491,7 +1491,7 @@ const PopularRentals: React.FC<PopularRentalsProps> = ({
 
                         }
 
-                        className="flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-[#00A8B5] px-2 py-2.5 text-[11px] font-bold text-white transition duration-200 hover:bg-[#0095A6] disabled:cursor-not-allowed disabled:opacity-50 sm:text-xs"
+                        className="flex min-h-9 sm:min-h-10 items-center justify-center gap-1 sm:gap-1.5 rounded-xl bg-[#00A8B5] px-1.5 sm:px-2 py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-white transition duration-200 hover:bg-[#0095A6] disabled:cursor-not-allowed disabled:opacity-50"
 
                       >
 

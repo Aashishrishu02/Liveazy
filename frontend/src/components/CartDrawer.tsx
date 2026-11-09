@@ -107,10 +107,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="absolute inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
+      <div className="absolute inset-y-0 right-0 flex max-w-full sm:pl-10">
+        <div className="w-full sm:w-[420px] max-w-full bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300">
           {/* HEADER */}
-          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 sm:px-6 py-4 sm:py-5">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E6F5F7] text-[#007C8A]">
                 <ShoppingBag size={18} />
@@ -123,14 +123,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition cursor-pointer"
             >
               <X size={18} />
             </button>
           </div>
 
           {/* CART ITEMS LIST */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3.5 sm:space-y-4">
             {cartItems.length > 0 ? (
               cartItems.map((item) => {
                 const discount = item.selectedTenure >= 24 ? 0.25 : item.selectedTenure >= 12 ? 0.15 : item.selectedTenure >= 6 ? 0.05 : 0;
@@ -217,7 +217,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* FOOTER TOTAL & CHECKOUT */}
           {cartItems.length > 0 && (
-            <div className="border-t border-gray-100 bg-[#F4F8FA] p-6 space-y-3">
+            <div className="border-t border-gray-100 bg-[#F4F8FA] p-4 sm:p-6 space-y-3">
               <div className="flex items-center justify-between text-xs text-gray-600">
                 <span>Total Monthly Rent</span>
                 <span className="text-lg font-extrabold text-gray-950">

@@ -217,34 +217,34 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous Slide"
-                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110"
+                className="absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110 cursor-pointer"
               >
-                <ChevronLeft size={22} className="stroke-[2.5]" />
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
               </button>
               <button
                 type="button"
                 onClick={handleNext}
                 aria-label="Next Slide"
-                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110"
+                className="absolute right-2 sm:right-5 top-1/2 -translate-y-1/2 flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/85 text-gray-800 shadow-md backdrop-blur-xs transition hover:bg-white hover:text-[#007C8A] hover:scale-110 cursor-pointer"
               >
-                <ChevronRight size={22} className="stroke-[2.5]" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
               </button>
             </>
           )}
 
           {/* Indicator Dots */}
           {banners.length > 1 && (
-            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-10">
               {banners.map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setActiveIndex(i)}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                  className={`h-1.5 sm:h-2.5 rounded-full transition-all duration-300 ${
                     i === activeIndex
-                      ? "w-7 bg-[#007C8A]"
-                      : "w-2.5 bg-white/70 hover:bg-white"
+                      ? "w-5 sm:w-7 bg-[#007C8A]"
+                      : "w-1.5 sm:w-2.5 bg-white/70 hover:bg-white"
                   }`}
                 />
               ))}

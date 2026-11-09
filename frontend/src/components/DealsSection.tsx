@@ -143,7 +143,7 @@ export const DealsSection: React.FC<DealsSectionProps> = () => {
         {loading ? (
           <div className="h-64 rounded-3xl bg-[#E6F5F7]/50 animate-pulse border border-[#EBF2FA]" />
         ) : deal ? (
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001F47] via-[#002B62] to-[#007C8A] p-6 sm:p-10 text-white shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001F47] via-[#002B62] to-[#007C8A] p-4 sm:p-8 text-white shadow-xl">
             {/* Background Glow */}
             <div className="absolute top-0 right-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-[#00A8B5]/20 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-72 w-72 rounded-full bg-[#002B62]/40 blur-3xl pointer-events-none" />
@@ -180,7 +180,7 @@ export const DealsSection: React.FC<DealsSectionProps> = () => {
                 </div>
 
                 {/* Actual Expiry Countdown Clock */}
-                <div className="flex items-center gap-2 sm:gap-3 pt-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
                   <div className="flex items-center gap-1.5 text-xs text-[#E6F5F7] font-bold mr-2">
                     <Clock size={16} className="text-[#00A8B5]" />
                     <span>Ends In:</span>
@@ -291,7 +291,7 @@ export const DealsSection: React.FC<DealsSectionProps> = () => {
             </div>
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001F47] via-[#002B62] to-[#007C8A] p-6 sm:p-10 text-white shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001F47] via-[#002B62] to-[#007C8A] p-4 sm:p-8 text-white shadow-xl">
             <div className="absolute top-0 right-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-[#00A8B5]/20 blur-3xl pointer-events-none" />
             <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
               <div className="space-y-3 max-w-xl text-center lg:text-left">

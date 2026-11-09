@@ -26,13 +26,16 @@ import Footer from "./components/Footer";
 import QuickViewModal from "./components/QuickViewModal";
 import CartDrawer from "./components/CartDrawer";
 import LoginModal from "./components/LoginModal";
+import MobileBottomNav from "./components/MobileBottomNav";
 import { CustomerAuthProvider, useCustomerAuth } from "./context/CustomerAuthContext";
-import type { CartItem, Product } from "./types/rental";
+import { CartProvider, useCart } from "./context/CartContext";
+import type { Product } from "./types/rental";
 import { getApiBaseUrl, fetchJsonDeduplicated } from "./utils/api";
 import { proceedToWhatsAppCheckout } from "./utils/whatsappCheckout";
 
 const ProductDetails = lazy(() => import("./components/ProductDetails"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
+const CategoriesPage = lazy(() => import("./pages/CategoriesPage"));
 const CategoryProducts = lazy(() => import("./pages/CategoryProducts"));
 const BlogListing = lazy(() => import("./pages/BlogListing"));
 const BlogDetails = lazy(() => import("./pages/BlogDetails"));
@@ -118,12 +121,16 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedCity, setSelectedCity] = useState("Pune");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Cart state
-  const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  // Global Cart state & city
+  const {
+    cartCount,
+    openCart,
+    addToCart,
+    selectedCity,
+    setSelectedCity,
+  } = useCart();
 
   // Quick View Modal state
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
@@ -222,37 +229,7 @@ function HomePage() {
   };
 
   const handleAddToCart = (product: Product, tenure: number, quantity = 1) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, selectedTenure: tenure }
-            : item
-        );
-      }
-      return [...prev, { product, selectedTenure: tenure, quantity }];
-    });
-    setCartOpen(true);
-  };
-
-  const handleRemoveCartItem = (productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.product.id !== productId));
-  };
-
-  const handleUpdateCartTenure = (productId: string, tenure: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, selectedTenure: tenure } : item
-      )
-    );
-  };
-
-  const handleCartProceedCheckout = async () => {
-    const res = await proceedToWhatsAppCheckout(cartItems, selectedCity);
-    if (!res.success && res.error) {
-      alert(res.error);
-    }
+    addToCart(product, tenure, quantity);
   };
 
   const renderSection = (sec: HomepageSectionData) => {
@@ -348,8 +325,8 @@ function HomePage() {
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
         onSearchSubmit={handleSearch}
-        cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-        onOpenCart={() => setCartOpen(true)}
+        cartCount={cartCount}
+        onOpenCart={openCart}
       />
 
       {/* 3. Homepage Category Circular Navigation Bar */}
@@ -372,17 +349,6 @@ function HomePage() {
         isOpen={quickViewOpen}
         onClose={() => setQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
-      />
-
-      {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cartItems={cartItems}
-        onRemoveItem={handleRemoveCartItem}
-        onUpdateTenure={handleUpdateCartTenure}
-        onProceedToCheckout={handleCartProceedCheckout}
-        selectedCity={selectedCity}
       />
     </div>
   );
@@ -418,52 +384,95 @@ function GlobalCustomerLoginModal() {
   return <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />;
 }
 
+function GlobalCustomerCartDrawer() {
+  const { isCartOpen, closeCart, cartItems, removeItem, updateTenure, selectedCity } = useCart();
+
+  const handleProceedCheckout = async () => {
+    const res = await proceedToWhatsAppCheckout(cartItems, selectedCity);
+    if (!res.success && res.error) {
+      alert(res.error);
+    }
+  };
+
+  return (
+    <CartDrawer
+      isOpen={isCartOpen}
+      onClose={closeCart}
+      cartItems={cartItems}
+      onRemoveItem={removeItem}
+      onUpdateTenure={updateTenure}
+      onProceedToCheckout={handleProceedCheckout}
+      selectedCity={selectedCity}
+    />
+  );
+}
+
+function CustomerGlobalLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
+
+  return (
+    <div className={isAdmin ? "" : "pb-20 md:pb-0 min-h-screen flex flex-col justify-between"}>
+      <div className="flex-1">
+        {children}
+      </div>
+      {!isAdmin && <MobileBottomNav />}
+      {!isAdmin && <GlobalCustomerCartDrawer />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <CustomerAuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <GlobalCustomerLoginModal />
+      <CartProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <GlobalCustomerLoginModal />
 
-        <Suspense fallback={<div className="min-h-screen bg-[#fafbfc]" />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
+          <CustomerGlobalLayout>
+            <Suspense fallback={<div className="min-h-screen bg-[#fafbfc]" />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
 
-            {/* Category-specific product listing */}
-            <Route path="/category/:id" element={<CategoryProducts />} />
+                {/* Category browsing and product listing */}
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/category/:id" element={<CategoryProducts />} />
 
-            {/* Existing admin routes (strictly preserved) */}
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/categories" element={<Categories />} />
-            <Route path="/admin/products" element={<Products />} />
-            <Route path="/admin/banner" element={<Banner />} />
-            <Route path="/admin/settings" element={<WhatsAppSettings />} />
-            <Route path="/admin/social-media" element={<SocialMediaSettings />} />
-            <Route path="/admin/social-settings" element={<SocialMediaSettings />} />
-            <Route path="/admin/promo-banners" element={<PromoBanners />} />
+                {/* Existing admin routes (strictly preserved) */}
+                <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/categories" element={<Categories />} />
+                <Route path="/admin/products" element={<Products />} />
+                <Route path="/admin/banner" element={<Banner />} />
+                <Route path="/admin/settings" element={<WhatsAppSettings />} />
+                <Route path="/admin/social-media" element={<SocialMediaSettings />} />
+                <Route path="/admin/social-settings" element={<SocialMediaSettings />} />
+                <Route path="/admin/promo-banners" element={<PromoBanners />} />
 
-            <Route
-              path="/admin/contact-management"
-              element={<ContactManagement />}
-            />
+                <Route
+                  path="/admin/contact-management"
+                  element={<ContactManagement />}
+                />
 
-            <Route path="/admin/feedback" element={<FeedbackMaster />} />
-            <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
-            <Route path="/admin/combos" element={<ComboOffersAdmin />} />
-            <Route path="/admin/deals" element={<DealsAdmin />} />
-            <Route path="/admin/customer-stories" element={<CustomerStoriesAdmin />} />
-            <Route path="/admin/sections" element={<HomepageSectionsAdmin />} />
-            <Route path="/admin/homepage-sections" element={<HomepageSectionsAdmin />} />
-            <Route path="/admin/blogs" element={<Blogs />} />
-            <Route path="/blogs" element={<BlogListing />} />
-            <Route path="/blogs/:slug" element={<BlogDetails />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+                <Route path="/admin/feedback" element={<FeedbackMaster />} />
+                <Route path="/admin/trending-rentals" element={<TrendingRentalsAdmin />} />
+                <Route path="/admin/combos" element={<ComboOffersAdmin />} />
+                <Route path="/admin/deals" element={<DealsAdmin />} />
+                <Route path="/admin/customer-stories" element={<CustomerStoriesAdmin />} />
+                <Route path="/admin/sections" element={<HomepageSectionsAdmin />} />
+                <Route path="/admin/homepage-sections" element={<HomepageSectionsAdmin />} />
+                <Route path="/admin/blogs" element={<Blogs />} />
+                <Route path="/blogs" element={<BlogListing />} />
+                <Route path="/blogs/:slug" element={<BlogDetails />} />
+              </Routes>
+            </Suspense>
+          </CustomerGlobalLayout>
+        </BrowserRouter>
+      </CartProvider>
     </CustomerAuthProvider>
   );
 }
